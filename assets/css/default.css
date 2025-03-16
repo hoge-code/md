@@ -40,13 +40,24 @@ body {
   width: 125%; /* スケーリングにより余分に広がるため、幅を調整 */
 }
 
+
 code {
-  background-color: #333333 !important;
+  background-color: rgb(31, 37, 46) !important;
   color: white !important;
   font-family: 'Roboto', sans-serif !important;  
   font-size: 0.9rem !important;
   font-weight: normal !important;
 }
+
+/*
+code {
+  background-color: gray !important;
+  color: white !important;
+  font-style:italic !important;
+  padding: 0 4px !important;
+  border-radius: 4px !important;
+}
+*/
 
 pre code {
   background: none !important; 
