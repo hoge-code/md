@@ -1,4 +1,154 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://hoge-code.github.io/md/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hoge-code.github.io/md/" rel="alternate" type="text/html" /><updated>2025-03-16T10:48:03+00:00</updated><id>https://hoge-code.github.io/md/feed.xml</id><title type="html">ツールの忘備録</title><subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle><entry><title type="html">はてなブログからJekyllに移行してみる</title><link href="https://hoge-code.github.io/md/posts/2025-03-13-jekyll-blog-copy" rel="alternate" type="text/html" title="はてなブログからJekyllに移行してみる" /><published>2025-03-13T03:00:00+00:00</published><updated>2025-03-13T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/jekyll-blog%20copy</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-03-13-jekyll-blog-copy"><![CDATA[<p>はてなブログからJekyllに移行する際、いくつかの点で躓きました。<code class="language-plaintext highlighter-rouge">ruby</code>やSSGにあまり慣れていなかったため、セットアップに多少時間がかかってしまいました。移行を決めたきっかけとして、はてなブログでは何故か記事を物理的に削除できなかったり、mdの編集がしづらかったりといった問題があり、<code class="language-plaintext highlighter-rouge">git</code>リポジトリでmdを管理できる環境にしたいと考えたからです。</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://hoge-code.github.io/md/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hoge-code.github.io/md/" rel="alternate" type="text/html" /><updated>2025-03-16T11:58:23+00:00</updated><id>https://hoge-code.github.io/md/feed.xml</id><title type="html">ツールの忘備録</title><subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle><entry><title type="html">GitHubでの複数アカウント登録</title><link href="https://hoge-code.github.io/md/posts/2025-03-16-github-multi-account" rel="alternate" type="text/html" title="GitHubでの複数アカウント登録" /><published>2025-03-16T03:00:00+00:00</published><updated>2025-03-16T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/github-multi-account</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-03-16-github-multi-account"><![CDATA[<p>GitHubで複数アカウントを登録する際にいくつかの問題に直面したため、忘備録として残しておきます。基本的な内容ですが、登録したのがかなり前で、忘れており、忘れやすいない内容のため、記事に残しておきます。</p>
+
+<h3 id="githubの認証方式">GitHubの認証方式</h3>
+
+<p>GitHubの認証方式には、主に2つの方法があります。</p>
+
+<ol>
+  <li><strong>HTTPでのトークン認証</strong></li>
+  <li><strong>SSH接続方式</strong></li>
+</ol>
+
+<h3 id="1-httpでのトークン認証">1. HTTPでのトークン認証</h3>
+
+<p>GitHubでは、ユーザー設定画面 &gt; Developer settings から<strong>パーソナルアクセストークン</strong>を生成することができます。トークンを生成した後、以下のコマンドでリモートURLを変更します。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git remote set-url origin https://your-username@github.com/username/repository.git
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">git push</code> 時に、通常はトークンが求められます。以前はこの方法で設定していましたが、私の環境では<strong>2つ目以降のアカウント</strong>でトークンが求められず、トークンの設定もできなかったため、<strong>403エラー</strong>が発生し続けました。</p>
+
+<p><code class="language-plaintext highlighter-rouge">credential-manager</code>を使っても設定が上手くいかず、原因がよく理解できていません。理解できたら追記して再度試みます。</p>
+
+<h3 id="2-ssh接続">2. SSH接続</h3>
+
+<p>SSH接続を使用する場合は、<code class="language-plaintext highlighter-rouge">git-bash</code> などでSSHキーを生成します。以下のコマンドでSSHキーを生成します。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ssh-keygen <span class="nt">-t</span> rsa <span class="nt">-b</span> 4096 <span class="nt">-C</span> <span class="s2">"your-email@example.com"</span>
+</code></pre></div></div>
+
+<p>生成されたSSHキーは、通常は <code class="language-plaintext highlighter-rouge">~/.ssh/id_rsa</code> として保存されますが、異なるファイル名を指定して保存することもできます。その後、GitHubのSSH設定画面で公開鍵を追加します。</p>
+
+<h4 id="sshconfig-の設定例"><code class="language-plaintext highlighter-rouge">~/.ssh/config</code> の設定例</h4>
+
+<p>複数のGitHubアカウントを使い分けるためには、<code class="language-plaintext highlighter-rouge">~/.ssh/config</code> を設定します。以下はその設定例です。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># ~/.ssh/config の例</span>
+Host github.com-Account1
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_rsa_account1
+
+Host github.com-Account2
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_rsa_account2
+</code></pre></div></div>
+
+<p>その後、リモートリポジトリのURLを以下のコマンドで変更します。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git remote set-url origin git@github.com-Account1:username/repository.git
+</code></pre></div></div>
+
+<h3 id="ssh接続の確認">SSH接続の確認</h3>
+
+<p>SSHキーが正しく設定されているか確認するためには、以下のコマンドで接続のテストができます。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ssh <span class="nt">-T</span> git@github.com
+</code></pre></div></div>
+
+<p>正常に接続できれば、GitHubから以下のメッセージが返ってきます。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Hi username! You've successfully authenticated, but GitHub does not provide shell access.
+</code></pre></div></div>
+
+<p>もしこのメッセージが表示されない場合、設定に問題がある可能性があります。</p>
+
+<h3 id="sshキーの登録確認">SSHキーの登録確認</h3>
+
+<p><code class="language-plaintext highlighter-rouge">ssh-agent</code> を使用してSSHキーが正しく登録されているか確認します。</p>
+
+<ol>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">ssh-agent</code> が起動していることを確認します。以下のコマンドを実行します。</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">eval</span> <span class="s2">"</span><span class="si">$(</span>ssh-agent <span class="nt">-s</span><span class="si">)</span><span class="s2">"</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>次に、生成したSSHキーを <code class="language-plaintext highlighter-rouge">ssh-agent</code> に追加します。</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ssh-add ~/.ssh/id_rsa
+</code></pre></div>    </div>
+
+    <p>別名でSSHキーを生成した場合は、ファイル名を適宜変更してください。</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ssh-add ~/.ssh/id_rsa_github
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">ssh-agent</code> に登録されているSSHキーを確認します。</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ssh-add <span class="nt">-l</span>
+</code></pre></div>    </div>
+
+    <p>登録されているキーのリストが表示されればOKです。もし何も表示されない場合は、SSHキーが正しく登録されていません。</p>
+  </li>
+</ol>
+
+<h3 id="4-ブランチ名の確認">4. ブランチ名の確認</h3>
+
+<p>初期状態で、<code class="language-plaintext highlighter-rouge">git push --set-upstream origin master</code> を実行した場合にエラーが発生することがあります。認証前にリモートブランチを手動で作成し、同じ名前のローカルブランチを作成し、pushします。</p>
+
+<h3 id="結論">結論</h3>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">git@github.com</code> のユーザー名は <strong>常に <code class="language-plaintext highlighter-rouge">git</code></strong> で、GitHubでのユーザー名は関係ありません。</li>
+  <li>SSH接続時には、<code class="language-plaintext highlighter-rouge">ssh-agent</code> の設定が重要です。SSHキーが正しく登録されているか確認してください。</li>
+  <li>初期のブランチ名の設定に注意します。</li>
+</ul>]]></content><author><name></name></author><category term="blog" /><category term="ツール" /><summary type="html"><![CDATA[GitHub]]></summary></entry><entry><title type="html">Warpターミナルを試してみる</title><link href="https://hoge-code.github.io/md/posts/2025-03-16-warp" rel="alternate" type="text/html" title="Warpターミナルを試してみる" /><published>2025-03-16T03:00:00+00:00</published><updated>2025-03-16T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/warp</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-03-16-warp"><![CDATA[<p>最近Windowsにも対応した<strong>Warpターミナル</strong>を試してみました。</p>
+
+<p>まず、Warpを起動した際に、<code class="language-plaintext highlighter-rouge">Ctrl + Shift + P</code>を押すと以下のようなパレットが表示されます。さまざまなコマンドや機能に簡単にアクセスできます。</p>
+
+<p><img src="/md/assets/images/warp-palette.png" alt="warp-palette" /></p>
+
+<h3 id="1-workflows">1. <strong>Workflows</strong></h3>
+
+<p><strong>Workflows</strong>は、よく使うコマンドを事前に登録できる機能です。プレースホルダやエイリアス機能もあり、長いコマンドや忘れがちなコマンドを簡単に呼び出すことができます。</p>
+
+<h3 id="2-notebooks">2. <strong>Notebooks</strong></h3>
+
+<p><strong>Notebooks</strong>は、Markdown形式でメモやコマンドを記述できる機能です。この機能を使うと、コードブロックを<code class="language-plaintext highlighter-rouge">Ctrl + ↑</code>または<code class="language-plaintext highlighter-rouge">Ctrl + ↓</code>で簡単に移動でき、エンターを押すとコマンドが自動で入力されます。Markdown形式なので、例えばChatGPTにコマンドスニペットを求めて、そのまま貼り付けて実行することができます。</p>
+
+<p>以下は、FlutterのコマンドをChatGPTに聞いて、その回答をノートブックに貼り付けた例です。</p>
+
+<p><img src="/md/assets/images/warp-notebook.png" alt="warp-notebook" /></p>
+
+<h3 id="3-environment-variables">3. <strong>Environment Variables</strong></h3>
+
+<p><strong>環境変数</strong>を設定することで、例えばAPIのURLなどを簡単に管理できます。これにより、<code class="language-plaintext highlighter-rouge">curl</code>でそのURLを簡単に呼び出せるようになったり、<strong>Workflows</strong>でプレースホルダとして環境変数を使うこともできます。</p>
+
+<h3 id="4-warp-drive">4. <strong>Warp Drive</strong></h3>
+
+<p><strong>Warp Drive</strong>は、上記のワークフローやノートブックを保存しておけるドライブ機能です。さらに、同期が可能で、<strong>YAML形式</strong>でのインポート・エクスポートもサポートしています。この機能を使えば、複数のマシンで状態を共有できそうです。</p>
+
+<h3 id="5-actions">5. <strong>Actions</strong></h3>
+
+<p><strong>Actions</strong>は、VSCodeのコマンドパレットのような機能です。コマンドを簡単に検索できます。</p>
+
+<h3 id="6-sessions">6. <strong>Sessions</strong></h3>
+
+<p><strong>Sessions</strong>は、現在のターミナルセッションを他のユーザーと共有できる機能です。<strong>tmux</strong>のように、セッションを共有できます。</p>
+
+<h3 id="7-launch-configurations">7. <strong>Launch Configurations</strong></h3>
+
+<p><strong>Launch Configurations</strong>では、現在のタブの状態をYAML形式で出力でき、簡単に復元することができます。</p>
+
+<h2 id="感想">感想</h2>
+
+<p>特に<strong>Notebooks</strong>機能が便利だと感じました。よく忘れてしまうGitやSSHのコマンドを、ChatGPTに質問してその回答をコピペするだけで簡単に呼び出すことができました。</p>
+
+<p>また、AI機能などはまだ試していないので、今後試してみたいと思っています。</p>]]></content><author><name></name></author><category term="blog" /><category term="ツール" /><summary type="html"><![CDATA[Warp]]></summary></entry><entry><title type="html">はてなブログからJekyllに移行してみる</title><link href="https://hoge-code.github.io/md/posts/2025-03-13-jekyll-blog-copy" rel="alternate" type="text/html" title="はてなブログからJekyllに移行してみる" /><published>2025-03-13T03:00:00+00:00</published><updated>2025-03-13T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/jekyll-blog%20copy</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-03-13-jekyll-blog-copy"><![CDATA[<p>はてなブログからJekyllに移行する際、いくつかの点で躓きました。<code class="language-plaintext highlighter-rouge">ruby</code>やSSGにあまり慣れていなかったため、セットアップに多少時間がかかってしまいました。移行を決めたきっかけとして、はてなブログでは何故か記事を物理的に削除できなかったり、mdの編集がしづらかったりといった問題があり、<code class="language-plaintext highlighter-rouge">git</code>リポジトリでmdを管理できる環境にしたいと考えたからです。</p>
 
 <h3 id="jekyllのメリット">Jekyllのメリット</h3>
 
@@ -495,165 +645,4 @@ pluginsは詳しくないが、適当に追加してみます。</li>
 
 <h4 id="感想">感想</h4>
 
-<p>notionはdocx形式でエキスポートできないし、ワードファイルを簡単に作成したいと思った際に、pandocとvscodeを使えば非常に簡単に作成できると感じました。</p>]]></content><author><name></name></author><category term="blog" /><category term="ツール" /><summary type="html"><![CDATA[Pandoc]]></summary></entry><entry><title type="html">postmanのテスト</title><link href="https://hoge-code.github.io/md/posts/2025-02-21-postman-test" rel="alternate" type="text/html" title="postmanのテスト" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/postman-test</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-02-21-postman-test"><![CDATA[<h3 id="stoplight-studio-で-yaml-をダウンロード">Stoplight Studio で yaml をダウンロード</h3>
-
-<p>自分でOASを書いてもいいのですが、今回は Stoplight Studio でデフォルトの API コレクションの yaml ファイルをダウンロードします。
-<img src="/md/assets/images/postman_export.png" alt="" /></p>
-
-<h3 id="postman-にアクセス">Postman にアクセス</h3>
-
-<p>Postman で先ほどダウンロードした yaml をインポートし、コレクションを作成します。また、コレクションを右クリックし、モックサーバーを建ててみます。この際、モックサーバーが生成した URL を環境変数に入れます。</p>
-
-<p>試しに pm ライブラリを使った簡易的なテストを書いてみます。(モックレスポンスを書いていないので当然 404 になりますが・・・)
-<img src="/md/assets/images/postman_test.png" alt="" /></p>
-
-<h3 id="newman-でテスト">newman でテスト</h3>
-
-<p>次に、作成したコレクションを右クリックし、json 形式でエキスポートします。また、<code class="language-plaintext highlighter-rouge">newman</code>という Postman コレクションをコマンドラインで実行するためのツールをインストールし、テストを実行してみます。</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm <span class="nb">install</span> <span class="nt">-g</span> newman
-newman run ./api.postman_collection.json
-</code></pre></div></div>
-<p>結果は以下のように表示されます。
-<img src="/md/assets/images/postman_newman.png" alt="" /></p>
-
-<p>今回は使いませんが、newmanはCICDで使うこともできます。GitHubActionsの場合、以下のようなコードを書くことになります。</p>
-
-<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      <span class="c1"># npmを使ってNewmanをインストール</span>
-      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Install Newman</span>
-        <span class="na">run</span><span class="pi">:</span> <span class="pi">|</span>
-          <span class="s">npm install -g newman</span>
-
-      <span class="c1"># Postmanコレクションと環境を指定してテストを実行</span>
-      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Run Postman tests</span>
-        <span class="na">run</span><span class="pi">:</span> <span class="pi">|</span>
-          <span class="s">newman run postman_collection.json </span>
-
-      <span class="c1"># テスト結果の報告</span>
-      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Upload test results</span>
-        <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/upload-artifact@v2</span>
-        <span class="na">with</span><span class="pi">:</span>
-          <span class="na">name</span><span class="pi">:</span> <span class="s">postman-test-results</span>
-          <span class="na">path</span><span class="pi">:</span> <span class="s">./newman/*.json</span>
-</code></pre></div></div>
-
-<h3 id="newmanでパフォーマンステスト">newmanでパフォーマンステスト</h3>
-
-<p>PostmanのRunnerからでも行えますが、newmanを使って繰り返しテストを行い、htmlで出力するようにしてみます。</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm <span class="nb">install </span>newman-reporter-html
-newman run ./api.postman_collection.json <span class="nt">-n</span> 10 <span class="nt">--reporters</span> cli,html <span class="nt">--reporter-html-export</span> result.html
-</code></pre></div></div>
-<p><img src="/md/assets/images/postman_html.png" alt="" /></p>
-
-<p>高度なテストならk6やJMeterなどを使うべきですが、簡易的な負荷テストならPostmanのCollection RunnerやNewmanでCIを使って実行できそうです。</p>
-
-<h4 id="感想">感想</h4>
-
-<p>OASを自動生成してくれるフレームワークに頼るだけでなく、OAS関連の様々なツールに慣れていきたいと思いました。</p>]]></content><author><name></name></author><category term="blog" /><category term="ツール" /><summary type="html"><![CDATA[Stoplight + Postman + pm + newman]]></summary></entry><entry><title type="html">PWAに入門する</title><link href="https://hoge-code.github.io/md/posts/2025-02-21-pwa" rel="alternate" type="text/html" title="PWAに入門する" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/pwa</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-02-21-pwa"><![CDATA[<p>PWAに関しては、<code class="language-plaintext highlighter-rouge">service-worker.js</code>や<code class="language-plaintext highlighter-rouge">manifest.json</code>ファイルの基本的な書き方程度の知識しかなかったので、<a href="https://roadmap.sh/frontend">フロントエンドロードマップ</a>のPWAの欄で紹介されていた項目について学習しました。</p>
-
-<p>列挙すると以下のような項目になります。</p>
-
-<ul>
-  <li>パフォーマンス計測と向上
-    <ul>
-      <li>PRPLパターン</li>
-      <li>RAILパターン</li>
-      <li>パフォーマンスメトリクス</li>
-      <li>Lighthouse</li>
-      <li>DevTools</li>
-    </ul>
-  </li>
-  <li>Browser APIs</li>
-</ul>
-
-<h3 id="browser-apis">Browser APIs</h3>
-<p><code class="language-plaintext highlighter-rouge">Storage</code>、<code class="language-plaintext highlighter-rouge">Server Sent Events</code>、<code class="language-plaintext highlighter-rouge">Service Workers</code>、<code class="language-plaintext highlighter-rouge">Location</code>など全9個が紹介されていましたが、どれもブラウザでも使われる基本APIでした。
-ブラウザAPIは自分で実装すると意外とコードが長くなってしまいますが、<code class="language-plaintext highlighter-rouge">react-use</code>や<code class="language-plaintext highlighter-rouge">vue-use</code>などのライブラリはこれらのフックを提供しているので簡潔に書けます。以下がサンプルコードです。</p>
-<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">useLocation</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react-use</span><span class="dl">'</span><span class="p">;</span>
-
-<span class="kd">const</span> <span class="nx">MyComponent</span><span class="p">:</span> <span class="nx">React</span><span class="p">.</span><span class="nx">FC</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
-  <span class="kd">const</span> <span class="nx">location</span> <span class="o">=</span> <span class="nf">useLocation</span><span class="p">();</span>
-
-  <span class="k">return </span><span class="p">(</span>
-    <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
-      <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Current pathname: <span class="si">{</span><span class="nx">location</span><span class="p">.</span><span class="nx">pathname</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
-      <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Current search: <span class="si">{</span><span class="nx">location</span><span class="p">.</span><span class="nx">search</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
-      <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Current hash: <span class="si">{</span><span class="nx">location</span><span class="p">.</span><span class="nx">hash</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
-    <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
-  <span class="p">);</span>
-<span class="p">};</span>
-</code></pre></div></div>
-
-<h3 id="prplパターン">PRPLパターン</h3>
-<p>PRPLパターンの目的は、リソース取得を効率化させ、ページのパフォーマンスを効率化させることです。これにより、PWAの拘束性やオフライン対応を実現できます。以下がPRPLの頭文字です。</p>
-
-<ul>
-  <li><strong>P - Push Critical Resources (重要なリソースをプッシュ)</strong>
-    <ul>
-      <li>Service Workerを使用してキャッシュなど</li>
-    </ul>
-  </li>
-  <li><strong>R - Render the Initial Route (最初のルートを描画)</strong>
-    <ul>
-      <li>SSGなどを使用してレンダリングを最適化など</li>
-    </ul>
-  </li>
-  <li>
-    <p><strong>P - Pre-cache Remaining Routes (残りのルートを事前キャッシュ)</strong></p>
-  </li>
-  <li><strong>L - Lazy-load Non-critical Resources (重要でないリソースを遅延読み込み)</strong></li>
-</ul>
-
-<h3 id="railパターン">RAILパターン</h3>
-<p>パフォーマンス指標に関するモデルです。RAILは、<strong>レスポンス時間</strong>と<strong>アニメーション</strong>を最適化することに焦点を当てています。</p>
-
-<ul>
-  <li>
-    <p><strong>R - Response to User Input in 100ms (100ms以内にユーザー入力に反応)</strong></p>
-  </li>
-  <li>
-    <p><strong>A - Animations should run at 60fps (アニメーションは60fpsで実行)</strong></p>
-  </li>
-  <li><strong>I - Idle Time should be used for non-urgent work (アイドル時間には非緊急の作業を行う)</strong>
-    <ul>
-      <li>事前キャッシュなど</li>
-    </ul>
-  </li>
-  <li><strong>L - Load content progressively (コンテンツを順次ロードする)</strong>
-    <ul>
-      <li>コンテンツを遅延読み込みするなど</li>
-    </ul>
-  </li>
-</ul>
-
-<h3 id="lighthouse">Lighthouse</h3>
-
-<p><code class="language-plaintext highlighter-rouge">Lighthouse</code>ではパフォーマンス、アクセシビリティ、ベストプラクティス、SEO、PWAの5つの項目をテストできます。ブラウザから実行するのは面倒なので、CLIやCIで実行します。
-Lighthouse CLIのサンプルコマンドです。</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npx lighthouse https://example.com <span class="nt">--output</span> html <span class="nt">--output-path</span> ./lighthouse-report.html
-</code></pre></div></div>
-
-<p>CIで実行する場合は以下のようになります。</p>
-<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">jobs</span><span class="pi">:</span>
-  <span class="na">lighthouse</span><span class="pi">:</span>
-    <span class="na">runs-on</span><span class="pi">:</span> <span class="s">ubuntu-latest</span>
-    <span class="na">steps</span><span class="pi">:</span>
-      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Checkout code</span>
-        <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/checkout@v2</span>
-
-      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Set up Node.js</span>
-        <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/setup-node@v2</span>
-        <span class="na">with</span><span class="pi">:</span>
-          <span class="na">node-version</span><span class="pi">:</span> <span class="s1">'</span><span class="s">14'</span>
-
-      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Install Lighthouse CI</span>
-        <span class="na">run</span><span class="pi">:</span> <span class="s">npm install -g @lhci/cli</span>
-
-      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Run Lighthouse CI</span>
-        <span class="na">run</span><span class="pi">:</span> <span class="s">lhci autorun --upload.target=temporary-public-storage</span>
-</code></pre></div></div>
-
-<p>生成されたレポートのうち、<strong>Core Web Vitals</strong>（LCP, FID, CLS）が重要な指標となります。</p>
-
-<h3 id="まとめ">まとめ</h3>
-<p>PRPLやRAILモデルの考え方や<code class="language-plaintext highlighter-rouge">Lighthouse</code>を使ったメトリクス確認方法、遅延読み込みやバンドルなどの基本的なパフォーマンス改善方法はブラウザのウェブアプリと共通する点が多いと思いました。</p>]]></content><author><name></name></author><category term="blog" /><category term="React" /><summary type="html"><![CDATA[React + パフォーマンス関連]]></summary></entry></feed>
+<p>notionはdocx形式でエキスポートできないし、ワードファイルを簡単に作成したいと思った際に、pandocとvscodeを使えば非常に簡単に作成できると感じました。</p>]]></content><author><name></name></author><category term="blog" /><category term="ツール" /><summary type="html"><![CDATA[Pandoc]]></summary></entry></feed>

@@ -1,0 +1,133 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/md/assets/css/default.css">
+  <link rel="stylesheet" href="/md/assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <title>ツールの忘備録</title>
+</head>
+<body>
+
+<header>
+  <h1><a href="/md/">ツールの忘備録</a></h1></h1>
+</header>
+
+<div id="content">
+  <!-- メインコンテンツ部分 -->
+  <main>
+        <article>
+      <header>
+        <h1>Warpターミナルを試してみる</h1>
+        <p class="meta">
+          March 16, 2025 in
+          <a href="/category/blog"
+            >blog</a
+          >
+        </p>
+      </header>
+
+      <div class="content"><p>最近Windowsにも対応した<strong>Warpターミナル</strong>を試してみました。</p>
+
+<p>まず、Warpを起動した際に、<code class="language-plaintext highlighter-rouge">Ctrl + Shift + P</code>を押すと以下のようなパレットが表示されます。さまざまなコマンドや機能に簡単にアクセスできます。</p>
+
+<p><img src="/md/assets/images/warp-palette.png" alt="warp-palette" /></p>
+
+<h3 id="1-workflows">1. <strong>Workflows</strong></h3>
+
+<p><strong>Workflows</strong>は、よく使うコマンドを事前に登録できる機能です。プレースホルダやエイリアス機能もあり、長いコマンドや忘れがちなコマンドを簡単に呼び出すことができます。</p>
+
+<h3 id="2-notebooks">2. <strong>Notebooks</strong></h3>
+
+<p><strong>Notebooks</strong>は、Markdown形式でメモやコマンドを記述できる機能です。この機能を使うと、コードブロックを<code class="language-plaintext highlighter-rouge">Ctrl + ↑</code>または<code class="language-plaintext highlighter-rouge">Ctrl + ↓</code>で簡単に移動でき、エンターを押すとコマンドが自動で入力されます。Markdown形式なので、例えばChatGPTにコマンドスニペットを求めて、そのまま貼り付けて実行することができます。</p>
+
+<p>以下は、FlutterのコマンドをChatGPTに聞いて、その回答をノートブックに貼り付けた例です。</p>
+
+<p><img src="/md/assets/images/warp-notebook.png" alt="warp-notebook" /></p>
+
+<h3 id="3-environment-variables">3. <strong>Environment Variables</strong></h3>
+
+<p><strong>環境変数</strong>を設定することで、例えばAPIのURLなどを簡単に管理できます。これにより、<code class="language-plaintext highlighter-rouge">curl</code>でそのURLを簡単に呼び出せるようになったり、<strong>Workflows</strong>でプレースホルダとして環境変数を使うこともできます。</p>
+
+<h3 id="4-warp-drive">4. <strong>Warp Drive</strong></h3>
+
+<p><strong>Warp Drive</strong>は、上記のワークフローやノートブックを保存しておけるドライブ機能です。さらに、同期が可能で、<strong>YAML形式</strong>でのインポート・エクスポートもサポートしています。この機能を使えば、複数のマシンで状態を共有できそうです。</p>
+
+<h3 id="5-actions">5. <strong>Actions</strong></h3>
+
+<p><strong>Actions</strong>は、VSCodeのコマンドパレットのような機能です。コマンドを簡単に検索できます。</p>
+
+<h3 id="6-sessions">6. <strong>Sessions</strong></h3>
+
+<p><strong>Sessions</strong>は、現在のターミナルセッションを他のユーザーと共有できる機能です。<strong>tmux</strong>のように、セッションを共有できます。</p>
+
+<h3 id="7-launch-configurations">7. <strong>Launch Configurations</strong></h3>
+
+<p><strong>Launch Configurations</strong>では、現在のタブの状態をYAML形式で出力でき、簡単に復元することができます。</p>
+
+<h2 id="感想">感想</h2>
+
+<p>特に<strong>Notebooks</strong>機能が便利だと感じました。よく忘れてしまうGitやSSHのコマンドを、ChatGPTに質問してその回答をコピペするだけで簡単に呼び出すことができました。</p>
+
+<p>また、AI機能などはまだ試していないので、今後試してみたいと思っています。</p>
+</div>
+
+      <footer>
+        <p>
+          Tags: 
+          <a href="/md/tag/ツール">ツール</a> 
+        </p>
+      </footer>
+    </article>
+
+  </main>
+
+  <!-- サイドバー部分 -->
+  <aside id="sidebar">
+    <h2><a href="/md/about/">About</a></h2>
+
+    <!--
+    <h2><a href="/md/categories/">Categories</a></h2>
+    <ul>
+      
+        <li><a href="/md/category/blog"">blog</a></li>
+      
+    </ul>
+    -->
+    
+    <h2><a href="/md/tags/">Tags</a></h2>
+    <ul>
+      
+        <li><a href="/md/tag/fastapi">FastAPI</a></li>
+      
+        <li><a href="/md/tag/nodejs">Nodejs</a></li>
+      
+        <li><a href="/md/tag/mysql">MySQL</a></li>
+      
+        <li><a href="/md/tag/ツール">ツール</a></li>
+      
+        <li><a href="/md/tag/react">React</a></li>
+      
+        <li><a href="/md/tag/開発">開発</a></li>
+      
+    </ul>
+    <h2><a href="/md/archives/">Archives</a></h2>
+<ul>
+  
+  
+    <li><a href="/md/2025/03/">2025-03</a></li>
+  
+    <li><a href="/md/2025/02/">2025-02</a></li>
+  
+</ul>
+
+  </aside>
+</div>
+
+<footer>
+  <p>&copy; 2025 ツールの忘備録</p>
+</footer>
+
+</body>
+</html>

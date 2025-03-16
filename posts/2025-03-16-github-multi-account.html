@@ -1,0 +1,199 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/md/assets/css/default.css">
+  <link rel="stylesheet" href="/md/assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <title>ツールの忘備録</title>
+</head>
+<body>
+
+<header>
+  <h1><a href="/md/">ツールの忘備録</a></h1></h1>
+</header>
+
+<div id="content">
+  <!-- メインコンテンツ部分 -->
+  <main>
+        <article>
+      <header>
+        <h1>GitHubでの複数アカウント登録</h1>
+        <p class="meta">
+          March 16, 2025 in
+          <a href="/category/blog"
+            >blog</a
+          >
+        </p>
+      </header>
+
+      <div class="content"><p>GitHubで複数アカウントを登録する際にいくつかの問題に直面したため、忘備録として残しておきます。基本的な内容ですが、登録したのがかなり前で、忘れており、忘れやすいない内容のため、記事に残しておきます。</p>
+
+<h3 id="githubの認証方式">GitHubの認証方式</h3>
+
+<p>GitHubの認証方式には、主に2つの方法があります。</p>
+
+<ol>
+  <li><strong>HTTPでのトークン認証</strong></li>
+  <li><strong>SSH接続方式</strong></li>
+</ol>
+
+<h3 id="1-httpでのトークン認証">1. HTTPでのトークン認証</h3>
+
+<p>GitHubでは、ユーザー設定画面 &gt; Developer settings から<strong>パーソナルアクセストークン</strong>を生成することができます。トークンを生成した後、以下のコマンドでリモートURLを変更します。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git remote set-url origin https://your-username@github.com/username/repository.git
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">git push</code> 時に、通常はトークンが求められます。以前はこの方法で設定していましたが、私の環境では<strong>2つ目以降のアカウント</strong>でトークンが求められず、トークンの設定もできなかったため、<strong>403エラー</strong>が発生し続けました。</p>
+
+<p><code class="language-plaintext highlighter-rouge">credential-manager</code>を使っても設定が上手くいかず、原因がよく理解できていません。理解できたら追記して再度試みます。</p>
+
+<h3 id="2-ssh接続">2. SSH接続</h3>
+
+<p>SSH接続を使用する場合は、<code class="language-plaintext highlighter-rouge">git-bash</code> などでSSHキーを生成します。以下のコマンドでSSHキーを生成します。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ssh-keygen <span class="nt">-t</span> rsa <span class="nt">-b</span> 4096 <span class="nt">-C</span> <span class="s2">"your-email@example.com"</span>
+</code></pre></div></div>
+
+<p>生成されたSSHキーは、通常は <code class="language-plaintext highlighter-rouge">~/.ssh/id_rsa</code> として保存されますが、異なるファイル名を指定して保存することもできます。その後、GitHubのSSH設定画面で公開鍵を追加します。</p>
+
+<h4 id="sshconfig-の設定例"><code class="language-plaintext highlighter-rouge">~/.ssh/config</code> の設定例</h4>
+
+<p>複数のGitHubアカウントを使い分けるためには、<code class="language-plaintext highlighter-rouge">~/.ssh/config</code> を設定します。以下はその設定例です。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># ~/.ssh/config の例</span>
+Host github.com-Account1
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_rsa_account1
+
+Host github.com-Account2
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_rsa_account2
+</code></pre></div></div>
+
+<p>その後、リモートリポジトリのURLを以下のコマンドで変更します。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git remote set-url origin git@github.com-Account1:username/repository.git
+</code></pre></div></div>
+
+<h3 id="ssh接続の確認">SSH接続の確認</h3>
+
+<p>SSHキーが正しく設定されているか確認するためには、以下のコマンドで接続のテストができます。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ssh <span class="nt">-T</span> git@github.com
+</code></pre></div></div>
+
+<p>正常に接続できれば、GitHubから以下のメッセージが返ってきます。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Hi username! You've successfully authenticated, but GitHub does not provide shell access.
+</code></pre></div></div>
+
+<p>もしこのメッセージが表示されない場合、設定に問題がある可能性があります。</p>
+
+<h3 id="sshキーの登録確認">SSHキーの登録確認</h3>
+
+<p><code class="language-plaintext highlighter-rouge">ssh-agent</code> を使用してSSHキーが正しく登録されているか確認します。</p>
+
+<ol>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">ssh-agent</code> が起動していることを確認します。以下のコマンドを実行します。</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">eval</span> <span class="s2">"</span><span class="si">$(</span>ssh-agent <span class="nt">-s</span><span class="si">)</span><span class="s2">"</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>次に、生成したSSHキーを <code class="language-plaintext highlighter-rouge">ssh-agent</code> に追加します。</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ssh-add ~/.ssh/id_rsa
+</code></pre></div>    </div>
+
+    <p>別名でSSHキーを生成した場合は、ファイル名を適宜変更してください。</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ssh-add ~/.ssh/id_rsa_github
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">ssh-agent</code> に登録されているSSHキーを確認します。</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ssh-add <span class="nt">-l</span>
+</code></pre></div>    </div>
+
+    <p>登録されているキーのリストが表示されればOKです。もし何も表示されない場合は、SSHキーが正しく登録されていません。</p>
+  </li>
+</ol>
+
+<h3 id="4-ブランチ名の確認">4. ブランチ名の確認</h3>
+
+<p>初期状態で、<code class="language-plaintext highlighter-rouge">git push --set-upstream origin master</code> を実行した場合にエラーが発生することがあります。認証前にリモートブランチを手動で作成し、同じ名前のローカルブランチを作成し、pushします。</p>
+
+<h3 id="結論">結論</h3>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">git@github.com</code> のユーザー名は <strong>常に <code class="language-plaintext highlighter-rouge">git</code></strong> で、GitHubでのユーザー名は関係ありません。</li>
+  <li>SSH接続時には、<code class="language-plaintext highlighter-rouge">ssh-agent</code> の設定が重要です。SSHキーが正しく登録されているか確認してください。</li>
+  <li>初期のブランチ名の設定に注意します。</li>
+</ul>
+</div>
+
+      <footer>
+        <p>
+          Tags: 
+          <a href="/md/tag/ツール">ツール</a> 
+        </p>
+      </footer>
+    </article>
+
+  </main>
+
+  <!-- サイドバー部分 -->
+  <aside id="sidebar">
+    <h2><a href="/md/about/">About</a></h2>
+
+    <!--
+    <h2><a href="/md/categories/">Categories</a></h2>
+    <ul>
+      
+        <li><a href="/md/category/blog"">blog</a></li>
+      
+    </ul>
+    -->
+    
+    <h2><a href="/md/tags/">Tags</a></h2>
+    <ul>
+      
+        <li><a href="/md/tag/fastapi">FastAPI</a></li>
+      
+        <li><a href="/md/tag/nodejs">Nodejs</a></li>
+      
+        <li><a href="/md/tag/mysql">MySQL</a></li>
+      
+        <li><a href="/md/tag/ツール">ツール</a></li>
+      
+        <li><a href="/md/tag/react">React</a></li>
+      
+        <li><a href="/md/tag/開発">開発</a></li>
+      
+    </ul>
+    <h2><a href="/md/archives/">Archives</a></h2>
+<ul>
+  
+  
+    <li><a href="/md/2025/03/">2025-03</a></li>
+  
+    <li><a href="/md/2025/02/">2025-02</a></li>
+  
+</ul>
+
+  </aside>
+</div>
+
+<footer>
+  <p>&copy; 2025 ツールの忘備録</p>
+</footer>
+
+</body>
+</html>
