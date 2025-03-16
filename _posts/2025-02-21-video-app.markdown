@@ -1,0 +1,208 @@
+---
+layout: post
+title: "コメント付きの動画アプリを開発しました"
+date: 2025-02-21 12:00:00 +0900
+categories: [blog]
+tags: [React, Nodejs, 開発]
+excerpt: "React + Express + HLS"
+---
+
+このアプリのコンセプトはローカル PC 内にある動画ファイルを HLS 形式で、ニコニコ動画の xml コメントファイルとともにブラウザで視聴することです。
+
+アプリの外観、機能の詳細や使い方については[readme](https://github.com/hogecode/video_app)をご覧ください。この記事では、技術の選定理由や内部実装などについて書きます。
+
+</br>
+
+### 技術スタック
+
+#### サーバー側
+
+サーバー側は Node.js + TS + Express + PrismaORM を使っています。
+
+Python(FastAPI)、Java(SpringBoot)なども考えましたが、フロントエンド側に時間を割きたかったので非同期中心かつ軽量で、慣れている TS(Express)にしました。もう少し API エンドポイントが多ければ、OAS を自動生成できる FastAPI を使っていたかもしれません。
+
+このアプリのバックエンドでは、ini ファイルに書かれた特定のフォルダ内の動画やコメントファイルを読み込んで DB(sqlite)に保存し、HLS 変換し、JSON 形式でコメントやメタデータを簡易的に送信しているだけなので正直コードも設計も雑です・・・。また、セキュリティの脆弱性を含んだコードもありますが、正直自己ホスト型アプリで、セキュリティにはあまり気を使う必要がないのでそのままにしています。せめてある程度テストを書きたいですが、外部 I/O が多く、テストを書きにくいのが問題点です。
+
+以下は package.json のライブラリの抜粋です。ご覧の通り、fluent-ffmpeg を使って動画関連の処理を行い、inquirer や simple-git などを使ってインストーラを作成しています。~~pkg のバイナリ化がうまくいかなかったのでインストーラはまだ途中です。~~
+
+```json
+{
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "args": "^5.0.3",
+    "compression": "^1.7.5",
+    "cors": "^2.8.5",
+    "express": "^4.21.1",
+    "ffmpeg-static": "^5.2.0",
+    "fluent-ffmpeg": "^2.1.3",
+    "ini": "^5.0.0",
+    "inquirer": "^12.1.0",
+    "minimist": "^1.2.8",
+    "pm2": "^5.4.3",
+    "simple-git": "^3.27.0",
+    "winston": "^3.17.0",
+    "xml2js": "^0.6.2"
+  }
+}
+```
+
+</br>
+
+#### フロントエンド側
+
+フロントエンド側は React(TS) + MUI を使っています。Vue.js を使う事も考えましたが、フロントエンド側の実装がある程度多くなり、外部ライブラリも多用するので、文法やエコシステムに慣れている React にしました。
+
+UI は MUI、CSS は基本的には外部ファイルを作らず、MUI の sx プロパティを使って書いています。今までは UI ライブラリを用いず、atomic design を使い、CSS は css module を使って書いていたのですが、流石に面倒だったのでこの機会に MUI を学習しました。ただ、UI ライブラリだけでは基本的な material design のレイアウトしかできないので、今後は自分で CSS などを使って実装する予定です。
+
+レスポンシブ対応にも多少時間がかかりました。一覧画面は MUI の xs や sm などのプロパティを使い、視聴画面ではスマホの場合はコメントテーブルがビデオの右に表示されないようなレイアウトにしました。レスポンシブ対応も、今までは grid-template-columns などを使っていたので UI ライブラリの便利さに驚きました。その一方で、あくまでも一般的な用途にしか対応できないので、もし余裕があれば SCSS の変数や mixin を使ってカスタマイズしたいと考えています。
+
+一応 PWA にも対応させましたが、サービスワーカー関連の実装をまだ書いていないのであまり効果はないです。また、自己ホストアプリである関係上 let's encrypt などを使って HTTPS 化できないので PC だと警告が表示されてしまいます。openssl を使ってオレオレ証明書をダウンロードできるようにする機能を実装する予定です。
+
+グローバルな状態管理は useContext を使いました。正直 useContext はボイラープレートが多く、zustand などの軽いライブラリを使うことも考えましたが、単純に慣れているので採用しました。
+
+以下は package.json のライブラリの抜粋です。これらのライブラリを使った感想などを簡易的に書きます。
+
+```json
+{
+  "dependencies": {
+    "@emotion/react": "^11.13.5",
+    "@emotion/styled": "^11.13.5",
+    "@mui/icons-material": "^6.1.10",
+    "@mui/material": "^6.1.9",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@types/jest": "^27.5.2",
+    "@types/node": "^16.18.119",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@types/react-router-dom": "^5.3.3",
+    "hls.js": "^1.5.17",
+    "plyr": "^3.7.8",
+    "plyr-react": "^5.3.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^7.0.1",
+    "react-scripts": "5.0.1",
+    "react-use": "^17.5.1",
+    "react-virtualized": "^9.22.5",
+    "react-window": "^1.8.10",
+    "sass": "^1.81.0",
+    "typescript": "^4.9.5",
+    "web-vitals": "^2.1.4"
+  }
+}
+```
+
+- **testing-library や jest**
+  → 当初はテストも書こうと考えたが面倒で、正直この程度の小規模のアプリなら、手動で E2E テストを行うほうが楽だし効率的だと思ったので使いませんでした。
+
+- **react-router-dom**
+  → ルーティングライブラリ。Next とか使うのはオーバーだったので使いました。最近は vue router と API が似ている tanstack/router を気に入って使っているので出来ればそちらに変更したいです。
+
+- **plyr**
+  → 動画ライブラリ。UI が綺麗で、レスポンシブ対応しており、KB ショートカット機能もあるので選定しました。その一方で、HLS 対応はしていないので、別途 hls.js ライブラリを使いました。
+
+- **react-scripts**
+  →CRA。重いのでいい加減 vite に移行したいです。
+
+- **react-use**
+  → 便利な汎用フックライブラリ。setTimeout、localstorage.setItem やそのクリーンアップ処理などの助長なコードが大量に存在するので、このライブラリを少しずつ導入してリファクタリングを進めています。
+
+- **react-virtualized**
+  → 仮想化ライブラリ。動画のコメントテーブルで、コメントが数千個あると重すぎて表示できないので導入しました。
+
+#### データベース
+
+データベースは SQLite、ORM は PrismaORM を使っています。自己ホストアプリであるので SQLite 一択でした。(Docker 使って mysql を動かすこともできますが・・・) DB といってもテーブルは 2,3 個しかないので sqlite で特に問題はないと思います。
+
+PrismaORM はとにかく API が使いやすく、型補完が利くので快適な開発体験ができました。TS で大規模なアプリならアクセスオブジェクトパターンの TypeORM が有名ですが、この程度のアプリなら Prisma が使いやすく感じました。
+
+#### その他の技術
+
+今後は GitHubActions の CI も書く予定です。テストは書いてないし、CD もしないのであまり必要性を感じていませんでしたが、Docker イメージを公開したり、リリース処理を簡略化したいと思ったので書く予定です。また、リリースにあたり、自分の環境以外(MacOS や Linux)での動作保証ができないので、Docker 関連の実装もする予定です。
+
+### 苦労した点など
+
+**コメントテーブル**
+このアプリの開発で一番苦労したのがコメントテーブルの実装です。内部的には API を叩いてコメントを表示するだけなのですが、コメント数が多いと非常に重くなるので react-virtualized という仮想化ライブラリを使いました。
+
+また、コメントが YoutubeLive のように自動でスクロールする機能を実装するのが非常に難しかったです。動画の再生時間に一番近いコメントの id を変数とし、通常時は次のコメントの時間が再生時間と比較して小さくなったか、ユーザーが再生時間をシークした場合は二分探索で一番近い id を探すような関数を一定間隔で呼び出す方法で実装しました。(この方法が正しいかは分からないが、情報が全くなかったので動くまで苦労しました・・・。)
+
+```tsx
+// 動画の再生時間に基づいて表示するコメントインデックスを計算
+useEffect(() => {
+  const findCurrentCommentIndex = (fixedVideoTime: number) => {
+    let index = 0;
+
+    // コメントのvposが現在の再生時間より小さい最大のインデックスを探す
+    for (let i = currentCommentIndex; i < comments?.length; i++) {
+      if (comments[i].vpos <= fixedVideoTime * 100) {
+        index = i;
+      } else {
+        break; // 条件を満たさない場合はループを抜ける
+      }
+    }
+
+    // currentCommentIndex以降で満たさないコメントがあった場合、二分探索を実行
+    // シークで移動した場合用
+    if (comments[index].vpos > fixedVideoTime * 100) {
+      let low = 0;
+      let high = comments.length - 1;
+      while (low <= high) {
+        const mid = Math.floor((low + high) / 2);
+        if (comments[mid].vpos <= fixedVideoTime * 100) {
+          index = mid;
+          low = mid + 1; // 満たすインデックスを見つけたので、次のインデックスを調べる
+        } else {
+          high = mid - 1;
+        }
+      }
+    }
+
+    return index;
+  };
+
+  const index = findCurrentCommentIndex(debouncedTime);
+  setCurrentCommentIndex(index);
+
+  // 再生時間に合わせてスクロール
+  if (listRef.current) {
+    listRef.current.scrollToRow(index);
+  }
+}, [debouncedTime, comments]);
+```
+
+**ビデオ画面のレイアウト**
+あらゆるデバイスや、PC で画面の大きさを変更しても、動画の高さとコメントテーブルの高さが常に同じになるようにするのにも苦労しました。特に、どちらとも外部ライブラリを使っているので css を使って実装することができませんでした。そこで、かなり強引な手法ですが、ページ起動時や画面の大きさを変更した際に video 要素の高さを計算し、コメントテーブルの高さをそれに合わせるような形で実装しました。(コードも煩雑になったので、他にいい方法が思いつけば今後変更します。)
+
+```tsx
+const [videoHeight, setVideoHeight] = useState(0);
+
+useLayoutEffect(() => {
+  const updateVideoHeight = () => {
+    const videoElement = document.querySelector("video");
+    if (videoElement) {
+      setVideoHeight(videoElement.clientHeight);
+    }
+  };
+
+  // 初期高さ取得
+  updateVideoHeight();
+
+  // ウィンドウリサイズ時にも高さを再取得
+  window.addEventListener("resize", updateVideoHeight);
+
+  // クリーンアップ関数でイベントリスナーを削除
+  return () => {
+    window.removeEventListener("resize", updateVideoHeight);
+  };
+}, []);
+```
+
+**HLS 対応**
+フロントエンドの hls.js、バックエンドの fluent-ffmpeg ライブラリを使った実装が思うようにいかず、エラーにも何度も遭遇しました。何とかgithub issue などを駆使して動くようになりましたが、外部ライブラリの選定には慎重になるべきだと改めて感じました。
+
+### 感想
+
+大学 4 年の一学期に 10 日程度で開発したアプリなので、動くだけで、コーディングの一貫性もなく、かなり雑なコードや設計になっています。(特にバックエンド) しかし、フロントエンドの様々なライブラリの使い方など、多くのことをこのアプリを開発する過程で学習できました。今後は機能追加よりもリファクタリングに力を入れていこうと考えています。

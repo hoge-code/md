@@ -1,0 +1,38 @@
+---
+# Feel free to add content and custom Front Matter to this file.
+# To modify the layout, see https://jekyllrb.com/docs/themes/#overriding-theme-defaults
+
+# layoutで_layouts/default.htmlを参照する
+# index.markdown(md)は自動でindex.htmlに変換される
+layout: default
+paginate: true
+---
+
+<!-- 記事 -->
+{% for post in paginator.posts %}
+<article>
+  <h2><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></h2>
+  <p>{{ post.excerpt }}</p>
+  <p><small>投稿日: {{ post.date | date: "%Y-%m-%d" }}</small></p>
+</article>
+{% endfor %}
+
+<!-- ページネーション -->
+<div class="pagination">
+  {% if paginator.first_page %}
+  <a href="{{ site.baseurl }}{{ paginator.first_page_path }}">First</a>
+  {% endif %} 
+  
+  {% if paginator.previous_page %}
+  <a href="{{ site.baseurl }}{{ paginator.previous_page_path }}"
+    >&laquo; Previous &nbsp;</a>
+  {% endif %} 
+  
+  {% if paginator.next_page %}
+  <a href="{{ site.baseurl }}{{ paginator.next_page_path }}">Next &raquo;</a>
+  {% endif %} 
+  
+  {% if paginator.last_page %}
+  <a href="{{ site.baseurl }}{{ paginator.last_page_path }}">Last</a>
+  {% endif %}
+</div>

@@ -1,0 +1,46 @@
+---
+layout: post
+title: "Pandocでmdからwordファイルを作る"
+date: 2025-02-21 12:00:00 +0900
+categories: [blog]
+tags: [ツール]
+excerpt: "Pandoc"
+---
+
+ドキュメントをワードで提出しなければならない際に、mdで書て変換したいと思ったので、vscodeとpandocを使ったセットアップ手順を書きます。
+
+#### Pandocのインストール
+
+[Pandocの公式サイト](https://pandoc.org/installing.html)にアクセスし、windows用のmsiインストーラをダウンロードし、インストールを完了します。</br>
+
+コマンドプロンプトで確認します。
+```bash
+pandoc --version
+```
+vscodeでも使えるように、`vscode-pandoc`という拡張機能をダウンロードします。
+
+#### mdファイルの作成
+
+適当なmdファイルを作成します。この際、YAMLダークマターを使ってメタデータを挿入します。
+
+```markdown
+---
+title: "My Document"
+author: "Your Name"
+date: "2025-01-07"
+---
+
+## セクション1
+
+内容の説明がここに来ます。
+```
+
+#### word形式に変換
+
+vscodeでコマンドパレットを開き、wordに変換します。ワード以外にも、pdfやhtml形式にも変換できます。上記のmdを変換すると、以下のようなdocxファイルが生成されます。このままではスタイルが不十分ですが、pandocの`--reference-doc=`オプションなどを使えば見た目の調整も出来そうです。
+![](/md/assets/images/pandoc_word.png)
+
+#### 感想
+
+notionはdocx形式でエキスポートできないし、ワードファイルを簡単に作成したいと思った際に、pandocとvscodeを使えば非常に簡単に作成できると感じました。
+

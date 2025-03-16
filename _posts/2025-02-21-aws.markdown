@@ -1,0 +1,75 @@
+---
+layout: post
+title: "XAトランザクション"
+date: 2025-02-21 12:00:00 +0900
+categories: [blog]
+tags: [MySQL]
+excerpt: "MySQL + XAトランザクション"
+---
+
+マイクロサービス間で整合性を保つには、CAP定理でいうC(整合性)の一部を妥協して、最終整合性を維持できるサーガパターンを`AWS StepFunctions`などを使用して実装するのが一般的らしいですが、せっかくなので分散トランザクションについても簡単に試してみます。
+
+### サンプルの流れ
+複数のmySQLデータベースを用意し、XAトランザクションを使用します。両方のデータベースで操作が成功すればコミットし、どちらかが失敗すればロールバックします。また、`my.cnf`ファイルで使用されているMySQLのエンジンが`InnoDB`であることを確認します。
+
+### テーブルの用意
+`docker-compose.yml`などを使って別のポートでmySQLサーバを二つ起動し、テーブルを作成します。
+
+#### **データベース1: `db1`**
+```sql
+CREATE DATABASE db1;
+USE db1;
+
+CREATE TABLE account_balance (
+    account_id INT PRIMARY KEY,
+    balance DECIMAL(10, 2)
+);
+
+INSERT INTO account_balance (account_id, balance) VALUES (1, 1000.00);
+```
+
+#### **データベース2: `db2`**
+```sql
+CREATE DATABASE db2;
+USE db2;
+
+CREATE TABLE transaction_log (
+    transaction_id INT AUTO_INCREMENT PRIMARY KEY,
+    account_id INT,
+    amount DECIMAL(10, 2),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO transaction_log (account_id, amount) VALUES (1, 0.00);
+```
+
+#### XAトランザクションを使用
+```sql
+-- db1 で XA トランザクションを開始
+XA START 'txn1';
+UPDATE db1.account_balance 
+SET balance = balance - 100.00 
+WHERE account_id = 1;
+XA END 'txn1';
+XA PREPARE 'txn1';
+
+-- db2 で XA トランザクションを開始
+XA START 'txn2';
+INSERT INTO db2.transaction_log (account_id, amount) 
+VALUES (1, -100.00);
+XA END 'txn2';
+XA PREPARE 'txn2';
+
+-- すべてのトランザクションをコミット
+XA COMMIT 'txn1';
+XA COMMIT 'txn2';
+
+-- ロールバック例: 失敗があれば以下を実行
+-- XA ROLLBACK 'txn1';
+-- XA ROLLBACK 'txn2';
+```
+
+上記を実行すると、すべての操作が正常に終了した場合、`XA COMMIT`でトランザクションを確定され、失敗があった場合、`XA ROLLBACK`でトランザクションを取り消されます。
+
+### まとめ
+上記は非常に単純なSQLのサンプルですが、それでも単一DBのトランザクションと比較して面倒になりました。プログラムで実装するとなると、さらに面倒になりそうです。パフォーマンスも悪いですし、よほどの一貫性が求められるような場面でもなければ、大人しくサーガを使って補填トランザクションで実装したほうが楽だと感じました。

@@ -1,0 +1,103 @@
+---
+layout: post
+title: "PWAに入門する"
+date: 2025-02-21 12:00:00 +0900
+categories: [blog]
+tags: [React]
+excerpt: "React + パフォーマンス関連"
+---
+
+PWAに関しては、`service-worker.js`や`manifest.json`ファイルの基本的な書き方程度の知識しかなかったので、[フロントエンドロードマップ](https://roadmap.sh/frontend)のPWAの欄で紹介されていた項目について学習しました。</br>
+
+列挙すると以下のような項目になります。
+
+- パフォーマンス計測と向上
+    - PRPLパターン
+    - RAILパターン
+    - パフォーマンスメトリクス
+    - Lighthouse
+    - DevTools
+
+- Browser APIs
+
+
+### Browser APIs
+`Storage`、`Server Sent Events`、`Service Workers`、`Location`など全9個が紹介されていましたが、どれもブラウザでも使われる基本APIでした。</br>
+ブラウザAPIは自分で実装すると意外とコードが長くなってしまいますが、`react-use`や`vue-use`などのライブラリはこれらのフックを提供しているので簡潔に書けます。以下がサンプルコードです。
+```tsx
+import { useLocation } from 'react-use';
+
+const MyComponent: React.FC = () => {
+  const location = useLocation();
+
+  return (
+    <div>
+      <p>Current pathname: {location.pathname}</p>
+      <p>Current search: {location.search}</p>
+      <p>Current hash: {location.hash}</p>
+    </div>
+  );
+};
+```
+
+### PRPLパターン
+PRPLパターンの目的は、リソース取得を効率化させ、ページのパフォーマンスを効率化させることです。これにより、PWAの拘束性やオフライン対応を実現できます。以下がPRPLの頭文字です。
+
+- **P - Push Critical Resources (重要なリソースをプッシュ)**
+    - Service Workerを使用してキャッシュなど
+
+- **R - Render the Initial Route (最初のルートを描画)**
+    - SSGなどを使用してレンダリングを最適化など
+
+- **P - Pre-cache Remaining Routes (残りのルートを事前キャッシュ)**
+
+- **L - Lazy-load Non-critical Resources (重要でないリソースを遅延読み込み)**
+    
+
+### RAILパターン
+パフォーマンス指標に関するモデルです。RAILは、**レスポンス時間**と**アニメーション**を最適化することに焦点を当てています。
+
+- **R - Response to User Input in 100ms (100ms以内にユーザー入力に反応)**
+
+- **A - Animations should run at 60fps (アニメーションは60fpsで実行)**
+
+- **I - Idle Time should be used for non-urgent work (アイドル時間には非緊急の作業を行う)**
+    - 事前キャッシュなど
+
+- **L - Load content progressively (コンテンツを順次ロードする)**
+    - コンテンツを遅延読み込みするなど
+
+
+### Lighthouse
+
+`Lighthouse`ではパフォーマンス、アクセシビリティ、ベストプラクティス、SEO、PWAの5つの項目をテストできます。ブラウザから実行するのは面倒なので、CLIやCIで実行します。</br>
+Lighthouse CLIのサンプルコマンドです。
+```bash
+npx lighthouse https://example.com --output html --output-path ./lighthouse-report.html
+```
+
+CIで実行する場合は以下のようになります。
+```yaml
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli
+
+      - name: Run Lighthouse CI
+        run: lhci autorun --upload.target=temporary-public-storage
+```
+
+生成されたレポートのうち、**Core Web Vitals**（LCP, FID, CLS）が重要な指標となります。
+
+### まとめ
+PRPLやRAILモデルの考え方や`Lighthouse`を使ったメトリクス確認方法、遅延読み込みやバンドルなどの基本的なパフォーマンス改善方法はブラウザのウェブアプリと共通する点が多いと思いました。

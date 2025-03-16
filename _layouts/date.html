@@ -1,0 +1,13 @@
+---
+layout: default
+---
+
+<h1>月: {{ page.date | date: "%B %Y" }}</h1>
+
+{% for post in page.posts %}
+<article>
+  <h2><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></h2>
+  <p>{{ post.excerpt }}</p>
+  <p><small>投稿日: {{ post.date | date: "%Y-%m-%d" }}</small></p>
+</article>
+{% endfor %}
