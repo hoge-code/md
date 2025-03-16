@@ -1,0 +1,196 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/md/assets/css/default.css">
+  <link rel="stylesheet" href="/md/assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <title>ツールの忘備録</title>
+</head>
+<body>
+
+<header>
+  <h1><a href="/md/">ツールの忘備録</a></h1></h1>
+</header>
+
+<div id="content">
+  <!-- メインコンテンツ部分 -->
+  <main>
+        <article>
+      <header>
+        <h1>PWAに入門する</h1>
+        <p class="meta">
+          February 21, 2025 in
+          <a href="/category/blog"
+            >blog</a
+          >
+        </p>
+      </header>
+
+      <div class="content"><p>PWAに関しては、<code class="language-plaintext highlighter-rouge">service-worker.js</code>や<code class="language-plaintext highlighter-rouge">manifest.json</code>ファイルの基本的な書き方程度の知識しかなかったので、<a href="https://roadmap.sh/frontend">フロントエンドロードマップ</a>のPWAの欄で紹介されていた項目について学習しました。&lt;/br&gt;</p>
+
+<p>列挙すると以下のような項目になります。</p>
+
+<ul>
+  <li>パフォーマンス計測と向上
+    <ul>
+      <li>PRPLパターン</li>
+      <li>RAILパターン</li>
+      <li>パフォーマンスメトリクス</li>
+      <li>Lighthouse</li>
+      <li>DevTools</li>
+    </ul>
+  </li>
+  <li>Browser APIs</li>
+</ul>
+
+<h3 id="browser-apis">Browser APIs</h3>
+<p><code class="language-plaintext highlighter-rouge">Storage</code>、<code class="language-plaintext highlighter-rouge">Server Sent Events</code>、<code class="language-plaintext highlighter-rouge">Service Workers</code>、<code class="language-plaintext highlighter-rouge">Location</code>など全9個が紹介されていましたが、どれもブラウザでも使われる基本APIでした。&lt;/br&gt;
+ブラウザAPIは自分で実装すると意外とコードが長くなってしまいますが、<code class="language-plaintext highlighter-rouge">react-use</code>や<code class="language-plaintext highlighter-rouge">vue-use</code>などのライブラリはこれらのフックを提供しているので簡潔に書けます。以下がサンプルコードです。</p>
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">useLocation</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react-use</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="kd">const</span> <span class="nx">MyComponent</span><span class="p">:</span> <span class="nx">React</span><span class="p">.</span><span class="nx">FC</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">location</span> <span class="o">=</span> <span class="nf">useLocation</span><span class="p">();</span>
+
+  <span class="k">return </span><span class="p">(</span>
+    <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Current pathname: <span class="si">{</span><span class="nx">location</span><span class="p">.</span><span class="nx">pathname</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Current search: <span class="si">{</span><span class="nx">location</span><span class="p">.</span><span class="nx">search</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Current hash: <span class="si">{</span><span class="nx">location</span><span class="p">.</span><span class="nx">hash</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+  <span class="p">);</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<h3 id="prplパターン">PRPLパターン</h3>
+<p>PRPLパターンの目的は、リソース取得を効率化させ、ページのパフォーマンスを効率化させることです。これにより、PWAの拘束性やオフライン対応を実現できます。以下がPRPLの頭文字です。</p>
+
+<ul>
+  <li><strong>P - Push Critical Resources (重要なリソースをプッシュ)</strong>
+    <ul>
+      <li>Service Workerを使用してキャッシュなど</li>
+    </ul>
+  </li>
+  <li><strong>R - Render the Initial Route (最初のルートを描画)</strong>
+    <ul>
+      <li>SSGなどを使用してレンダリングを最適化など</li>
+    </ul>
+  </li>
+  <li>
+    <p><strong>P - Pre-cache Remaining Routes (残りのルートを事前キャッシュ)</strong></p>
+  </li>
+  <li><strong>L - Lazy-load Non-critical Resources (重要でないリソースを遅延読み込み)</strong></li>
+</ul>
+
+<h3 id="railパターン">RAILパターン</h3>
+<p>パフォーマンス指標に関するモデルです。RAILは、<strong>レスポンス時間</strong>と<strong>アニメーション</strong>を最適化することに焦点を当てています。</p>
+
+<ul>
+  <li>
+    <p><strong>R - Response to User Input in 100ms (100ms以内にユーザー入力に反応)</strong></p>
+  </li>
+  <li>
+    <p><strong>A - Animations should run at 60fps (アニメーションは60fpsで実行)</strong></p>
+  </li>
+  <li><strong>I - Idle Time should be used for non-urgent work (アイドル時間には非緊急の作業を行う)</strong>
+    <ul>
+      <li>事前キャッシュなど</li>
+    </ul>
+  </li>
+  <li><strong>L - Load content progressively (コンテンツを順次ロードする)</strong>
+    <ul>
+      <li>コンテンツを遅延読み込みするなど</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="lighthouse">Lighthouse</h3>
+
+<p><code class="language-plaintext highlighter-rouge">Lighthouse</code>ではパフォーマンス、アクセシビリティ、ベストプラクティス、SEO、PWAの5つの項目をテストできます。ブラウザから実行するのは面倒なので、CLIやCIで実行します。&lt;/br&gt;
+Lighthouse CLIのサンプルコマンドです。</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npx lighthouse https://example.com <span class="nt">--output</span> html <span class="nt">--output-path</span> ./lighthouse-report.html
+</code></pre></div></div>
+
+<p>CIで実行する場合は以下のようになります。</p>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">jobs</span><span class="pi">:</span>
+  <span class="na">lighthouse</span><span class="pi">:</span>
+    <span class="na">runs-on</span><span class="pi">:</span> <span class="s">ubuntu-latest</span>
+    <span class="na">steps</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Checkout code</span>
+        <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/checkout@v2</span>
+
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Set up Node.js</span>
+        <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/setup-node@v2</span>
+        <span class="na">with</span><span class="pi">:</span>
+          <span class="na">node-version</span><span class="pi">:</span> <span class="s1">'</span><span class="s">14'</span>
+
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Install Lighthouse CI</span>
+        <span class="na">run</span><span class="pi">:</span> <span class="s">npm install -g @lhci/cli</span>
+
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Run Lighthouse CI</span>
+        <span class="na">run</span><span class="pi">:</span> <span class="s">lhci autorun --upload.target=temporary-public-storage</span>
+</code></pre></div></div>
+
+<p>生成されたレポートのうち、<strong>Core Web Vitals</strong>（LCP, FID, CLS）が重要な指標となります。</p>
+
+<h3 id="まとめ">まとめ</h3>
+<p>PRPLやRAILモデルの考え方や<code class="language-plaintext highlighter-rouge">Lighthouse</code>を使ったメトリクス確認方法、遅延読み込みやバンドルなどの基本的なパフォーマンス改善方法はブラウザのウェブアプリと共通する点が多いと思いました。</p>
+</div>
+
+      <footer>
+        <p>
+          Tags: 
+          <a href="/md/tag/react">React</a> 
+        </p>
+      </footer>
+    </article>
+
+  </main>
+
+  <!-- サイドバー部分 -->
+  <aside id="sidebar">
+    <h2><a href="/md/about/">About</a></h2>
+
+    <h2><a href="/md/categories/">Categories</a></h2>
+    <ul>
+      
+        <li><a href="/md/category/blog"">blog</a></li>
+      
+    </ul>
+
+    <h2><a href="/md/tags/">Tags</a></h2>
+    <ul>
+      
+        <li><a href="/md/tag/fastapi">FastAPI</a></li>
+      
+        <li><a href="/md/tag/nodejs">Nodejs</a></li>
+      
+        <li><a href="/md/tag/mysql">MySQL</a></li>
+      
+        <li><a href="/md/tag/ツール">ツール</a></li>
+      
+        <li><a href="/md/tag/react">React</a></li>
+      
+        <li><a href="/md/tag/開発">開発</a></li>
+      
+    </ul>
+    <h2><a href="/md/archives/">Archives</a></h2>
+<ul>
+  
+  
+    <li><a href="/md/2025/03/">2025-03</a></li>
+  
+    <li><a href="/md/2025/02/">2025-02</a></li>
+  
+</ul>
+
+  </aside>
+</div>
+
+<footer>
+  <p>&copy; 2025 ツールの忘備録</p>
+</footer>
+
+</body>
+</html>

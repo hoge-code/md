@@ -1,0 +1,123 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/md/assets/css/default.css">
+  <link rel="stylesheet" href="/md/assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <title>ツールの忘備録</title>
+</head>
+<body>
+
+<header>
+  <h1><a href="/md/">ツールの忘備録</a></h1></h1>
+</header>
+
+<div id="content">
+  <!-- メインコンテンツ部分 -->
+  <main>
+        <article>
+      <header>
+        <h1>Pandocでmdからwordファイルを作る</h1>
+        <p class="meta">
+          February 21, 2025 in
+          <a href="/category/blog"
+            >blog</a
+          >
+        </p>
+      </header>
+
+      <div class="content"><p>ドキュメントをワードで提出しなければならない際に、mdで書て変換したいと思ったので、vscodeとpandocを使ったセットアップ手順を書きます。</p>
+
+<h4 id="pandocのインストール">Pandocのインストール</h4>
+
+<p><a href="https://pandoc.org/installing.html">Pandocの公式サイト</a>にアクセスし、windows用のmsiインストーラをダウンロードし、インストールを完了します。&lt;/br&gt;</p>
+
+<p>コマンドプロンプトで確認します。</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pandoc <span class="nt">--version</span>
+</code></pre></div></div>
+<p>vscodeでも使えるように、<code class="language-plaintext highlighter-rouge">vscode-pandoc</code>という拡張機能をダウンロードします。</p>
+
+<h4 id="mdファイルの作成">mdファイルの作成</h4>
+
+<p>適当なmdファイルを作成します。この際、YAMLダークマターを使ってメタデータを挿入します。</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
+<span class="na">title</span><span class="pi">:</span> <span class="s2">"</span><span class="s">My</span><span class="nv"> </span><span class="s">Document"</span>
+<span class="na">author</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Your</span><span class="nv"> </span><span class="s">Name"</span>
+<span class="na">date</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-01-07"</span>
+<span class="nn">---</span>
+
+<span class="gu">## セクション1</span>
+
+内容の説明がここに来ます。
+</code></pre></div></div>
+
+<h4 id="word形式に変換">word形式に変換</h4>
+
+<p>vscodeでコマンドパレットを開き、wordに変換します。ワード以外にも、pdfやhtml形式にも変換できます。上記のmdを変換すると、以下のようなdocxファイルが生成されます。このままではスタイルが不十分ですが、pandocの<code class="language-plaintext highlighter-rouge">--reference-doc=</code>オプションなどを使えば見た目の調整も出来そうです。
+<img src="/md/assets/images/pandoc_word.png" alt="" /></p>
+
+<h4 id="感想">感想</h4>
+
+<p>notionはdocx形式でエキスポートできないし、ワードファイルを簡単に作成したいと思った際に、pandocとvscodeを使えば非常に簡単に作成できると感じました。</p>
+
+</div>
+
+      <footer>
+        <p>
+          Tags: 
+          <a href="/md/tag/ツール">ツール</a> 
+        </p>
+      </footer>
+    </article>
+
+  </main>
+
+  <!-- サイドバー部分 -->
+  <aside id="sidebar">
+    <h2><a href="/md/about/">About</a></h2>
+
+    <h2><a href="/md/categories/">Categories</a></h2>
+    <ul>
+      
+        <li><a href="/md/category/blog"">blog</a></li>
+      
+    </ul>
+
+    <h2><a href="/md/tags/">Tags</a></h2>
+    <ul>
+      
+        <li><a href="/md/tag/fastapi">FastAPI</a></li>
+      
+        <li><a href="/md/tag/nodejs">Nodejs</a></li>
+      
+        <li><a href="/md/tag/mysql">MySQL</a></li>
+      
+        <li><a href="/md/tag/ツール">ツール</a></li>
+      
+        <li><a href="/md/tag/react">React</a></li>
+      
+        <li><a href="/md/tag/開発">開発</a></li>
+      
+    </ul>
+    <h2><a href="/md/archives/">Archives</a></h2>
+<ul>
+  
+  
+    <li><a href="/md/2025/03/">2025-03</a></li>
+  
+    <li><a href="/md/2025/02/">2025-02</a></li>
+  
+</ul>
+
+  </aside>
+</div>
+
+<footer>
+  <p>&copy; 2025 ツールの忘備録</p>
+</footer>
+
+</body>
+</html>

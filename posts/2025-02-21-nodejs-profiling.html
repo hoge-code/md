@@ -1,0 +1,110 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/md/assets/css/default.css">
+  <link rel="stylesheet" href="/md/assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <title>ツールの忘備録</title>
+</head>
+<body>
+
+<header>
+  <h1><a href="/md/">ツールの忘備録</a></h1></h1>
+</header>
+
+<div id="content">
+  <!-- メインコンテンツ部分 -->
+  <main>
+        <article>
+      <header>
+        <h1>nodejsをプロファイリングしてみる</h1>
+        <p class="meta">
+          February 21, 2025 in
+          <a href="/category/blog"
+            >blog</a
+          >
+        </p>
+      </header>
+
+      <div class="content"><p>nodejsのデバッグは<code class="language-plaintext highlighter-rouge">inspect-brk</code>や、それを内部的に使用しているvscodeが有名ですが、プロファイリングに使われる<code class="language-plaintext highlighter-rouge">clinic.js</code>を試してみます。</p>
+
+<h3 id="使用してみる">使用してみる</h3>
+<p>まずはグローバルにインストールします。</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm <span class="nb">install</span> <span class="nt">-g</span> clinic
+</code></pre></div></div>
+<p>その後、以下のコマンドで分析します。</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>clinic docter <span class="nt">--</span> node dist/app.js
+</code></pre></div></div>
+<p>HTMLが表示されるのでブラウザで結果を確認できます。</p>
+
+<h3 id="他のオプション">他のオプション</h3>
+<p><code class="language-plaintext highlighter-rouge">clinic.js</code> には、以下のオプションがあります。</p>
+
+<h4 id="1-clinic-doctor">1. <strong><code class="language-plaintext highlighter-rouge">clinic doctor</code></strong></h4>
+<p>一般的なパフォーマンス診断ツール。アプリケーションを監視して、ボトルネックを特定します。CPU使用率、イベントループの遅延、GCなどを確認できます。各関数の呼び出し回数や遅延を確認できるので、ボトルネックを確認しやすくなります。</p>
+
+<h4 id="2-clinic-flame">2. <strong><code class="language-plaintext highlighter-rouge">clinic flame</code></strong></h4>
+<p>Flamegraph（炎グラフ）を使用して、CPU のプロファイルを視覚化します。コマンドは<code class="language-plaintext highlighter-rouge">docter</code>を<code class="language-plaintext highlighter-rouge">flame</code>に変更するだけです。グラフが表示され、関数ごとのCPU使用率を視覚的に確認できます。</p>
+
+<h4 id="3-clinic-bubbleprof">3. <strong><code class="language-plaintext highlighter-rouge">clinic bubbleprof</code></strong></h4>
+<p>関数間の呼び出し関係を視覚化するツール。円の大きさによって関数の依存関係や、ボトルネックを確認できます。</p>
+</div>
+
+      <footer>
+        <p>
+          Tags: 
+          <a href="/md/tag/nodejs">Nodejs</a> 
+        </p>
+      </footer>
+    </article>
+
+  </main>
+
+  <!-- サイドバー部分 -->
+  <aside id="sidebar">
+    <h2><a href="/md/about/">About</a></h2>
+
+    <h2><a href="/md/categories/">Categories</a></h2>
+    <ul>
+      
+        <li><a href="/md/category/blog"">blog</a></li>
+      
+    </ul>
+
+    <h2><a href="/md/tags/">Tags</a></h2>
+    <ul>
+      
+        <li><a href="/md/tag/fastapi">FastAPI</a></li>
+      
+        <li><a href="/md/tag/nodejs">Nodejs</a></li>
+      
+        <li><a href="/md/tag/mysql">MySQL</a></li>
+      
+        <li><a href="/md/tag/ツール">ツール</a></li>
+      
+        <li><a href="/md/tag/react">React</a></li>
+      
+        <li><a href="/md/tag/開発">開発</a></li>
+      
+    </ul>
+    <h2><a href="/md/archives/">Archives</a></h2>
+<ul>
+  
+  
+    <li><a href="/md/2025/03/">2025-03</a></li>
+  
+    <li><a href="/md/2025/02/">2025-02</a></li>
+  
+</ul>
+
+  </aside>
+</div>
+
+<footer>
+  <p>&copy; 2025 ツールの忘備録</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,151 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/md/assets/css/default.css">
+  <link rel="stylesheet" href="/md/assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <title>ツールの忘備録</title>
+</head>
+<body>
+
+<header>
+  <h1><a href="/md/">ツールの忘備録</a></h1></h1>
+</header>
+
+<div id="content">
+  <!-- メインコンテンツ部分 -->
+  <main>
+        <article>
+      <header>
+        <h1>XAトランザクション</h1>
+        <p class="meta">
+          February 21, 2025 in
+          <a href="/category/blog"
+            >blog</a
+          >
+        </p>
+      </header>
+
+      <div class="content"><p>マイクロサービス間で整合性を保つには、CAP定理でいうC(整合性)の一部を妥協して、最終整合性を維持できるサーガパターンを<code class="language-plaintext highlighter-rouge">AWS StepFunctions</code>などを使用して実装するのが一般的らしいですが、せっかくなので分散トランザクションについても簡単に試してみます。</p>
+
+<h3 id="サンプルの流れ">サンプルの流れ</h3>
+<p>複数のmySQLデータベースを用意し、XAトランザクションを使用します。両方のデータベースで操作が成功すればコミットし、どちらかが失敗すればロールバックします。また、<code class="language-plaintext highlighter-rouge">my.cnf</code>ファイルで使用されているMySQLのエンジンが<code class="language-plaintext highlighter-rouge">InnoDB</code>であることを確認します。</p>
+
+<h3 id="テーブルの用意">テーブルの用意</h3>
+<p><code class="language-plaintext highlighter-rouge">docker-compose.yml</code>などを使って別のポートでmySQLサーバを二つ起動し、テーブルを作成します。</p>
+
+<h4 id="データベース1-db1"><strong>データベース1: <code class="language-plaintext highlighter-rouge">db1</code></strong></h4>
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">CREATE</span> <span class="k">DATABASE</span> <span class="n">db1</span><span class="p">;</span>
+<span class="n">USE</span> <span class="n">db1</span><span class="p">;</span>
+
+<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">account_balance</span> <span class="p">(</span>
+    <span class="n">account_id</span> <span class="nb">INT</span> <span class="k">PRIMARY</span> <span class="k">KEY</span><span class="p">,</span>
+    <span class="n">balance</span> <span class="nb">DECIMAL</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="p">);</span>
+
+<span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">account_balance</span> <span class="p">(</span><span class="n">account_id</span><span class="p">,</span> <span class="n">balance</span><span class="p">)</span> <span class="k">VALUES</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1000</span><span class="p">.</span><span class="mi">00</span><span class="p">);</span>
+</code></pre></div></div>
+
+<h4 id="データベース2-db2"><strong>データベース2: <code class="language-plaintext highlighter-rouge">db2</code></strong></h4>
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">CREATE</span> <span class="k">DATABASE</span> <span class="n">db2</span><span class="p">;</span>
+<span class="n">USE</span> <span class="n">db2</span><span class="p">;</span>
+
+<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">transaction_log</span> <span class="p">(</span>
+    <span class="n">transaction_id</span> <span class="nb">INT</span> <span class="n">AUTO_INCREMENT</span> <span class="k">PRIMARY</span> <span class="k">KEY</span><span class="p">,</span>
+    <span class="n">account_id</span> <span class="nb">INT</span><span class="p">,</span>
+    <span class="n">amount</span> <span class="nb">DECIMAL</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="n">created_at</span> <span class="nb">TIMESTAMP</span> <span class="k">DEFAULT</span> <span class="k">CURRENT_TIMESTAMP</span>
+<span class="p">);</span>
+
+<span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">transaction_log</span> <span class="p">(</span><span class="n">account_id</span><span class="p">,</span> <span class="n">amount</span><span class="p">)</span> <span class="k">VALUES</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">.</span><span class="mi">00</span><span class="p">);</span>
+</code></pre></div></div>
+
+<h4 id="xaトランザクションを使用">XAトランザクションを使用</h4>
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- db1 で XA トランザクションを開始</span>
+<span class="n">XA</span> <span class="k">START</span> <span class="s1">'txn1'</span><span class="p">;</span>
+<span class="k">UPDATE</span> <span class="n">db1</span><span class="p">.</span><span class="n">account_balance</span> 
+<span class="k">SET</span> <span class="n">balance</span> <span class="o">=</span> <span class="n">balance</span> <span class="o">-</span> <span class="mi">100</span><span class="p">.</span><span class="mi">00</span> 
+<span class="k">WHERE</span> <span class="n">account_id</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="n">XA</span> <span class="k">END</span> <span class="s1">'txn1'</span><span class="p">;</span>
+<span class="n">XA</span> <span class="k">PREPARE</span> <span class="s1">'txn1'</span><span class="p">;</span>
+
+<span class="c1">-- db2 で XA トランザクションを開始</span>
+<span class="n">XA</span> <span class="k">START</span> <span class="s1">'txn2'</span><span class="p">;</span>
+<span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">db2</span><span class="p">.</span><span class="n">transaction_log</span> <span class="p">(</span><span class="n">account_id</span><span class="p">,</span> <span class="n">amount</span><span class="p">)</span> 
+<span class="k">VALUES</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">100</span><span class="p">.</span><span class="mi">00</span><span class="p">);</span>
+<span class="n">XA</span> <span class="k">END</span> <span class="s1">'txn2'</span><span class="p">;</span>
+<span class="n">XA</span> <span class="k">PREPARE</span> <span class="s1">'txn2'</span><span class="p">;</span>
+
+<span class="c1">-- すべてのトランザクションをコミット</span>
+<span class="n">XA</span> <span class="k">COMMIT</span> <span class="s1">'txn1'</span><span class="p">;</span>
+<span class="n">XA</span> <span class="k">COMMIT</span> <span class="s1">'txn2'</span><span class="p">;</span>
+
+<span class="c1">-- ロールバック例: 失敗があれば以下を実行</span>
+<span class="c1">-- XA ROLLBACK 'txn1';</span>
+<span class="c1">-- XA ROLLBACK 'txn2';</span>
+</code></pre></div></div>
+
+<p>上記を実行すると、すべての操作が正常に終了した場合、<code class="language-plaintext highlighter-rouge">XA COMMIT</code>でトランザクションを確定され、失敗があった場合、<code class="language-plaintext highlighter-rouge">XA ROLLBACK</code>でトランザクションを取り消されます。</p>
+
+<h3 id="まとめ">まとめ</h3>
+<p>上記は非常に単純なSQLのサンプルですが、それでも単一DBのトランザクションと比較して面倒になりました。プログラムで実装するとなると、さらに面倒になりそうです。パフォーマンスも悪いですし、よほどの一貫性が求められるような場面でもなければ、大人しくサーガを使って補填トランザクションで実装したほうが楽だと感じました。</p>
+</div>
+
+      <footer>
+        <p>
+          Tags: 
+          <a href="/md/tag/mysql">MySQL</a> 
+        </p>
+      </footer>
+    </article>
+
+  </main>
+
+  <!-- サイドバー部分 -->
+  <aside id="sidebar">
+    <h2><a href="/md/about/">About</a></h2>
+
+    <h2><a href="/md/categories/">Categories</a></h2>
+    <ul>
+      
+        <li><a href="/md/category/blog"">blog</a></li>
+      
+    </ul>
+
+    <h2><a href="/md/tags/">Tags</a></h2>
+    <ul>
+      
+        <li><a href="/md/tag/fastapi">FastAPI</a></li>
+      
+        <li><a href="/md/tag/nodejs">Nodejs</a></li>
+      
+        <li><a href="/md/tag/mysql">MySQL</a></li>
+      
+        <li><a href="/md/tag/ツール">ツール</a></li>
+      
+        <li><a href="/md/tag/react">React</a></li>
+      
+        <li><a href="/md/tag/開発">開発</a></li>
+      
+    </ul>
+    <h2><a href="/md/archives/">Archives</a></h2>
+<ul>
+  
+  
+    <li><a href="/md/2025/03/">2025-03</a></li>
+  
+    <li><a href="/md/2025/02/">2025-02</a></li>
+  
+</ul>
+
+  </aside>
+</div>
+
+<footer>
+  <p>&copy; 2025 ツールの忘備録</p>
+</footer>
+
+</body>
+</html>

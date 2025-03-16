@@ -1,0 +1,131 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/md/assets/css/default.css">
+  <link rel="stylesheet" href="/md/assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <title>ツールの忘備録</title>
+</head>
+<body>
+
+<header>
+  <h1><a href="/md/">ツールの忘備録</a></h1></h1>
+</header>
+
+<div id="content">
+  <!-- メインコンテンツ部分 -->
+  <main>
+        <article>
+      <header>
+        <h1>socket.ioでHTTPヘッダーを使った認証</h1>
+        <p class="meta">
+          February 21, 2025 in
+          <a href="/category/blog"
+            >blog</a
+          >
+        </p>
+      </header>
+
+      <div class="content"><p><code class="language-plaintext highlighter-rouge">socket-io</code>を使って認証機能を実装する際につまづいたので記事に残しておきます。</p>
+
+<h3 id="socketioの通信プロトコル">Socket.IOの通信プロトコル</h3>
+<p><code class="language-plaintext highlighter-rouge">Socket.io</code>接続をする場合、HTTPから<code class="language-plaintext highlighter-rouge">ws</code>にアップグレードされますが、(HTTPSの場合は<code class="language-plaintext highlighter-rouge">wss://</code>)、初回のプロトコルアップグレード時のみHTTPリクエストとしてヘッダーやクエリパラメータを送信できます。それ以降はHTTPではなく、<code class="language-plaintext highlighter-rouge">ws</code>での通信となるので、テキストでもバイナリでも、データを送信するにはペイロード内で送る必要があります。</p>
+
+<h3 id="クライアント側での初期設定">クライアント側での初期設定</h3>
+<p>以下のように<code class="language-plaintext highlighter-rouge">extraHeaders</code> を使用してトークンを送信します。(フロントでトークンを保存している場合)この際、再接続処理や、そのバックオフも書いておきます。</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// クライアント側 (ブラウザ)</span>
+<span class="kd">const</span> <span class="nx">socket</span> <span class="o">=</span> <span class="nf">io</span><span class="p">(</span><span class="dl">'</span><span class="s1">http://localhost:3000</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span>
+  <span class="na">transports</span><span class="p">:</span> <span class="p">[</span><span class="dl">'</span><span class="s1">websocket</span><span class="dl">'</span><span class="p">],</span>
+  <span class="na">extraHeaders</span><span class="p">:</span> <span class="p">{</span>
+    <span class="dl">'</span><span class="s1">Authorization</span><span class="dl">'</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Bearer my_token_here</span><span class="dl">'</span>
+  <span class="p">},</span>
+  <span class="na">reconnection</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span> <span class="c1">// 再接続を有効化</span>
+  <span class="na">reconnectionAttempts</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="c1">// 無限に再接続を試みる</span>
+  <span class="na">reconnectionDelay</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span> <span class="c1">// 再接続の待機時間（ミリ秒）</span>
+  <span class="na">reconnectionDelayMax</span><span class="p">:</span> <span class="mi">5000</span><span class="p">,</span> <span class="c1">// 最大待機時間（ミリ秒）</span>
+  <span class="na">randomizationFactor</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span> <span class="c1">// 再接続時の待機時間のランダム化</span>
+<span class="p">});</span>
+</code></pre></div></div>
+<p><code class="language-plaintext highlighter-rouge">React</code>などを使う場合は、上記で作成した<code class="language-plaintext highlighter-rouge">socket</code>を<code class="language-plaintext highlighter-rouge">useContext</code>などを使うと様々なコンポーネントで<code class="language-plaintext highlighter-rouge">socket.emit</code>の処理を書けるようになります。</p>
+
+<h3 id="サーバー側での設定">サーバー側での設定</h3>
+<p><code class="language-plaintext highlighter-rouge">Node.js + Express</code>の場合、接続時に <code class="language-plaintext highlighter-rouge">socket.handshake</code> を使って、ヘッダーを確認することができます。<code class="language-plaintext highlighter-rouge">python-socketio</code>の場合は<code class="language-plaintext highlighter-rouge">environ</code>でヘッダーを確認できます。&lt;/br&gt;
+以下のサンプルコードの<code class="language-plaintext highlighter-rouge">isValidToken</code>関数では、<code class="language-plaintext highlighter-rouge">jsonwebtoken</code>ライブラリなどを使い、JWTペイロードからクレームを検証するような処理を実装します。認証サービスを利用している場合は、<code class="language-plaintext highlighter-rouge">cognito</code>や<code class="language-plaintext highlighter-rouge">keycloak</code>の公開鍵エンドポイントを使って公開鍵を取得して検証します。</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// サーバー側での認証処理例</span>
+<span class="kd">const</span> <span class="nx">io</span> <span class="o">=</span> <span class="nf">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">socket.io</span><span class="dl">'</span><span class="p">)(</span><span class="nx">server</span><span class="p">);</span>
+
+<span class="nx">io</span><span class="p">.</span><span class="nf">use</span><span class="p">((</span><span class="nx">socket</span><span class="p">,</span> <span class="nx">next</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">token</span> <span class="o">=</span> <span class="nx">socket</span><span class="p">.</span><span class="nx">handshake</span><span class="p">.</span><span class="nx">headers</span><span class="p">[</span><span class="dl">'</span><span class="s1">authorization</span><span class="dl">'</span><span class="p">];</span>
+  <span class="k">if </span><span class="p">(</span><span class="nf">isValidToken</span><span class="p">(</span><span class="nx">token</span><span class="p">))</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nf">next</span><span class="p">();</span>  <span class="c1">// 認証成功</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="nf">next</span><span class="p">(</span><span class="k">new</span> <span class="nc">Error</span><span class="p">(</span><span class="dl">'</span><span class="s1">Authentication error</span><span class="dl">'</span><span class="p">));</span>  <span class="c1">// 認証失敗</span>
+<span class="p">});</span>
+
+<span class="nx">io</span><span class="p">.</span><span class="nf">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">connection</span><span class="dl">'</span><span class="p">,</span> <span class="p">(</span><span class="nx">socket</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">User connected</span><span class="dl">'</span><span class="p">);</span>
+<span class="p">});</span>
+</code></pre></div></div>
+
+<h3 id="テスト">テスト</h3>
+<p>調べたところ、<code class="language-plaintext highlighter-rouge">OAS</code>のように<code class="language-plaintext highlighter-rouge">AsyncAPI</code>のドキュメントを自動生成するフレームワークはなかったので、手動で<code class="language-plaintext highlighter-rouge">AsyncAPI</code>ドキュメントをyamlで作成した後に、<code class="language-plaintext highlighter-rouge">Postman</code>でトークンを環境変数に設定し、エンドポイントをテストするという流れになりそうです。</p>
+</div>
+
+      <footer>
+        <p>
+          Tags: 
+          <a href="/md/tag/nodejs">Nodejs</a> 
+        </p>
+      </footer>
+    </article>
+
+  </main>
+
+  <!-- サイドバー部分 -->
+  <aside id="sidebar">
+    <h2><a href="/md/about/">About</a></h2>
+
+    <h2><a href="/md/categories/">Categories</a></h2>
+    <ul>
+      
+        <li><a href="/md/category/blog"">blog</a></li>
+      
+    </ul>
+
+    <h2><a href="/md/tags/">Tags</a></h2>
+    <ul>
+      
+        <li><a href="/md/tag/fastapi">FastAPI</a></li>
+      
+        <li><a href="/md/tag/nodejs">Nodejs</a></li>
+      
+        <li><a href="/md/tag/mysql">MySQL</a></li>
+      
+        <li><a href="/md/tag/ツール">ツール</a></li>
+      
+        <li><a href="/md/tag/react">React</a></li>
+      
+        <li><a href="/md/tag/開発">開発</a></li>
+      
+    </ul>
+    <h2><a href="/md/archives/">Archives</a></h2>
+<ul>
+  
+  
+    <li><a href="/md/2025/03/">2025-03</a></li>
+  
+    <li><a href="/md/2025/02/">2025-02</a></li>
+  
+</ul>
+
+  </aside>
+</div>
+
+<footer>
+  <p>&copy; 2025 ツールの忘備録</p>
+</footer>
+
+</body>
+</html>

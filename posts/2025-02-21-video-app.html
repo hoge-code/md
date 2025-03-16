@@ -1,0 +1,294 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/md/assets/css/default.css">
+  <link rel="stylesheet" href="/md/assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <title>ツールの忘備録</title>
+</head>
+<body>
+
+<header>
+  <h1><a href="/md/">ツールの忘備録</a></h1></h1>
+</header>
+
+<div id="content">
+  <!-- メインコンテンツ部分 -->
+  <main>
+        <article>
+      <header>
+        <h1>コメント付きの動画アプリを開発しました</h1>
+        <p class="meta">
+          February 21, 2025 in
+          <a href="/category/blog"
+            >blog</a
+          >
+        </p>
+      </header>
+
+      <div class="content"><p>このアプリのコンセプトはローカル PC 内にある動画ファイルを HLS 形式で、ニコニコ動画の xml コメントファイルとともにブラウザで視聴することです。</p>
+
+<p>アプリの外観、機能の詳細や使い方については<a href="https://github.com/hogecode/video_app">readme</a>をご覧ください。この記事では、技術の選定理由や内部実装などについて書きます。</p>
+
+<p>&lt;/br&gt;</p>
+
+<h3 id="技術スタック">技術スタック</h3>
+
+<h4 id="サーバー側">サーバー側</h4>
+
+<p>サーバー側は Node.js + TS + Express + PrismaORM を使っています。</p>
+
+<p>Python(FastAPI)、Java(SpringBoot)なども考えましたが、フロントエンド側に時間を割きたかったので非同期中心かつ軽量で、慣れている TS(Express)にしました。もう少し API エンドポイントが多ければ、OAS を自動生成できる FastAPI を使っていたかもしれません。</p>
+
+<p>このアプリのバックエンドでは、ini ファイルに書かれた特定のフォルダ内の動画やコメントファイルを読み込んで DB(sqlite)に保存し、HLS 変換し、JSON 形式でコメントやメタデータを簡易的に送信しているだけなので正直コードも設計も雑です・・・。また、セキュリティの脆弱性を含んだコードもありますが、正直自己ホスト型アプリで、セキュリティにはあまり気を使う必要がないのでそのままにしています。せめてある程度テストを書きたいですが、外部 I/O が多く、テストを書きにくいのが問題点です。</p>
+
+<p>以下は package.json のライブラリの抜粋です。ご覧の通り、fluent-ffmpeg を使って動画関連の処理を行い、inquirer や simple-git などを使ってインストーラを作成しています。<del>pkg のバイナリ化がうまくいかなかったのでインストーラはまだ途中です。</del></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"dependencies"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"@prisma/client"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^5.22.0"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"args"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^5.0.3"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"compression"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^1.7.5"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"cors"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^2.8.5"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"express"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^4.21.1"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"ffmpeg-static"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^5.2.0"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"fluent-ffmpeg"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^2.1.3"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"ini"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^5.0.0"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"inquirer"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^12.1.0"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"minimist"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^1.2.8"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"pm2"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^5.4.3"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"simple-git"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^3.27.0"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"winston"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^3.17.0"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"xml2js"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^0.6.2"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>&lt;/br&gt;</p>
+
+<h4 id="フロントエンド側">フロントエンド側</h4>
+
+<p>フロントエンド側は React(TS) + MUI を使っています。Vue.js を使う事も考えましたが、フロントエンド側の実装がある程度多くなり、外部ライブラリも多用するので、文法やエコシステムに慣れている React にしました。</p>
+
+<p>UI は MUI、CSS は基本的には外部ファイルを作らず、MUI の sx プロパティを使って書いています。今までは UI ライブラリを用いず、atomic design を使い、CSS は css module を使って書いていたのですが、流石に面倒だったのでこの機会に MUI を学習しました。ただ、UI ライブラリだけでは基本的な material design のレイアウトしかできないので、今後は自分で CSS などを使って実装する予定です。</p>
+
+<p>レスポンシブ対応にも多少時間がかかりました。一覧画面は MUI の xs や sm などのプロパティを使い、視聴画面ではスマホの場合はコメントテーブルがビデオの右に表示されないようなレイアウトにしました。レスポンシブ対応も、今までは grid-template-columns などを使っていたので UI ライブラリの便利さに驚きました。その一方で、あくまでも一般的な用途にしか対応できないので、もし余裕があれば SCSS の変数や mixin を使ってカスタマイズしたいと考えています。</p>
+
+<p>一応 PWA にも対応させましたが、サービスワーカー関連の実装をまだ書いていないのであまり効果はないです。また、自己ホストアプリである関係上 let’s encrypt などを使って HTTPS 化できないので PC だと警告が表示されてしまいます。openssl を使ってオレオレ証明書をダウンロードできるようにする機能を実装する予定です。</p>
+
+<p>グローバルな状態管理は useContext を使いました。正直 useContext はボイラープレートが多く、zustand などの軽いライブラリを使うことも考えましたが、単純に慣れているので採用しました。</p>
+
+<p>以下は package.json のライブラリの抜粋です。これらのライブラリを使った感想などを簡易的に書きます。</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"dependencies"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"@emotion/react"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^11.13.5"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"@emotion/styled"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^11.13.5"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"@mui/icons-material"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^6.1.10"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"@mui/material"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^6.1.9"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"@testing-library/jest-dom"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^5.17.0"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"@testing-library/react"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^13.4.0"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"@testing-library/user-event"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^13.5.0"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"@types/jest"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^27.5.2"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"@types/node"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^16.18.119"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"@types/react"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^18.3.12"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"@types/react-dom"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^18.3.1"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"@types/react-router-dom"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^5.3.3"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"hls.js"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^1.5.17"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"plyr"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^3.7.8"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"plyr-react"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^5.3.0"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"react"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^18.3.1"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"react-dom"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^18.3.1"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"react-router-dom"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^7.0.1"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"react-scripts"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5.0.1"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"react-use"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^17.5.1"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"react-virtualized"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^9.22.5"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"react-window"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^1.8.10"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"sass"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^1.81.0"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"typescript"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^4.9.5"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"web-vitals"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^2.1.4"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<ul>
+  <li>
+    <p><strong>testing-library や jest</strong>
+→ 当初はテストも書こうと考えたが面倒で、正直この程度の小規模のアプリなら、手動で E2E テストを行うほうが楽だし効率的だと思ったので使いませんでした。</p>
+  </li>
+  <li>
+    <p><strong>react-router-dom</strong>
+→ ルーティングライブラリ。Next とか使うのはオーバーだったので使いました。最近は vue router と API が似ている tanstack/router を気に入って使っているので出来ればそちらに変更したいです。</p>
+  </li>
+  <li>
+    <p><strong>plyr</strong>
+→ 動画ライブラリ。UI が綺麗で、レスポンシブ対応しており、KB ショートカット機能もあるので選定しました。その一方で、HLS 対応はしていないので、別途 hls.js ライブラリを使いました。</p>
+  </li>
+  <li>
+    <p><strong>react-scripts</strong>
+→CRA。重いのでいい加減 vite に移行したいです。</p>
+  </li>
+  <li>
+    <p><strong>react-use</strong>
+→ 便利な汎用フックライブラリ。setTimeout、localstorage.setItem やそのクリーンアップ処理などの助長なコードが大量に存在するので、このライブラリを少しずつ導入してリファクタリングを進めています。</p>
+  </li>
+  <li>
+    <p><strong>react-virtualized</strong>
+→ 仮想化ライブラリ。動画のコメントテーブルで、コメントが数千個あると重すぎて表示できないので導入しました。</p>
+  </li>
+</ul>
+
+<h4 id="データベース">データベース</h4>
+
+<p>データベースは SQLite、ORM は PrismaORM を使っています。自己ホストアプリであるので SQLite 一択でした。(Docker 使って mysql を動かすこともできますが・・・) DB といってもテーブルは 2,3 個しかないので sqlite で特に問題はないと思います。</p>
+
+<p>PrismaORM はとにかく API が使いやすく、型補完が利くので快適な開発体験ができました。TS で大規模なアプリならアクセスオブジェクトパターンの TypeORM が有名ですが、この程度のアプリなら Prisma が使いやすく感じました。</p>
+
+<h4 id="その他の技術">その他の技術</h4>
+
+<p>今後は GitHubActions の CI も書く予定です。テストは書いてないし、CD もしないのであまり必要性を感じていませんでしたが、Docker イメージを公開したり、リリース処理を簡略化したいと思ったので書く予定です。また、リリースにあたり、自分の環境以外(MacOS や Linux)での動作保証ができないので、Docker 関連の実装もする予定です。</p>
+
+<h3 id="苦労した点など">苦労した点など</h3>
+
+<p><strong>コメントテーブル</strong>
+このアプリの開発で一番苦労したのがコメントテーブルの実装です。内部的には API を叩いてコメントを表示するだけなのですが、コメント数が多いと非常に重くなるので react-virtualized という仮想化ライブラリを使いました。</p>
+
+<p>また、コメントが YoutubeLive のように自動でスクロールする機能を実装するのが非常に難しかったです。動画の再生時間に一番近いコメントの id を変数とし、通常時は次のコメントの時間が再生時間と比較して小さくなったか、ユーザーが再生時間をシークした場合は二分探索で一番近い id を探すような関数を一定間隔で呼び出す方法で実装しました。(この方法が正しいかは分からないが、情報が全くなかったので動くまで苦労しました・・・。)</p>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 動画の再生時間に基づいて表示するコメントインデックスを計算</span>
+<span class="nf">useEffect</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">findCurrentCommentIndex</span> <span class="o">=</span> <span class="p">(</span><span class="na">fixedVideoTime</span><span class="p">:</span> <span class="kr">number</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="kd">let</span> <span class="nx">index</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+    <span class="c1">// コメントのvposが現在の再生時間より小さい最大のインデックスを探す</span>
+    <span class="k">for </span><span class="p">(</span><span class="kd">let</span> <span class="nx">i</span> <span class="o">=</span> <span class="nx">currentCommentIndex</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">comments</span><span class="p">?.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if </span><span class="p">(</span><span class="nx">comments</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">vpos</span> <span class="o">&lt;=</span> <span class="nx">fixedVideoTime</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">index</span> <span class="o">=</span> <span class="nx">i</span><span class="p">;</span>
+      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="k">break</span><span class="p">;</span> <span class="c1">// 条件を満たさない場合はループを抜ける</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="c1">// currentCommentIndex以降で満たさないコメントがあった場合、二分探索を実行</span>
+    <span class="c1">// シークで移動した場合用</span>
+    <span class="k">if </span><span class="p">(</span><span class="nx">comments</span><span class="p">[</span><span class="nx">index</span><span class="p">].</span><span class="nx">vpos</span> <span class="o">&gt;</span> <span class="nx">fixedVideoTime</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">let</span> <span class="nx">low</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+      <span class="kd">let</span> <span class="nx">high</span> <span class="o">=</span> <span class="nx">comments</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+      <span class="k">while </span><span class="p">(</span><span class="nx">low</span> <span class="o">&lt;=</span> <span class="nx">high</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">const</span> <span class="nx">mid</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nf">floor</span><span class="p">((</span><span class="nx">low</span> <span class="o">+</span> <span class="nx">high</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">);</span>
+        <span class="k">if </span><span class="p">(</span><span class="nx">comments</span><span class="p">[</span><span class="nx">mid</span><span class="p">].</span><span class="nx">vpos</span> <span class="o">&lt;=</span> <span class="nx">fixedVideoTime</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">index</span> <span class="o">=</span> <span class="nx">mid</span><span class="p">;</span>
+          <span class="nx">low</span> <span class="o">=</span> <span class="nx">mid</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span> <span class="c1">// 満たすインデックスを見つけたので、次のインデックスを調べる</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+          <span class="nx">high</span> <span class="o">=</span> <span class="nx">mid</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="nx">index</span><span class="p">;</span>
+  <span class="p">};</span>
+
+  <span class="kd">const</span> <span class="nx">index</span> <span class="o">=</span> <span class="nf">findCurrentCommentIndex</span><span class="p">(</span><span class="nx">debouncedTime</span><span class="p">);</span>
+  <span class="nf">setCurrentCommentIndex</span><span class="p">(</span><span class="nx">index</span><span class="p">);</span>
+
+  <span class="c1">// 再生時間に合わせてスクロール</span>
+  <span class="k">if </span><span class="p">(</span><span class="nx">listRef</span><span class="p">.</span><span class="nx">current</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">listRef</span><span class="p">.</span><span class="nx">current</span><span class="p">.</span><span class="nf">scrollToRow</span><span class="p">(</span><span class="nx">index</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">},</span> <span class="p">[</span><span class="nx">debouncedTime</span><span class="p">,</span> <span class="nx">comments</span><span class="p">]);</span>
+</code></pre></div></div>
+
+<p><strong>ビデオ画面のレイアウト</strong>
+あらゆるデバイスや、PC で画面の大きさを変更しても、動画の高さとコメントテーブルの高さが常に同じになるようにするのにも苦労しました。特に、どちらとも外部ライブラリを使っているので css を使って実装することができませんでした。そこで、かなり強引な手法ですが、ページ起動時や画面の大きさを変更した際に video 要素の高さを計算し、コメントテーブルの高さをそれに合わせるような形で実装しました。(コードも煩雑になったので、他にいい方法が思いつけば今後変更します。)</p>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="p">[</span><span class="nx">videoHeight</span><span class="p">,</span> <span class="nx">setVideoHeight</span><span class="p">]</span> <span class="o">=</span> <span class="nf">useState</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+
+<span class="nf">useLayoutEffect</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">updateVideoHeight</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">videoElement</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nf">querySelector</span><span class="p">(</span><span class="dl">"</span><span class="s2">video</span><span class="dl">"</span><span class="p">);</span>
+    <span class="k">if </span><span class="p">(</span><span class="nx">videoElement</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nf">setVideoHeight</span><span class="p">(</span><span class="nx">videoElement</span><span class="p">.</span><span class="nx">clientHeight</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">};</span>
+
+  <span class="c1">// 初期高さ取得</span>
+  <span class="nf">updateVideoHeight</span><span class="p">();</span>
+
+  <span class="c1">// ウィンドウリサイズ時にも高さを再取得</span>
+  <span class="nb">window</span><span class="p">.</span><span class="nf">addEventListener</span><span class="p">(</span><span class="dl">"</span><span class="s2">resize</span><span class="dl">"</span><span class="p">,</span> <span class="nx">updateVideoHeight</span><span class="p">);</span>
+
+  <span class="c1">// クリーンアップ関数でイベントリスナーを削除</span>
+  <span class="k">return </span><span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nb">window</span><span class="p">.</span><span class="nf">removeEventListener</span><span class="p">(</span><span class="dl">"</span><span class="s2">resize</span><span class="dl">"</span><span class="p">,</span> <span class="nx">updateVideoHeight</span><span class="p">);</span>
+  <span class="p">};</span>
+<span class="p">},</span> <span class="p">[]);</span>
+</code></pre></div></div>
+
+<p><strong>HLS 対応</strong>
+フロントエンドの hls.js、バックエンドの fluent-ffmpeg ライブラリを使った実装が思うようにいかず、エラーにも何度も遭遇しました。何とかgithub issue などを駆使して動くようになりましたが、外部ライブラリの選定には慎重になるべきだと改めて感じました。</p>
+
+<h3 id="感想">感想</h3>
+
+<p>大学 4 年の一学期に 10 日程度で開発したアプリなので、動くだけで、コーディングの一貫性もなく、かなり雑なコードや設計になっています。(特にバックエンド) しかし、フロントエンドの様々なライブラリの使い方など、多くのことをこのアプリを開発する過程で学習できました。今後は機能追加よりもリファクタリングに力を入れていこうと考えています。</p>
+</div>
+
+      <footer>
+        <p>
+          Tags: 
+          <a href="/md/tag/react">React</a>,  
+          <a href="/md/tag/nodejs">Nodejs</a>,  
+          <a href="/md/tag/開発">開発</a> 
+        </p>
+      </footer>
+    </article>
+
+  </main>
+
+  <!-- サイドバー部分 -->
+  <aside id="sidebar">
+    <h2><a href="/md/about/">About</a></h2>
+
+    <h2><a href="/md/categories/">Categories</a></h2>
+    <ul>
+      
+        <li><a href="/md/category/blog"">blog</a></li>
+      
+    </ul>
+
+    <h2><a href="/md/tags/">Tags</a></h2>
+    <ul>
+      
+        <li><a href="/md/tag/fastapi">FastAPI</a></li>
+      
+        <li><a href="/md/tag/nodejs">Nodejs</a></li>
+      
+        <li><a href="/md/tag/mysql">MySQL</a></li>
+      
+        <li><a href="/md/tag/ツール">ツール</a></li>
+      
+        <li><a href="/md/tag/react">React</a></li>
+      
+        <li><a href="/md/tag/開発">開発</a></li>
+      
+    </ul>
+    <h2><a href="/md/archives/">Archives</a></h2>
+<ul>
+  
+  
+    <li><a href="/md/2025/03/">2025-03</a></li>
+  
+    <li><a href="/md/2025/02/">2025-02</a></li>
+  
+</ul>
+
+  </aside>
+</div>
+
+<footer>
+  <p>&copy; 2025 ツールの忘備録</p>
+</footer>
+
+</body>
+</html>

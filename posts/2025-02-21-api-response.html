@@ -1,0 +1,182 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/md/assets/css/default.css">
+  <link rel="stylesheet" href="/md/assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <title>ツールの忘備録</title>
+</head>
+<body>
+
+<header>
+  <h1><a href="/md/">ツールの忘備録</a></h1></h1>
+</header>
+
+<div id="content">
+  <!-- メインコンテンツ部分 -->
+  <main>
+        <article>
+      <header>
+        <h1>APIのレスポンス形式を統一する</h1>
+        <p class="meta">
+          February 21, 2025 in
+          <a href="/category/blog"
+            >blog</a
+          >
+        </p>
+      </header>
+
+      <div class="content"><p>APIレスポンスの形式を統一する方法を考えてみます。</p>
+
+<h3 id="fastapiの場合">FastAPIの場合</h3>
+
+<p>FastAPIはエンドポイントの<code class="language-plaintext highlighter-rouge">response_model</code>のDTOクラスの構造をもとにOASドキュメントを生成しますが、ミドルウェアを使って、レスポンス後に返却するJSONの構造を変更すると上手く表示されないのでDTOを使って実装してみます。</p>
+
+<h4 id="dtoの生成">DTOの生成</h4>
+<p>適当な<code class="language-plaintext highlighter-rouge">Item</code>と汎用的な<code class="language-plaintext highlighter-rouge">ResponseDTO</code>を作成します。<code class="language-plaintext highlighter-rouge">ResponseDTO</code>も本来ならステータスコードや、エラーならエラーメッセージを詳細に含めるべきですが、簡略化します。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from typing import TypeVar, Generic, List
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+# 総称型の定義
+T = TypeVar('T')  # Tは任意の型
+
+class ResponseDTO(Generic[T], BaseModel):
+    success: bool
+    data: T
+    message: str
+
+# レスポンス用のDTOクラス
+class Item(BaseModel):
+    id: int
+    name: str
+</code></pre></div></div>
+
+<h4 id="エンドポイントの作成">エンドポイントの作成</h4>
+<p>こちらも本来ならクエリパラメータなどを使ってページネーションを実装し、それらのメタデータもレスポンスに含めるべきですが簡略化します。</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>app = FastAPI()
+
+@app.get("/items", response_model=ResponseDTO[List[Item]])
+async def get_items():
+    items = [
+        Item(id=1, name="Item 1"),
+        Item(id=2, name="Item 2")
+    ]
+    return ResponseDTO(success=True, data=items, message="Items fetched successfully")
+</code></pre></div></div>
+
+<h3 id="expressの場合">Expressの場合</h3>
+<p>Expressでも一応<code class="language-plaintext highlighter-rouge">Response</code>の型定義にDTOを使うこともできますが、OASを使わないし、ミドルウェアで作成してみます。この際、<code class="language-plaintext highlighter-rouge">X-Forwarded-For</code>ヘッダーを消し、エラーレスポンスは標準の<code class="language-plaintext highlighter-rouge">RFC7807</code>形式で返却するように実装してみます。以下がサンプルコードです。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import { Request, Response, NextFunction } from 'express';
+
+// 成功時のレスポンス形式
+interface SuccessResponse {
+  status: string;
+  data: any;
+}
+
+// エラーレスポンスのRFC7807形式
+interface ErrorResponse {
+  type: string;
+  title: string;
+  status: number;
+  detail: string;
+}
+
+const responseMiddleware = (req: Request, res: Response, next: NextFunction) =&gt; {
+  const originalJson = res.json;
+
+  res.json = (body: any) =&gt; {
+    // X-Forwarded-Forを消す
+    res.removeHeader('X-Forwarded-For');
+
+    if (res.statusCode &gt;= 200 &amp;&amp; res.statusCode &lt; 300) {
+      // 成功時のレスポンス形式
+      const successResponse: SuccessResponse = {
+        status: 'success',
+        data: body,
+      };
+      return originalJson.call(res, successResponse);
+    } else {
+      // 失敗時のRFC7807形式
+      const errorResponse: ErrorResponse = {
+        type: 'about:blank',
+        title: 'Error',
+        status: res.statusCode,
+        detail: body.message || 'Unknown error',
+      };
+      return originalJson.call(res, errorResponse);
+    }
+  };
+
+  next();
+};
+
+export default responseMiddleware;
+</code></pre></div></div>
+
+<h3 id="まとめ">まとめ</h3>
+<p>上記は単純な例ですが、一度レスポンス形式を統一する処理を書いておけば繰り返し使えそうです。</p>
+</div>
+
+      <footer>
+        <p>
+          Tags: 
+          <a href="/md/tag/fastapi">FastAPI</a>,  
+          <a href="/md/tag/nodejs">Nodejs</a> 
+        </p>
+      </footer>
+    </article>
+
+  </main>
+
+  <!-- サイドバー部分 -->
+  <aside id="sidebar">
+    <h2><a href="/md/about/">About</a></h2>
+
+    <h2><a href="/md/categories/">Categories</a></h2>
+    <ul>
+      
+        <li><a href="/md/category/blog"">blog</a></li>
+      
+    </ul>
+
+    <h2><a href="/md/tags/">Tags</a></h2>
+    <ul>
+      
+        <li><a href="/md/tag/fastapi">FastAPI</a></li>
+      
+        <li><a href="/md/tag/nodejs">Nodejs</a></li>
+      
+        <li><a href="/md/tag/mysql">MySQL</a></li>
+      
+        <li><a href="/md/tag/ツール">ツール</a></li>
+      
+        <li><a href="/md/tag/react">React</a></li>
+      
+        <li><a href="/md/tag/開発">開発</a></li>
+      
+    </ul>
+    <h2><a href="/md/archives/">Archives</a></h2>
+<ul>
+  
+  
+    <li><a href="/md/2025/03/">2025-03</a></li>
+  
+    <li><a href="/md/2025/02/">2025-02</a></li>
+  
+</ul>
+
+  </aside>
+</div>
+
+<footer>
+  <p>&copy; 2025 ツールの忘備録</p>
+</footer>
+
+</body>
+</html>

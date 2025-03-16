@@ -1,0 +1,144 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/md/assets/css/default.css">
+  <link rel="stylesheet" href="/md/assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <title>ツールの忘備録</title>
+</head>
+<body>
+
+<header>
+  <h1><a href="/md/">ツールの忘備録</a></h1></h1>
+</header>
+
+<div id="content">
+  <!-- メインコンテンツ部分 -->
+  <main>
+        <article>
+      <header>
+        <h1>はてなブログからJekyllに移行してみる</h1>
+        <p class="meta">
+          March 13, 2025 in
+          <a href="/category/blog"
+            >blog</a
+          >
+        </p>
+      </header>
+
+      <div class="content"><p>はてなブログからJekyllに移行する際、いくつかの点で躓きました。<code class="language-plaintext highlighter-rouge">ruby</code>やSSGにあまり慣れていなかったため、セットアップに多少時間がかかってしまいました。移行を決めたきっかけとして、はてなブログでは何故か記事を物理的に削除できなかったり、mdの編集がしづらかったりといった問題があり、<code class="language-plaintext highlighter-rouge">git</code>リポジトリでmdを管理できる環境にしたいと考えたからです。</p>
+
+<h3 id="jekyllのメリット">Jekyllのメリット</h3>
+
+<ul>
+  <li><strong>プラグインでUIのカスタマイズが可能</strong></li>
+  <li><strong>ローカル環境でサイトを確認できる</strong> (<code class="language-plaintext highlighter-rouge">bundle exec jekyll serve</code> で確認)</li>
+  <li><strong>ウェブ上でMarkdownを編集する必要がなく、CI/CDで簡単に更新できる</strong></li>
+</ul>
+
+<p>これらのメリットがあり、Jekyllを使うことに決めました。</p>
+
+<h3 id="苦労した点">苦労した点</h3>
+
+<h4 id="1-そもそもrubyが分からない">1. そもそも<code class="language-plaintext highlighter-rouge">ruby</code>が分からない</h4>
+
+<p><code class="language-plaintext highlighter-rouge">bundle exec jekyll serve</code>や<code class="language-plaintext highlighter-rouge">gem install</code>などのコマンドすら知りませんでした。しかし、最近Windows用にもAIが搭載されたターミナル<code class="language-plaintext highlighter-rouge">warp</code>が登場したことで、VSCodeのコードスニペットのように一度登録すれば簡単にコマンドを呼び出せるようになり、少し楽になりました。</p>
+
+<h4 id="2-htmlテンプレートエンジン--ssgに慣れていない">2. HTMLテンプレートエンジン + SSGに慣れていない</h4>
+
+<p>フロントエンドで<code class="language-plaintext highlighter-rouge">React</code>のコンポーネントベースに慣れすぎていたため、昔ながらのテンプレートエンジンの構文を思い出すのにも時間がかかりました。</p>
+
+<h4 id="3-jekyllのプラグイン設定">3. <code class="language-plaintext highlighter-rouge">jekyll</code>のプラグイン設定</h4>
+
+<p>SSGサイトを構築する際に、以下のプラグインを使用しました。</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">jekyll-paginate</code></li>
+  <li><code class="language-plaintext highlighter-rouge">jekyll-theme-cayman</code></li>
+  <li><code class="language-plaintext highlighter-rouge">jekyll-archives</code></li>
+</ul>
+
+<p>これらのプラグインの設定に少し手間がかかりました。</p>
+
+<h5 id="jekyll-theme-cayman">jekyll-theme-cayman</h5>
+
+<p>このプラグインはSCSSを使用しているため、以下の手順で設定を行う必要がありました。</p>
+
+<ol>
+  <li><code class="language-plaintext highlighter-rouge">/assets/css/style.scss</code>ファイルで<code class="language-plaintext highlighter-rouge">@import "jekyll-theme-cayman"</code>をインポート</li>
+  <li><code class="language-plaintext highlighter-rouge">index.html</code>でビルドされたCSSファイルをインポート</li>
+  <li><code class="language-plaintext highlighter-rouge">_config.yml</code>ファイルでSCSSのビルド情報を設定</li>
+</ol>
+
+<p>これらを正しく設定しないと、テーマがうまく反映されませんでした。</p>
+
+<h5 id="jekyll-archives">jekyll-archives</h5>
+
+<p>タグや日付ごとの表示が可能なプラグインですが、どうやら<code class="language-plaintext highlighter-rouge">github-pages</code>では動作しないようです。Jekyllは本来、<code class="language-plaintext highlighter-rouge">github-actions</code>を自動的に使うことができるのが特徴ですが、<code class="language-plaintext highlighter-rouge">github-pages</code>に対応させるためには手動でCI/CDを設定しなければならず、結果的に自分でCI/CDを構築する羽目になりました。</p>
+
+<p>また、<code class="language-plaintext highlighter-rouge">github-pages</code>自体の設定を久々に行ったため、公開先のブランチを変更する必要があることすら忘れており、少し手間取りました。</p>
+
+<h3 id="結論">結論</h3>
+
+<p>色々と面倒な点がありましたが、特にローカル環境でmdを編集できる点が大きな利点だと感じました。デメリットとしては、無料枠だとパブリックリポジトリにする必要があることくらいかと思います。</p>
+
+</div>
+
+      <footer>
+        <p>
+          Tags: 
+          <a href="/md/tag/開発">開発</a> 
+        </p>
+      </footer>
+    </article>
+
+  </main>
+
+  <!-- サイドバー部分 -->
+  <aside id="sidebar">
+    <h2><a href="/md/about/">About</a></h2>
+
+    <h2><a href="/md/categories/">Categories</a></h2>
+    <ul>
+      
+        <li><a href="/md/category/blog"">blog</a></li>
+      
+    </ul>
+
+    <h2><a href="/md/tags/">Tags</a></h2>
+    <ul>
+      
+        <li><a href="/md/tag/fastapi">FastAPI</a></li>
+      
+        <li><a href="/md/tag/nodejs">Nodejs</a></li>
+      
+        <li><a href="/md/tag/mysql">MySQL</a></li>
+      
+        <li><a href="/md/tag/ツール">ツール</a></li>
+      
+        <li><a href="/md/tag/react">React</a></li>
+      
+        <li><a href="/md/tag/開発">開発</a></li>
+      
+    </ul>
+    <h2><a href="/md/archives/">Archives</a></h2>
+<ul>
+  
+  
+    <li><a href="/md/2025/03/">2025-03</a></li>
+  
+    <li><a href="/md/2025/02/">2025-02</a></li>
+  
+</ul>
+
+  </aside>
+</div>
+
+<footer>
+  <p>&copy; 2025 ツールの忘備録</p>
+</footer>
+
+</body>
+</html>

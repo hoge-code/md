@@ -1,0 +1,659 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://hogecode.github.io/md/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hogecode.github.io/md/" rel="alternate" type="text/html" /><updated>2025-03-16T10:10:47+00:00</updated><id>https://hogecode.github.io/md/feed.xml</id><title type="html">ツールの忘備録</title><subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle><entry><title type="html">はてなブログからJekyllに移行してみる</title><link href="https://hogecode.github.io/md/posts/2025-03-13-jekyll-blog" rel="alternate" type="text/html" title="はてなブログからJekyllに移行してみる" /><published>2025-03-13T03:00:00+00:00</published><updated>2025-03-13T03:00:00+00:00</updated><id>https://hogecode.github.io/md/posts/jekyll-blog</id><content type="html" xml:base="https://hogecode.github.io/md/posts/2025-03-13-jekyll-blog"><![CDATA[<p>はてなブログからJekyllに移行する際、いくつかの点で躓きました。<code class="language-plaintext highlighter-rouge">ruby</code>やSSGにあまり慣れていなかったため、セットアップに多少時間がかかってしまいました。移行を決めたきっかけとして、はてなブログでは何故か記事を物理的に削除できなかったり、mdの編集がしづらかったりといった問題があり、<code class="language-plaintext highlighter-rouge">git</code>リポジトリでmdを管理できる環境にしたいと考えたからです。</p>
+
+<h3 id="jekyllのメリット">Jekyllのメリット</h3>
+
+<ul>
+  <li><strong>プラグインでUIのカスタマイズが可能</strong></li>
+  <li><strong>ローカル環境でサイトを確認できる</strong> (<code class="language-plaintext highlighter-rouge">bundle exec jekyll serve</code> で確認)</li>
+  <li><strong>ウェブ上でMarkdownを編集する必要がなく、CI/CDで簡単に更新できる</strong></li>
+</ul>
+
+<p>これらのメリットがあり、Jekyllを使うことに決めました。</p>
+
+<h3 id="苦労した点">苦労した点</h3>
+
+<h4 id="1-そもそもrubyが分からない">1. そもそも<code class="language-plaintext highlighter-rouge">ruby</code>が分からない</h4>
+
+<p><code class="language-plaintext highlighter-rouge">bundle exec jekyll serve</code>や<code class="language-plaintext highlighter-rouge">gem install</code>などのコマンドすら知りませんでした。しかし、最近Windows用にもAIが搭載されたターミナル<code class="language-plaintext highlighter-rouge">warp</code>が登場したことで、VSCodeのコードスニペットのように一度登録すれば簡単にコマンドを呼び出せるようになり、少し楽になりました。</p>
+
+<h4 id="2-htmlテンプレートエンジン--ssgに慣れていない">2. HTMLテンプレートエンジン + SSGに慣れていない</h4>
+
+<p>フロントエンドで<code class="language-plaintext highlighter-rouge">React</code>のコンポーネントベースに慣れすぎていたため、昔ながらのテンプレートエンジンの構文を思い出すのにも時間がかかりました。</p>
+
+<h4 id="3-jekyllのプラグイン設定">3. <code class="language-plaintext highlighter-rouge">jekyll</code>のプラグイン設定</h4>
+
+<p>SSGサイトを構築する際に、以下のプラグインを使用しました。</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">jekyll-paginate</code></li>
+  <li><code class="language-plaintext highlighter-rouge">jekyll-theme-cayman</code></li>
+  <li><code class="language-plaintext highlighter-rouge">jekyll-archives</code></li>
+</ul>
+
+<p>これらのプラグインの設定に少し手間がかかりました。</p>
+
+<h5 id="jekyll-theme-cayman">jekyll-theme-cayman</h5>
+
+<p>このプラグインはSCSSを使用しているため、以下の手順で設定を行う必要がありました。</p>
+
+<ol>
+  <li><code class="language-plaintext highlighter-rouge">/assets/css/style.scss</code>ファイルで<code class="language-plaintext highlighter-rouge">@import "jekyll-theme-cayman"</code>をインポート</li>
+  <li><code class="language-plaintext highlighter-rouge">index.html</code>でビルドされたCSSファイルをインポート</li>
+  <li><code class="language-plaintext highlighter-rouge">_config.yml</code>ファイルでSCSSのビルド情報を設定</li>
+</ol>
+
+<p>これらを正しく設定しないと、テーマがうまく反映されませんでした。</p>
+
+<h5 id="jekyll-archives">jekyll-archives</h5>
+
+<p>タグや日付ごとの表示が可能なプラグインですが、どうやら<code class="language-plaintext highlighter-rouge">github-pages</code>では動作しないようです。Jekyllは本来、<code class="language-plaintext highlighter-rouge">github-actions</code>を自動的に使うことができるのが特徴ですが、<code class="language-plaintext highlighter-rouge">github-pages</code>に対応させるためには手動でCI/CDを設定しなければならず、結果的に自分でCI/CDを構築する羽目になりました。</p>
+
+<p>また、<code class="language-plaintext highlighter-rouge">github-pages</code>自体の設定を久々に行ったため、公開先のブランチを変更する必要があることすら忘れており、少し手間取りました。</p>
+
+<h3 id="結論">結論</h3>
+
+<p>色々と面倒な点がありましたが、特にローカル環境でmdを編集できる点が大きな利点だと感じました。デメリットとしては、無料枠だとパブリックリポジトリにする必要があることくらいかと思います。</p>]]></content><author><name></name></author><category term="blog" /><category term="開発" /><summary type="html"><![CDATA[Jekyll + GitHubPages]]></summary></entry><entry><title type="html">APIのレスポンス形式を統一する</title><link href="https://hogecode.github.io/md/posts/2025-02-21-api-response" rel="alternate" type="text/html" title="APIのレスポンス形式を統一する" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hogecode.github.io/md/posts/api-response</id><content type="html" xml:base="https://hogecode.github.io/md/posts/2025-02-21-api-response"><![CDATA[<p>APIレスポンスの形式を統一する方法を考えてみます。</p>
+
+<h3 id="fastapiの場合">FastAPIの場合</h3>
+
+<p>FastAPIはエンドポイントの<code class="language-plaintext highlighter-rouge">response_model</code>のDTOクラスの構造をもとにOASドキュメントを生成しますが、ミドルウェアを使って、レスポンス後に返却するJSONの構造を変更すると上手く表示されないのでDTOを使って実装してみます。</p>
+
+<h4 id="dtoの生成">DTOの生成</h4>
+<p>適当な<code class="language-plaintext highlighter-rouge">Item</code>と汎用的な<code class="language-plaintext highlighter-rouge">ResponseDTO</code>を作成します。<code class="language-plaintext highlighter-rouge">ResponseDTO</code>も本来ならステータスコードや、エラーならエラーメッセージを詳細に含めるべきですが、簡略化します。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from typing import TypeVar, Generic, List
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+# 総称型の定義
+T = TypeVar('T')  # Tは任意の型
+
+class ResponseDTO(Generic[T], BaseModel):
+    success: bool
+    data: T
+    message: str
+
+# レスポンス用のDTOクラス
+class Item(BaseModel):
+    id: int
+    name: str
+</code></pre></div></div>
+
+<h4 id="エンドポイントの作成">エンドポイントの作成</h4>
+<p>こちらも本来ならクエリパラメータなどを使ってページネーションを実装し、それらのメタデータもレスポンスに含めるべきですが簡略化します。</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>app = FastAPI()
+
+@app.get("/items", response_model=ResponseDTO[List[Item]])
+async def get_items():
+    items = [
+        Item(id=1, name="Item 1"),
+        Item(id=2, name="Item 2")
+    ]
+    return ResponseDTO(success=True, data=items, message="Items fetched successfully")
+</code></pre></div></div>
+
+<h3 id="expressの場合">Expressの場合</h3>
+<p>Expressでも一応<code class="language-plaintext highlighter-rouge">Response</code>の型定義にDTOを使うこともできますが、OASを使わないし、ミドルウェアで作成してみます。この際、<code class="language-plaintext highlighter-rouge">X-Forwarded-For</code>ヘッダーを消し、エラーレスポンスは標準の<code class="language-plaintext highlighter-rouge">RFC7807</code>形式で返却するように実装してみます。以下がサンプルコードです。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import { Request, Response, NextFunction } from 'express';
+
+// 成功時のレスポンス形式
+interface SuccessResponse {
+  status: string;
+  data: any;
+}
+
+// エラーレスポンスのRFC7807形式
+interface ErrorResponse {
+  type: string;
+  title: string;
+  status: number;
+  detail: string;
+}
+
+const responseMiddleware = (req: Request, res: Response, next: NextFunction) =&gt; {
+  const originalJson = res.json;
+
+  res.json = (body: any) =&gt; {
+    // X-Forwarded-Forを消す
+    res.removeHeader('X-Forwarded-For');
+
+    if (res.statusCode &gt;= 200 &amp;&amp; res.statusCode &lt; 300) {
+      // 成功時のレスポンス形式
+      const successResponse: SuccessResponse = {
+        status: 'success',
+        data: body,
+      };
+      return originalJson.call(res, successResponse);
+    } else {
+      // 失敗時のRFC7807形式
+      const errorResponse: ErrorResponse = {
+        type: 'about:blank',
+        title: 'Error',
+        status: res.statusCode,
+        detail: body.message || 'Unknown error',
+      };
+      return originalJson.call(res, errorResponse);
+    }
+  };
+
+  next();
+};
+
+export default responseMiddleware;
+</code></pre></div></div>
+
+<h3 id="まとめ">まとめ</h3>
+<p>上記は単純な例ですが、一度レスポンス形式を統一する処理を書いておけば繰り返し使えそうです。</p>]]></content><author><name></name></author><category term="blog" /><category term="FastAPI" /><category term="Nodejs" /><summary type="html"><![CDATA[FastAPIやNode.jsでレスポンス形式を統一する]]></summary></entry><entry><title type="html">XAトランザクション</title><link href="https://hogecode.github.io/md/posts/2025-02-21-aws" rel="alternate" type="text/html" title="XAトランザクション" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hogecode.github.io/md/posts/aws</id><content type="html" xml:base="https://hogecode.github.io/md/posts/2025-02-21-aws"><![CDATA[<p>マイクロサービス間で整合性を保つには、CAP定理でいうC(整合性)の一部を妥協して、最終整合性を維持できるサーガパターンを<code class="language-plaintext highlighter-rouge">AWS StepFunctions</code>などを使用して実装するのが一般的らしいですが、せっかくなので分散トランザクションについても簡単に試してみます。</p>
+
+<h3 id="サンプルの流れ">サンプルの流れ</h3>
+<p>複数のmySQLデータベースを用意し、XAトランザクションを使用します。両方のデータベースで操作が成功すればコミットし、どちらかが失敗すればロールバックします。また、<code class="language-plaintext highlighter-rouge">my.cnf</code>ファイルで使用されているMySQLのエンジンが<code class="language-plaintext highlighter-rouge">InnoDB</code>であることを確認します。</p>
+
+<h3 id="テーブルの用意">テーブルの用意</h3>
+<p><code class="language-plaintext highlighter-rouge">docker-compose.yml</code>などを使って別のポートでmySQLサーバを二つ起動し、テーブルを作成します。</p>
+
+<h4 id="データベース1-db1"><strong>データベース1: <code class="language-plaintext highlighter-rouge">db1</code></strong></h4>
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">CREATE</span> <span class="k">DATABASE</span> <span class="n">db1</span><span class="p">;</span>
+<span class="n">USE</span> <span class="n">db1</span><span class="p">;</span>
+
+<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">account_balance</span> <span class="p">(</span>
+    <span class="n">account_id</span> <span class="nb">INT</span> <span class="k">PRIMARY</span> <span class="k">KEY</span><span class="p">,</span>
+    <span class="n">balance</span> <span class="nb">DECIMAL</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="p">);</span>
+
+<span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">account_balance</span> <span class="p">(</span><span class="n">account_id</span><span class="p">,</span> <span class="n">balance</span><span class="p">)</span> <span class="k">VALUES</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1000</span><span class="p">.</span><span class="mi">00</span><span class="p">);</span>
+</code></pre></div></div>
+
+<h4 id="データベース2-db2"><strong>データベース2: <code class="language-plaintext highlighter-rouge">db2</code></strong></h4>
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">CREATE</span> <span class="k">DATABASE</span> <span class="n">db2</span><span class="p">;</span>
+<span class="n">USE</span> <span class="n">db2</span><span class="p">;</span>
+
+<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">transaction_log</span> <span class="p">(</span>
+    <span class="n">transaction_id</span> <span class="nb">INT</span> <span class="n">AUTO_INCREMENT</span> <span class="k">PRIMARY</span> <span class="k">KEY</span><span class="p">,</span>
+    <span class="n">account_id</span> <span class="nb">INT</span><span class="p">,</span>
+    <span class="n">amount</span> <span class="nb">DECIMAL</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="n">created_at</span> <span class="nb">TIMESTAMP</span> <span class="k">DEFAULT</span> <span class="k">CURRENT_TIMESTAMP</span>
+<span class="p">);</span>
+
+<span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">transaction_log</span> <span class="p">(</span><span class="n">account_id</span><span class="p">,</span> <span class="n">amount</span><span class="p">)</span> <span class="k">VALUES</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">.</span><span class="mi">00</span><span class="p">);</span>
+</code></pre></div></div>
+
+<h4 id="xaトランザクションを使用">XAトランザクションを使用</h4>
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- db1 で XA トランザクションを開始</span>
+<span class="n">XA</span> <span class="k">START</span> <span class="s1">'txn1'</span><span class="p">;</span>
+<span class="k">UPDATE</span> <span class="n">db1</span><span class="p">.</span><span class="n">account_balance</span> 
+<span class="k">SET</span> <span class="n">balance</span> <span class="o">=</span> <span class="n">balance</span> <span class="o">-</span> <span class="mi">100</span><span class="p">.</span><span class="mi">00</span> 
+<span class="k">WHERE</span> <span class="n">account_id</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="n">XA</span> <span class="k">END</span> <span class="s1">'txn1'</span><span class="p">;</span>
+<span class="n">XA</span> <span class="k">PREPARE</span> <span class="s1">'txn1'</span><span class="p">;</span>
+
+<span class="c1">-- db2 で XA トランザクションを開始</span>
+<span class="n">XA</span> <span class="k">START</span> <span class="s1">'txn2'</span><span class="p">;</span>
+<span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">db2</span><span class="p">.</span><span class="n">transaction_log</span> <span class="p">(</span><span class="n">account_id</span><span class="p">,</span> <span class="n">amount</span><span class="p">)</span> 
+<span class="k">VALUES</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">100</span><span class="p">.</span><span class="mi">00</span><span class="p">);</span>
+<span class="n">XA</span> <span class="k">END</span> <span class="s1">'txn2'</span><span class="p">;</span>
+<span class="n">XA</span> <span class="k">PREPARE</span> <span class="s1">'txn2'</span><span class="p">;</span>
+
+<span class="c1">-- すべてのトランザクションをコミット</span>
+<span class="n">XA</span> <span class="k">COMMIT</span> <span class="s1">'txn1'</span><span class="p">;</span>
+<span class="n">XA</span> <span class="k">COMMIT</span> <span class="s1">'txn2'</span><span class="p">;</span>
+
+<span class="c1">-- ロールバック例: 失敗があれば以下を実行</span>
+<span class="c1">-- XA ROLLBACK 'txn1';</span>
+<span class="c1">-- XA ROLLBACK 'txn2';</span>
+</code></pre></div></div>
+
+<p>上記を実行すると、すべての操作が正常に終了した場合、<code class="language-plaintext highlighter-rouge">XA COMMIT</code>でトランザクションを確定され、失敗があった場合、<code class="language-plaintext highlighter-rouge">XA ROLLBACK</code>でトランザクションを取り消されます。</p>
+
+<h3 id="まとめ">まとめ</h3>
+<p>上記は非常に単純なSQLのサンプルですが、それでも単一DBのトランザクションと比較して面倒になりました。プログラムで実装するとなると、さらに面倒になりそうです。パフォーマンスも悪いですし、よほどの一貫性が求められるような場面でもなければ、大人しくサーガを使って補填トランザクションで実装したほうが楽だと感じました。</p>]]></content><author><name></name></author><category term="blog" /><category term="MySQL" /><summary type="html"><![CDATA[MySQL + XAトランザクション]]></summary></entry><entry><title type="html">ClientCredential認証</title><link href="https://hogecode.github.io/md/posts/2025-02-21-client-credential" rel="alternate" type="text/html" title="ClientCredential認証" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hogecode.github.io/md/posts/client-credential</id><content type="html" xml:base="https://hogecode.github.io/md/posts/2025-02-21-client-credential"><![CDATA[<p>OAuth認証のうち、<br /></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">Resource Owner Password Credentials Grant</code>
+    <ul>
+      <li>モバイルアプリで使われるらしいがよく分からない</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">Implicit Grant</code>
+    <ul>
+      <li>危険なので非推奨</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">Authorization Code Grant</code>
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">amplify + Cognito</code>や<code class="language-plaintext highlighter-rouge">Firebase Authentication</code>を使えばバックエンドで<code class="language-plaintext highlighter-rouge">/callback</code>エンドポイントすら作成せずにフロントエンドのみで完結できてしまう</li>
+    </ul>
+  </li>
+</ul>
+
+<p>というわけで最後の<code class="language-plaintext highlighter-rouge">Client Credentials</code>認証を少しだけ理解できたような気がするのでまとめてみます。</p>
+
+<h3 id="client-credentials認証の流れ">Client Credentials認証の流れ</h3>
+<p><code class="language-plaintext highlighter-rouge">Keycloak</code>の場合は以下のような手順になります。</p>
+<ul>
+  <li><strong>レルムを作成</strong></li>
+  <li>
+    <p><strong>クライアント登録</strong>
+クライアントを作成し、<code class="language-plaintext highlighter-rouge">Client Credentials</code>フローを有効化。</p>
+  </li>
+  <li>
+    <p><strong>クライアントIDとクライアントシークレットの取得</strong> 
+登録したクライアントの設定から、<code class="language-plaintext highlighter-rouge">Client ID</code>と<code class="language-plaintext highlighter-rouge">Client Secret</code>を取得。</p>
+  </li>
+  <li><strong>アクセストークンのリクエスト</strong><br />
+<code class="language-plaintext highlighter-rouge">Keycloak</code>のトークンエンドポイントにリクエストを送信。
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>POST /realms/&lt;realm-name&gt;/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+<span class="nv">client_id</span><span class="o">=</span>&lt;client-id&gt;&amp;client_secret<span class="o">=</span>&lt;client-secret&gt;&amp;grant_type<span class="o">=</span>client_credentials
+</code></pre></div>    </div>
+  </li>
+  <li><strong>APIリクエストの実行</strong><br />
+アクセストークンを使用して、保護されたリソースやAPIにアクセス。<br />
+例：
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET /protected-api
+Authorization: Bearer &lt;access_token&gt;
+</code></pre></div>    </div>
+    <p>プログラムで実装する場合は、トークンが存在しない場合に<code class="language-plaintext highlighter-rouge">keycloak</code>から取得し、そのトークンをヘッダーに設定して他のマイクロサービスに送信するという流れになりそうです。</p>
+    <div class="language-typescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nx">axios</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">axios</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="kd">let</span> <span class="nx">accessToken</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+
+<span class="k">async</span> <span class="kd">function</span> <span class="nf">getToken</span><span class="p">()</span> <span class="p">{</span>
+<span class="kd">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">axios</span><span class="p">.</span><span class="nf">post</span><span class="p">(</span><span class="dl">'</span><span class="s1">https://&lt;keycloak-server&gt;/realms/&lt;realm-name&gt;/protocol/openid-connect/token</span><span class="dl">'</span><span class="p">,</span> <span class="k">new</span> <span class="nc">URLSearchParams</span><span class="p">({</span>
+  <span class="na">client_id</span><span class="p">:</span> <span class="dl">'</span><span class="s1">&lt;client-id&gt;</span><span class="dl">'</span><span class="p">,</span>
+  <span class="na">client_secret</span><span class="p">:</span> <span class="dl">'</span><span class="s1">&lt;client-secret&gt;</span><span class="dl">'</span><span class="p">,</span>
+  <span class="na">grant_type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">client_credentials</span><span class="dl">'</span>
+<span class="p">}));</span>
+<span class="nx">accessToken</span> <span class="o">=</span> <span class="nx">response</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">access_token</span><span class="p">;</span>
+<span class="k">return</span> <span class="nx">accessToken</span><span class="p">;</span>
+<span class="p">}</span>
+  
+<span class="k">async</span> <span class="kd">function</span> <span class="nf">callMicroservice</span><span class="p">()</span> <span class="p">{</span>
+<span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">accessToken</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">await</span> <span class="nf">getToken</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="kd">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">axios</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">'</span><span class="s1">https://&lt;microservice-url&gt;/api/resource</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span>
+  <span class="na">headers</span><span class="p">:</span> <span class="p">{</span>
+    <span class="na">Authorization</span><span class="p">:</span> <span class="s2">`Bearer </span><span class="p">${</span><span class="nx">accessToken</span><span class="p">}</span><span class="s2">`</span>
+  <span class="p">}</span>
+<span class="p">});</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">data</span><span class="p">);</span>
+<span class="p">}</span>
+  
+<span class="nf">callMicroservice</span><span class="p">();</span>
+</code></pre></div>    </div>
+  </li>
+  <li><strong>サーバー側での検証</strong>
+サーバー側で<code class="language-plaintext highlighter-rouge">keycloak</code>の公開鍵エンドポイントから公開鍵を取得し、トークンを検証します。<code class="language-plaintext highlighter-rouge">keycloak</code>と<code class="language-plaintext highlighter-rouge">cognito</code>の公開鍵エンドポイントは以下のようになります。&lt;/br&gt;
+```</li>
+  <li>
+    <p>Keycloak公開鍵エンドポイント:<br />
+<code class="language-plaintext highlighter-rouge">https://&lt;keycloak-server&gt;/realms/&lt;realm-name&gt;/protocol/openid-connect/certs</code></p>
+  </li>
+  <li>Amazon Cognito公開鍵エンドポイント:<br />
+<code class="language-plaintext highlighter-rouge">https://cognito-idp.&lt;region&gt;.amazonaws.com/&lt;user-pool-id&gt;/.well-known/jwks.json</code>
+<code class="language-plaintext highlighter-rouge">
+`express`を使用したサンプルコードは以下のようになります。
+</code>javascript
+import express from ‘express’;
+import axios from ‘axios’;
+import jwt from ‘jsonwebtoken’;</li>
+</ul>
+
+<p>const app = express();
+const keycloakUrl = ‘https://<keycloak-server>/realms/<realm-name>';
+let publicKey = null;</realm-name></keycloak-server></p>
+
+<p>// Keycloak公開鍵の取得
+async function getPublicKey() {
+  if (!publicKey) {
+    const response = await axios.get(<code class="language-plaintext highlighter-rouge">${keycloakUrl}/protocol/openid-connect/certs</code>);
+    const keys = response.data.keys;
+    publicKey = keys[0].x5c[0]; // 最初の鍵を使用 (通常、複数の鍵がある場合)
+  }
+  return publicKey;
+}</p>
+
+<p>// JWTを検証するミドルウェア
+async function verifyToken(req, res, next) {
+  try {
+    const token = req.headers[‘authorization’]?.split(‘ ‘)[1];</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>if (!token) {
+  return res.status(401).send('Token is required');
+}
+
+const publicKey = await getPublicKey();
+const decoded = jwt.verify(token, `-----BEGIN CERTIFICATE-----\n${publicKey}\n-----END CERTIFICATE-----`);
+
+req.user = decoded; // ユーザー情報をリクエストオブジェクトに追加
+next();   } catch (err) {
+return res.status(401).send('Invalid or expired token');   } }
+</code></pre></div></div>
+
+<p>// ミドルウェアを使用
+app.use(verifyToken);
+```</p>
+
+<h3 id="まとめ">まとめ</h3>
+<p><code class="language-plaintext highlighter-rouge">EKS</code>など<code class="language-plaintext highlighter-rouge">k8s</code>環境のマイクロサービス間認証では、<code class="language-plaintext highlighter-rouge">IAM</code>や<code class="language-plaintext highlighter-rouge">k8s</code>の<code class="language-plaintext highlighter-rouge">ServiceAcount</code>を使用する方法や、<code class="language-plaintext highlighter-rouge">AppMesh</code>などサービスメッシュを使用した<code class="language-plaintext highlighter-rouge">mTLS</code>が主流らしいですが、どちらも環境構築の時点で難しすぎるので、手軽な<code class="language-plaintext highlighter-rouge">Client Credential</code>認証について学習してみました。</p>]]></content><author><name></name></author><category term="blog" /><category term="Nodejs" /><summary type="html"><![CDATA[Node.js]]></summary></entry><entry><title type="html">hyperターミナルを設定してみる</title><link href="https://hogecode.github.io/md/posts/2025-02-21-hyper" rel="alternate" type="text/html" title="hyperターミナルを設定してみる" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hogecode.github.io/md/posts/hyper</id><content type="html" xml:base="https://hogecode.github.io/md/posts/2025-02-21-hyper"><![CDATA[<p><a href="https://hyper.is/">Hyper</a>はElectronを使ったターミナルで、プラグインを使った拡張や、tmuxのようにマルチタブが使えるらしいです。正直に言うと、AI補完やコマンド履歴を使える<a href="https://www.warp.dev/">WARP</a>を使いたかったのですが、まだWindowsには対応していないのでHyperを使ってみることにしました。忘備録を兼ねて、セットアップ手順を書きます。</p>
+
+<h4 id="hyperをダウンロード">hyperをダウンロード</h4>
+<p>公式サイトにアクセスするか、chocolateyでインストールします。</p>
+
+<h4 id="設定ファイルを開く">設定ファイルを開く</h4>
+<p>デフォルトでは以下のような画面になっています。</p>
+
+<p><img src="/md/assets/images/hyper_default.png" alt="default" />
+文字が小さく、シェルもcmd.exeのデフォルトのままなので、スタイルを整えて、git bashを導入します。設定ファイルは左上のハンバーメニューから開けますが、デフォルトではJSファイルはテキストエディタで開かれてしまうので、vscodeで開かれるように注意する必要があります。hyper.jsは自分の環境では以下のパスにありました。
+<code class="language-plaintext highlighter-rouge">C:\Users\{username}\AppData\Roaming\Hyper\.hyper.js</code></p>
+
+<h4 id="hyperjsを編集する">.hyper.jsを編集する</h4>
+
+<ul>
+  <li>
+    <p><strong>configディレクティブ</strong>
+・fontsizeを12→16に変更
+・fontWeightをnormal→boldに変更</p>
+  </li>
+  <li>
+    <p><strong>shell</strong>
+デフォルトの空文字からgit bashのパスに変更&lt;/br&gt;
+この際、基本的なことですが、JSなので\をエスケープすることを忘れないようにします。</p>
+  </li>
+</ul>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">shell:</span><span class="w"> </span><span class="err">'C:\\Program</span><span class="w"> </span><span class="err">Files\\Git\\bin\\bash.exe',</span><span class="w">
+</span></code></pre></div></div>
+
+<ul>
+  <li><strong>plugins</strong>
+pluginsは詳しくないが、適当に追加してみます。</li>
+</ul>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">    </span><span class="err">plugins:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="err">'hyper-snazzy'</span><span class="p">,</span><span class="w">
+        </span><span class="err">'hyper-statusline'</span><span class="p">,</span><span class="w">
+        </span><span class="err">'hyper-search'</span><span class="w">
+    </span><span class="p">]</span><span class="err">,</span><span class="w">
+</span></code></pre></div></div>
+
+<h4 id="編集後">編集後</h4>
+
+<p>以下のような見た目になりました。
+<img src="/md/assets/images/hyper.png" alt="default" /></p>
+
+<p>画面分割すると以下のようになります。
+<img src="/md/assets/images/hyper_tmux.png" alt="default" /></p>
+
+<h4 id="感想">感想</h4>
+
+<p>設定ファイルを編集することで簡単にスタイル変更やプラグイン追加ができるのは便利だと感じました。その一方で、git bashだけでは補完が利かないのでxonshなど他のシェルを試してみたくなりました。</p>]]></content><author><name></name></author><category term="blog" /><category term="ツール" /><summary type="html"><![CDATA[Hyper]]></summary></entry><entry><title type="html">MySQLで全文検索を試してみる</title><link href="https://hogecode.github.io/md/posts/2025-02-21-mysql-full-search" rel="alternate" type="text/html" title="MySQLで全文検索を試してみる" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hogecode.github.io/md/posts/mysql-full-search</id><content type="html" xml:base="https://hogecode.github.io/md/posts/2025-02-21-mysql-full-search"><![CDATA[<p>Docker、VSCode(拡張機能はMySQLとDevContainer)、MySQLで全文検索を試してみます。RDBのLIKE検索は前方一致条件でない限りインデックスが利かないし、Elasticsearchを使ってCQRS的に実装するのは小規模なアプリだとオーバーなのでMySQLの全文検索を使った際の忘備録を残しておきます。</p>
+
+<h4 id="dockerコンテナ起動"><strong>Dockerコンテナ起動</strong></h4>
+
+<p>docker runだとコマンド入力が面倒なので、docker-compose.ymlを書きます。本当は.envファイルに環境変数を書くべきだけどベタ書きします。Docker拡張機能を入れているので、上のRun All Servicesボタンをクリックし、mysqlコンテナが起動することを確認します。</p>
+
+<p><img src="/md/assets/images/mysql_docker_compose.png" alt="" /></p>
+
+<h4 id="テーブル作成とfulltextインデックスの設定"><strong>テーブル作成とFULLTEXTインデックスの設定</strong></h4>
+
+<p>全文検索を行うために、テーブル内の対象カラムに<code class="language-plaintext highlighter-rouge">FULLTEXT</code>インデックスを作成してテーブルを作成します。</p>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">articles</span> <span class="p">(</span>
+    <span class="n">id</span> <span class="nb">INT</span> <span class="n">AUTO_INCREMENT</span> <span class="k">PRIMARY</span> <span class="k">KEY</span><span class="p">,</span>
+    <span class="n">title</span> <span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">255</span><span class="p">)</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span>
+    <span class="n">body</span> <span class="nb">TEXT</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span>
+    <span class="n">FULLTEXT</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">body</span><span class="p">)</span> <span class="c1">-- FULLTEXTインデックスを作成</span>
+<span class="p">);</span>
+</code></pre></div></div>
+
+<p>適当にデータも挿入します。</p>
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">articles</span> <span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">body</span><span class="p">)</span> <span class="k">VALUES</span>
+<span class="p">(</span><span class="s1">'MySQL Full-Text Search'</span><span class="p">,</span> <span class="s1">'This tutorial explains how to use full-text search in MySQL.'</span><span class="p">),</span>
+<span class="p">(</span><span class="s1">'Introduction to Databases'</span><span class="p">,</span> <span class="s1">'Databases store data and provide various query functionalities.'</span><span class="p">),</span>
+<span class="p">(</span><span class="s1">'Full-Text Search Features'</span><span class="p">,</span> <span class="s1">'MySQL full-text search supports natural language queries.'</span><span class="p">);</span>
+</code></pre></div></div>
+
+<h4 id="クエリを試してみる">クエリを試してみる</h4>
+
+<p><code class="language-plaintext highlighter-rouge">MATCH(column_name) AGAINST('検索文字列')</code>を使用します。以下のように、idが1と3のデータのみが表示されます。
+<img src="/md/assets/images/mysql_against.png" alt="" /></p>
+
+<p>次に、クエリのスコアを算出してランキングにしてみます。
+<img src="/md/assets/images/mysql_ranking.png" alt="" /></p>
+
+<h4 id="設定ファイルを編集してみる">設定ファイルを編集してみる</h4>
+<p>MySQLの全文検索では、最小文字数を指定し、その文字数以下の単語は検索対象外にできます。<code class="language-plaintext highlighter-rouge">Dev Containers</code>という拡張機能を使い、<code class="language-plaintext highlighter-rouge">etc/my.cnf</code>にアクセスし、以下のディレクティブを追加してみます。</p>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[mysqld]</span>
+<span class="py">ft_min_word_len</span><span class="p">=</span><span class="s">2</span>
+</code></pre></div></div>
+
+<p><img src="/md/assets/images/mysql_ranking.png" alt="" /></p>
+
+<p>その後、インデックスを再構築します。</p>
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">REPAIR</span> <span class="k">TABLE</span> <span class="n">articles</span> <span class="n">QUICK</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h4 id="感想">感想</h4>
+
+<p>小規模なアプリで全文検索を試したいと思った時、わざわざ全文検索エンジンを導入する必要がないので便利だと感じました。</p>]]></content><author><name></name></author><category term="blog" /><category term="MySQL" /><summary type="html"><![CDATA[MySQL + 全文検索]]></summary></entry><entry><title type="html">nodejsをプロファイリングしてみる</title><link href="https://hogecode.github.io/md/posts/2025-02-21-nodejs-profiling" rel="alternate" type="text/html" title="nodejsをプロファイリングしてみる" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hogecode.github.io/md/posts/nodejs-profiling</id><content type="html" xml:base="https://hogecode.github.io/md/posts/2025-02-21-nodejs-profiling"><![CDATA[<p>nodejsのデバッグは<code class="language-plaintext highlighter-rouge">inspect-brk</code>や、それを内部的に使用しているvscodeが有名ですが、プロファイリングに使われる<code class="language-plaintext highlighter-rouge">clinic.js</code>を試してみます。</p>
+
+<h3 id="使用してみる">使用してみる</h3>
+<p>まずはグローバルにインストールします。</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm <span class="nb">install</span> <span class="nt">-g</span> clinic
+</code></pre></div></div>
+<p>その後、以下のコマンドで分析します。</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>clinic docter <span class="nt">--</span> node dist/app.js
+</code></pre></div></div>
+<p>HTMLが表示されるのでブラウザで結果を確認できます。</p>
+
+<h3 id="他のオプション">他のオプション</h3>
+<p><code class="language-plaintext highlighter-rouge">clinic.js</code> には、以下のオプションがあります。</p>
+
+<h4 id="1-clinic-doctor">1. <strong><code class="language-plaintext highlighter-rouge">clinic doctor</code></strong></h4>
+<p>一般的なパフォーマンス診断ツール。アプリケーションを監視して、ボトルネックを特定します。CPU使用率、イベントループの遅延、GCなどを確認できます。各関数の呼び出し回数や遅延を確認できるので、ボトルネックを確認しやすくなります。</p>
+
+<h4 id="2-clinic-flame">2. <strong><code class="language-plaintext highlighter-rouge">clinic flame</code></strong></h4>
+<p>Flamegraph（炎グラフ）を使用して、CPU のプロファイルを視覚化します。コマンドは<code class="language-plaintext highlighter-rouge">docter</code>を<code class="language-plaintext highlighter-rouge">flame</code>に変更するだけです。グラフが表示され、関数ごとのCPU使用率を視覚的に確認できます。</p>
+
+<h4 id="3-clinic-bubbleprof">3. <strong><code class="language-plaintext highlighter-rouge">clinic bubbleprof</code></strong></h4>
+<p>関数間の呼び出し関係を視覚化するツール。円の大きさによって関数の依存関係や、ボトルネックを確認できます。</p>]]></content><author><name></name></author><category term="blog" /><category term="Nodejs" /><summary type="html"><![CDATA[Node.js + Clinic.js]]></summary></entry><entry><title type="html">Pandocでmdからwordファイルを作る</title><link href="https://hogecode.github.io/md/posts/2025-02-21-pandoc" rel="alternate" type="text/html" title="Pandocでmdからwordファイルを作る" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hogecode.github.io/md/posts/pandoc</id><content type="html" xml:base="https://hogecode.github.io/md/posts/2025-02-21-pandoc"><![CDATA[<p>ドキュメントをワードで提出しなければならない際に、mdで書て変換したいと思ったので、vscodeとpandocを使ったセットアップ手順を書きます。</p>
+
+<h4 id="pandocのインストール">Pandocのインストール</h4>
+
+<p><a href="https://pandoc.org/installing.html">Pandocの公式サイト</a>にアクセスし、windows用のmsiインストーラをダウンロードし、インストールを完了します。&lt;/br&gt;</p>
+
+<p>コマンドプロンプトで確認します。</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pandoc <span class="nt">--version</span>
+</code></pre></div></div>
+<p>vscodeでも使えるように、<code class="language-plaintext highlighter-rouge">vscode-pandoc</code>という拡張機能をダウンロードします。</p>
+
+<h4 id="mdファイルの作成">mdファイルの作成</h4>
+
+<p>適当なmdファイルを作成します。この際、YAMLダークマターを使ってメタデータを挿入します。</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
+<span class="na">title</span><span class="pi">:</span> <span class="s2">"</span><span class="s">My</span><span class="nv"> </span><span class="s">Document"</span>
+<span class="na">author</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Your</span><span class="nv"> </span><span class="s">Name"</span>
+<span class="na">date</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-01-07"</span>
+<span class="nn">---</span>
+
+<span class="gu">## セクション1</span>
+
+内容の説明がここに来ます。
+</code></pre></div></div>
+
+<h4 id="word形式に変換">word形式に変換</h4>
+
+<p>vscodeでコマンドパレットを開き、wordに変換します。ワード以外にも、pdfやhtml形式にも変換できます。上記のmdを変換すると、以下のようなdocxファイルが生成されます。このままではスタイルが不十分ですが、pandocの<code class="language-plaintext highlighter-rouge">--reference-doc=</code>オプションなどを使えば見た目の調整も出来そうです。
+<img src="/md/assets/images/pandoc_word.png" alt="" /></p>
+
+<h4 id="感想">感想</h4>
+
+<p>notionはdocx形式でエキスポートできないし、ワードファイルを簡単に作成したいと思った際に、pandocとvscodeを使えば非常に簡単に作成できると感じました。</p>]]></content><author><name></name></author><category term="blog" /><category term="ツール" /><summary type="html"><![CDATA[Pandoc]]></summary></entry><entry><title type="html">postmanのテスト</title><link href="https://hogecode.github.io/md/posts/2025-02-21-postman-test" rel="alternate" type="text/html" title="postmanのテスト" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hogecode.github.io/md/posts/postman-test</id><content type="html" xml:base="https://hogecode.github.io/md/posts/2025-02-21-postman-test"><![CDATA[<h3 id="stoplight-studio-で-yaml-をダウンロード">Stoplight Studio で yaml をダウンロード</h3>
+
+<p>自分でOASを書いてもいいのですが、今回は Stoplight Studio でデフォルトの API コレクションの yaml ファイルをダウンロードします。
+<img src="/md/assets/images/postman_export.png" alt="" /></p>
+
+<h3 id="postman-にアクセス">Postman にアクセス</h3>
+
+<p>Postman で先ほどダウンロードした yaml をインポートし、コレクションを作成します。また、コレクションを右クリックし、モックサーバーを建ててみます。この際、モックサーバーが生成した URL を環境変数に入れます。&lt;/br&gt;</p>
+
+<p>試しに pm ライブラリを使った簡易的なテストを書いてみます。(モックレスポンスを書いていないので当然 404 になりますが・・・)
+<img src="/md/assets/images/postman_test.png" alt="" /></p>
+
+<h3 id="newman-でテスト">newman でテスト</h3>
+
+<p>次に、作成したコレクションを右クリックし、json 形式でエキスポートします。また、<code class="language-plaintext highlighter-rouge">newman</code>という Postman コレクションをコマンドラインで実行するためのツールをインストールし、テストを実行してみます。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm <span class="nb">install</span> <span class="nt">-g</span> newman
+newman run ./api.postman_collection.json
+</code></pre></div></div>
+<p>結果は以下のように表示されます。
+<img src="/md/assets/images/postman_newman.png" alt="" /></p>
+
+<p>今回は使いませんが、newmanはCICDで使うこともできます。GitHubActionsの場合、以下のようなコードを書くことになります。</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      <span class="c1"># npmを使ってNewmanをインストール</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Install Newman</span>
+        <span class="na">run</span><span class="pi">:</span> <span class="pi">|</span>
+          <span class="s">npm install -g newman</span>
+
+      <span class="c1"># Postmanコレクションと環境を指定してテストを実行</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Run Postman tests</span>
+        <span class="na">run</span><span class="pi">:</span> <span class="pi">|</span>
+          <span class="s">newman run postman_collection.json </span>
+
+      <span class="c1"># テスト結果の報告</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Upload test results</span>
+        <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/upload-artifact@v2</span>
+        <span class="na">with</span><span class="pi">:</span>
+          <span class="na">name</span><span class="pi">:</span> <span class="s">postman-test-results</span>
+          <span class="na">path</span><span class="pi">:</span> <span class="s">./newman/*.json</span>
+</code></pre></div></div>
+
+<h3 id="newmanでパフォーマンステスト">newmanでパフォーマンステスト</h3>
+
+<p>PostmanのRunnerからでも行えますが、newmanを使って繰り返しテストを行い、htmlで出力するようにしてみます。</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm <span class="nb">install </span>newman-reporter-html
+newman run ./api.postman_collection.json <span class="nt">-n</span> 10 <span class="nt">--reporters</span> cli,html <span class="nt">--reporter-html-export</span> result.html
+</code></pre></div></div>
+<p><img src="/md/assets/images/postman_html.png" alt="" /></p>
+
+<p>高度なテストならk6やJMeterなどを使うべきですが、簡易的な負荷テストならPostmanのCollection RunnerやNewmanでCIを使って実行できそうです。</p>
+
+<h4 id="感想">感想</h4>
+
+<p>OASを自動生成してくれるフレームワークに頼るだけでなく、OAS関連の様々なツールに慣れていきたいと思いました。</p>]]></content><author><name></name></author><category term="blog" /><category term="ツール" /><summary type="html"><![CDATA[Stoplight + Postman + pm + newman]]></summary></entry><entry><title type="html">PWAに入門する</title><link href="https://hogecode.github.io/md/posts/2025-02-21-pwa" rel="alternate" type="text/html" title="PWAに入門する" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hogecode.github.io/md/posts/pwa</id><content type="html" xml:base="https://hogecode.github.io/md/posts/2025-02-21-pwa"><![CDATA[<p>PWAに関しては、<code class="language-plaintext highlighter-rouge">service-worker.js</code>や<code class="language-plaintext highlighter-rouge">manifest.json</code>ファイルの基本的な書き方程度の知識しかなかったので、<a href="https://roadmap.sh/frontend">フロントエンドロードマップ</a>のPWAの欄で紹介されていた項目について学習しました。&lt;/br&gt;</p>
+
+<p>列挙すると以下のような項目になります。</p>
+
+<ul>
+  <li>パフォーマンス計測と向上
+    <ul>
+      <li>PRPLパターン</li>
+      <li>RAILパターン</li>
+      <li>パフォーマンスメトリクス</li>
+      <li>Lighthouse</li>
+      <li>DevTools</li>
+    </ul>
+  </li>
+  <li>Browser APIs</li>
+</ul>
+
+<h3 id="browser-apis">Browser APIs</h3>
+<p><code class="language-plaintext highlighter-rouge">Storage</code>、<code class="language-plaintext highlighter-rouge">Server Sent Events</code>、<code class="language-plaintext highlighter-rouge">Service Workers</code>、<code class="language-plaintext highlighter-rouge">Location</code>など全9個が紹介されていましたが、どれもブラウザでも使われる基本APIでした。&lt;/br&gt;
+ブラウザAPIは自分で実装すると意外とコードが長くなってしまいますが、<code class="language-plaintext highlighter-rouge">react-use</code>や<code class="language-plaintext highlighter-rouge">vue-use</code>などのライブラリはこれらのフックを提供しているので簡潔に書けます。以下がサンプルコードです。</p>
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">useLocation</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react-use</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="kd">const</span> <span class="nx">MyComponent</span><span class="p">:</span> <span class="nx">React</span><span class="p">.</span><span class="nx">FC</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">location</span> <span class="o">=</span> <span class="nf">useLocation</span><span class="p">();</span>
+
+  <span class="k">return </span><span class="p">(</span>
+    <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Current pathname: <span class="si">{</span><span class="nx">location</span><span class="p">.</span><span class="nx">pathname</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Current search: <span class="si">{</span><span class="nx">location</span><span class="p">.</span><span class="nx">search</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Current hash: <span class="si">{</span><span class="nx">location</span><span class="p">.</span><span class="nx">hash</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+  <span class="p">);</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<h3 id="prplパターン">PRPLパターン</h3>
+<p>PRPLパターンの目的は、リソース取得を効率化させ、ページのパフォーマンスを効率化させることです。これにより、PWAの拘束性やオフライン対応を実現できます。以下がPRPLの頭文字です。</p>
+
+<ul>
+  <li><strong>P - Push Critical Resources (重要なリソースをプッシュ)</strong>
+    <ul>
+      <li>Service Workerを使用してキャッシュなど</li>
+    </ul>
+  </li>
+  <li><strong>R - Render the Initial Route (最初のルートを描画)</strong>
+    <ul>
+      <li>SSGなどを使用してレンダリングを最適化など</li>
+    </ul>
+  </li>
+  <li>
+    <p><strong>P - Pre-cache Remaining Routes (残りのルートを事前キャッシュ)</strong></p>
+  </li>
+  <li><strong>L - Lazy-load Non-critical Resources (重要でないリソースを遅延読み込み)</strong></li>
+</ul>
+
+<h3 id="railパターン">RAILパターン</h3>
+<p>パフォーマンス指標に関するモデルです。RAILは、<strong>レスポンス時間</strong>と<strong>アニメーション</strong>を最適化することに焦点を当てています。</p>
+
+<ul>
+  <li>
+    <p><strong>R - Response to User Input in 100ms (100ms以内にユーザー入力に反応)</strong></p>
+  </li>
+  <li>
+    <p><strong>A - Animations should run at 60fps (アニメーションは60fpsで実行)</strong></p>
+  </li>
+  <li><strong>I - Idle Time should be used for non-urgent work (アイドル時間には非緊急の作業を行う)</strong>
+    <ul>
+      <li>事前キャッシュなど</li>
+    </ul>
+  </li>
+  <li><strong>L - Load content progressively (コンテンツを順次ロードする)</strong>
+    <ul>
+      <li>コンテンツを遅延読み込みするなど</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="lighthouse">Lighthouse</h3>
+
+<p><code class="language-plaintext highlighter-rouge">Lighthouse</code>ではパフォーマンス、アクセシビリティ、ベストプラクティス、SEO、PWAの5つの項目をテストできます。ブラウザから実行するのは面倒なので、CLIやCIで実行します。&lt;/br&gt;
+Lighthouse CLIのサンプルコマンドです。</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npx lighthouse https://example.com <span class="nt">--output</span> html <span class="nt">--output-path</span> ./lighthouse-report.html
+</code></pre></div></div>
+
+<p>CIで実行する場合は以下のようになります。</p>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">jobs</span><span class="pi">:</span>
+  <span class="na">lighthouse</span><span class="pi">:</span>
+    <span class="na">runs-on</span><span class="pi">:</span> <span class="s">ubuntu-latest</span>
+    <span class="na">steps</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Checkout code</span>
+        <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/checkout@v2</span>
+
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Set up Node.js</span>
+        <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/setup-node@v2</span>
+        <span class="na">with</span><span class="pi">:</span>
+          <span class="na">node-version</span><span class="pi">:</span> <span class="s1">'</span><span class="s">14'</span>
+
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Install Lighthouse CI</span>
+        <span class="na">run</span><span class="pi">:</span> <span class="s">npm install -g @lhci/cli</span>
+
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Run Lighthouse CI</span>
+        <span class="na">run</span><span class="pi">:</span> <span class="s">lhci autorun --upload.target=temporary-public-storage</span>
+</code></pre></div></div>
+
+<p>生成されたレポートのうち、<strong>Core Web Vitals</strong>（LCP, FID, CLS）が重要な指標となります。</p>
+
+<h3 id="まとめ">まとめ</h3>
+<p>PRPLやRAILモデルの考え方や<code class="language-plaintext highlighter-rouge">Lighthouse</code>を使ったメトリクス確認方法、遅延読み込みやバンドルなどの基本的なパフォーマンス改善方法はブラウザのウェブアプリと共通する点が多いと思いました。</p>]]></content><author><name></name></author><category term="blog" /><category term="React" /><summary type="html"><![CDATA[React + パフォーマンス関連]]></summary></entry></feed>
