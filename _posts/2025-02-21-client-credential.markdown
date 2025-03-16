@@ -77,7 +77,7 @@ OAuth認証のうち、<br>
 ```
 
 - **サーバー側での検証**
-サーバー側で`keycloak`の公開鍵エンドポイントから公開鍵を取得し、トークンを検証します。`keycloak`と`cognito`の公開鍵エンドポイントは以下のようになります。</br>
+サーバー側で`keycloak`の公開鍵エンドポイントから公開鍵を取得し、トークンを検証します。`keycloak`と`cognito`の公開鍵エンドポイントは以下のようになります。
 ```
 - Keycloak公開鍵エンドポイント:  
   `https://<keycloak-server>/realms/<realm-name>/protocol/openid-connect/certs`

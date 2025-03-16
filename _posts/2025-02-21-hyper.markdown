@@ -26,7 +26,7 @@ excerpt: "Hyper"
 ・fontWeightをnormal→boldに変更
 
 - **shell**
-デフォルトの空文字からgit bashのパスに変更</br>
+デフォルトの空文字からgit bashのパスに変更
 この際、基本的なことですが、JSなので\をエスケープすることを忘れないようにします。
 
 ```json

@@ -11,7 +11,7 @@ excerpt: "Pandoc"
 
 #### Pandocのインストール
 
-[Pandocの公式サイト](https://pandoc.org/installing.html)にアクセスし、windows用のmsiインストーラをダウンロードし、インストールを完了します。</br>
+[Pandocの公式サイト](https://pandoc.org/installing.html)にアクセスし、windows用のmsiインストーラをダウンロードし、インストールを完了します。
 
 コマンドプロンプトで確認します。
 ```bash

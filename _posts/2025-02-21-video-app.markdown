@@ -11,7 +11,7 @@ excerpt: "React + Express + HLS"
 
 アプリの外観、機能の詳細や使い方については[readme](https://github.com/hogecode/video_app)をご覧ください。この記事では、技術の選定理由や内部実装などについて書きます。
 
-</br>
+
 
 ### 技術スタック
 
@@ -46,7 +46,7 @@ Python(FastAPI)、Java(SpringBoot)なども考えましたが、フロントエ�
 }
 ```
 
-</br>
+
 
 #### フロントエンド側
 

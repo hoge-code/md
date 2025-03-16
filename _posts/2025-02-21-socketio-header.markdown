@@ -31,7 +31,7 @@ const socket = io('http://localhost:3000', {
 `React`などを使う場合は、上記で作成した`socket`を`useContext`などを使うと様々なコンポーネントで`socket.emit`の処理を書けるようになります。
 
 ### サーバー側での設定
-`Node.js + Express`の場合、接続時に `socket.handshake` を使って、ヘッダーを確認することができます。`python-socketio`の場合は`environ`でヘッダーを確認できます。</br>
+`Node.js + Express`の場合、接続時に `socket.handshake` を使って、ヘッダーを確認することができます。`python-socketio`の場合は`environ`でヘッダーを確認できます。
 以下のサンプルコードの`isValidToken`関数では、`jsonwebtoken`ライブラリなどを使い、JWTペイロードからクレームを検証するような処理を実装します。認証サービスを利用している場合は、`cognito`や`keycloak`の公開鍵エンドポイントを使って公開鍵を取得して検証します。
 ```javascript
 // サーバー側での認証処理例

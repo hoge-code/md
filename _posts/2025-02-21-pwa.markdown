@@ -7,7 +7,7 @@ tags: [React]
 excerpt: "React + パフォーマンス関連"
 ---
 
-PWAに関しては、`service-worker.js`や`manifest.json`ファイルの基本的な書き方程度の知識しかなかったので、[フロントエンドロードマップ](https://roadmap.sh/frontend)のPWAの欄で紹介されていた項目について学習しました。</br>
+PWAに関しては、`service-worker.js`や`manifest.json`ファイルの基本的な書き方程度の知識しかなかったので、[フロントエンドロードマップ](https://roadmap.sh/frontend)のPWAの欄で紹介されていた項目について学習しました。
 
 列挙すると以下のような項目になります。
 
@@ -22,7 +22,7 @@ PWAに関しては、`service-worker.js`や`manifest.json`ファイルの基本�
 
 
 ### Browser APIs
-`Storage`、`Server Sent Events`、`Service Workers`、`Location`など全9個が紹介されていましたが、どれもブラウザでも使われる基本APIでした。</br>
+`Storage`、`Server Sent Events`、`Service Workers`、`Location`など全9個が紹介されていましたが、どれもブラウザでも使われる基本APIでした。
 ブラウザAPIは自分で実装すると意外とコードが長くなってしまいますが、`react-use`や`vue-use`などのライブラリはこれらのフックを提供しているので簡潔に書けます。以下がサンプルコードです。
 ```tsx
 import { useLocation } from 'react-use';
@@ -70,7 +70,7 @@ PRPLパターンの目的は、リソース取得を効率化させ、ページ�
 
 ### Lighthouse
 
-`Lighthouse`ではパフォーマンス、アクセシビリティ、ベストプラクティス、SEO、PWAの5つの項目をテストできます。ブラウザから実行するのは面倒なので、CLIやCIで実行します。</br>
+`Lighthouse`ではパフォーマンス、アクセシビリティ、ベストプラクティス、SEO、PWAの5つの項目をテストできます。ブラウザから実行するのは面倒なので、CLIやCIで実行します。
 Lighthouse CLIのサンプルコマンドです。
 ```bash
 npx lighthouse https://example.com --output html --output-path ./lighthouse-report.html
