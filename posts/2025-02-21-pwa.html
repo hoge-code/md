@@ -28,7 +28,7 @@
         </p>
       </header>
 
-      <div class="content"><p>PWAに関しては、<code class="language-plaintext highlighter-rouge">service-worker.js</code>や<code class="language-plaintext highlighter-rouge">manifest.json</code>ファイルの基本的な書き方程度の知識しかなかったので、<a href="https://roadmap.sh/frontend">フロントエンドロードマップ</a>のPWAの欄で紹介されていた項目について学習しました。&lt;/br&gt;</p>
+      <div class="content"><p>PWAに関しては、<code class="language-plaintext highlighter-rouge">service-worker.js</code>や<code class="language-plaintext highlighter-rouge">manifest.json</code>ファイルの基本的な書き方程度の知識しかなかったので、<a href="https://roadmap.sh/frontend">フロントエンドロードマップ</a>のPWAの欄で紹介されていた項目について学習しました。</p>
 
 <p>列挙すると以下のような項目になります。</p>
 
@@ -46,7 +46,7 @@
 </ul>
 
 <h3 id="browser-apis">Browser APIs</h3>
-<p><code class="language-plaintext highlighter-rouge">Storage</code>、<code class="language-plaintext highlighter-rouge">Server Sent Events</code>、<code class="language-plaintext highlighter-rouge">Service Workers</code>、<code class="language-plaintext highlighter-rouge">Location</code>など全9個が紹介されていましたが、どれもブラウザでも使われる基本APIでした。&lt;/br&gt;
+<p><code class="language-plaintext highlighter-rouge">Storage</code>、<code class="language-plaintext highlighter-rouge">Server Sent Events</code>、<code class="language-plaintext highlighter-rouge">Service Workers</code>、<code class="language-plaintext highlighter-rouge">Location</code>など全9個が紹介されていましたが、どれもブラウザでも使われる基本APIでした。
 ブラウザAPIは自分で実装すると意外とコードが長くなってしまいますが、<code class="language-plaintext highlighter-rouge">react-use</code>や<code class="language-plaintext highlighter-rouge">vue-use</code>などのライブラリはこれらのフックを提供しているので簡潔に書けます。以下がサンプルコードです。</p>
 <div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">useLocation</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react-use</span><span class="dl">'</span><span class="p">;</span>
 
@@ -107,7 +107,7 @@
 
 <h3 id="lighthouse">Lighthouse</h3>
 
-<p><code class="language-plaintext highlighter-rouge">Lighthouse</code>ではパフォーマンス、アクセシビリティ、ベストプラクティス、SEO、PWAの5つの項目をテストできます。ブラウザから実行するのは面倒なので、CLIやCIで実行します。&lt;/br&gt;
+<p><code class="language-plaintext highlighter-rouge">Lighthouse</code>ではパフォーマンス、アクセシビリティ、ベストプラクティス、SEO、PWAの5つの項目をテストできます。ブラウザから実行するのは面倒なので、CLIやCIで実行します。
 Lighthouse CLIのサンプルコマンドです。</p>
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npx lighthouse https://example.com <span class="nt">--output</span> html <span class="nt">--output-path</span> ./lighthouse-report.html
 </code></pre></div></div>

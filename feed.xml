@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://hogecode.github.io/md/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hogecode.github.io/md/" rel="alternate" type="text/html" /><updated>2025-03-16T10:10:47+00:00</updated><id>https://hogecode.github.io/md/feed.xml</id><title type="html">ツールの忘備録</title><subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle><entry><title type="html">はてなブログからJekyllに移行してみる</title><link href="https://hogecode.github.io/md/posts/2025-03-13-jekyll-blog" rel="alternate" type="text/html" title="はてなブログからJekyllに移行してみる" /><published>2025-03-13T03:00:00+00:00</published><updated>2025-03-13T03:00:00+00:00</updated><id>https://hogecode.github.io/md/posts/jekyll-blog</id><content type="html" xml:base="https://hogecode.github.io/md/posts/2025-03-13-jekyll-blog"><![CDATA[<p>はてなブログからJekyllに移行する際、いくつかの点で躓きました。<code class="language-plaintext highlighter-rouge">ruby</code>やSSGにあまり慣れていなかったため、セットアップに多少時間がかかってしまいました。移行を決めたきっかけとして、はてなブログでは何故か記事を物理的に削除できなかったり、mdの編集がしづらかったりといった問題があり、<code class="language-plaintext highlighter-rouge">git</code>リポジトリでmdを管理できる環境にしたいと考えたからです。</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://hoge-code.github.io/md/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hoge-code.github.io/md/" rel="alternate" type="text/html" /><updated>2025-03-16T10:48:03+00:00</updated><id>https://hoge-code.github.io/md/feed.xml</id><title type="html">ツールの忘備録</title><subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle><entry><title type="html">はてなブログからJekyllに移行してみる</title><link href="https://hoge-code.github.io/md/posts/2025-03-13-jekyll-blog-copy" rel="alternate" type="text/html" title="はてなブログからJekyllに移行してみる" /><published>2025-03-13T03:00:00+00:00</published><updated>2025-03-13T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/jekyll-blog%20copy</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-03-13-jekyll-blog-copy"><![CDATA[<p>はてなブログからJekyllに移行する際、いくつかの点で躓きました。<code class="language-plaintext highlighter-rouge">ruby</code>やSSGにあまり慣れていなかったため、セットアップに多少時間がかかってしまいました。移行を決めたきっかけとして、はてなブログでは何故か記事を物理的に削除できなかったり、mdの編集がしづらかったりといった問題があり、<code class="language-plaintext highlighter-rouge">git</code>リポジトリでmdを管理できる環境にしたいと考えたからです。</p>
 
 <h3 id="jekyllのメリット">Jekyllのメリット</h3>
 
@@ -52,7 +52,7 @@
 
 <h3 id="結論">結論</h3>
 
-<p>色々と面倒な点がありましたが、特にローカル環境でmdを編集できる点が大きな利点だと感じました。デメリットとしては、無料枠だとパブリックリポジトリにする必要があることくらいかと思います。</p>]]></content><author><name></name></author><category term="blog" /><category term="開発" /><summary type="html"><![CDATA[Jekyll + GitHubPages]]></summary></entry><entry><title type="html">APIのレスポンス形式を統一する</title><link href="https://hogecode.github.io/md/posts/2025-02-21-api-response" rel="alternate" type="text/html" title="APIのレスポンス形式を統一する" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hogecode.github.io/md/posts/api-response</id><content type="html" xml:base="https://hogecode.github.io/md/posts/2025-02-21-api-response"><![CDATA[<p>APIレスポンスの形式を統一する方法を考えてみます。</p>
+<p>色々と面倒な点がありましたが、特にローカル環境でmdを編集できる点が大きな利点だと感じました。デメリットとしては、無料枠だとパブリックリポジトリにする必要があることくらいかと思います。</p>]]></content><author><name></name></author><category term="blog" /><category term="開発" /><summary type="html"><![CDATA[Jekyll + GitHubPages]]></summary></entry><entry><title type="html">APIのレスポンス形式を統一する</title><link href="https://hoge-code.github.io/md/posts/2025-02-21-api-response" rel="alternate" type="text/html" title="APIのレスポンス形式を統一する" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/api-response</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-02-21-api-response"><![CDATA[<p>APIレスポンスの形式を統一する方法を考えてみます。</p>
 
 <h3 id="fastapiの場合">FastAPIの場合</h3>
 
@@ -144,7 +144,7 @@ export default responseMiddleware;
 </code></pre></div></div>
 
 <h3 id="まとめ">まとめ</h3>
-<p>上記は単純な例ですが、一度レスポンス形式を統一する処理を書いておけば繰り返し使えそうです。</p>]]></content><author><name></name></author><category term="blog" /><category term="FastAPI" /><category term="Nodejs" /><summary type="html"><![CDATA[FastAPIやNode.jsでレスポンス形式を統一する]]></summary></entry><entry><title type="html">XAトランザクション</title><link href="https://hogecode.github.io/md/posts/2025-02-21-aws" rel="alternate" type="text/html" title="XAトランザクション" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hogecode.github.io/md/posts/aws</id><content type="html" xml:base="https://hogecode.github.io/md/posts/2025-02-21-aws"><![CDATA[<p>マイクロサービス間で整合性を保つには、CAP定理でいうC(整合性)の一部を妥協して、最終整合性を維持できるサーガパターンを<code class="language-plaintext highlighter-rouge">AWS StepFunctions</code>などを使用して実装するのが一般的らしいですが、せっかくなので分散トランザクションについても簡単に試してみます。</p>
+<p>上記は単純な例ですが、一度レスポンス形式を統一する処理を書いておけば繰り返し使えそうです。</p>]]></content><author><name></name></author><category term="blog" /><category term="FastAPI" /><category term="Nodejs" /><summary type="html"><![CDATA[FastAPIやNode.jsでレスポンス形式を統一する]]></summary></entry><entry><title type="html">XAトランザクション</title><link href="https://hoge-code.github.io/md/posts/2025-02-21-aws" rel="alternate" type="text/html" title="XAトランザクション" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/aws</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-02-21-aws"><![CDATA[<p>マイクロサービス間で整合性を保つには、CAP定理でいうC(整合性)の一部を妥協して、最終整合性を維持できるサーガパターンを<code class="language-plaintext highlighter-rouge">AWS StepFunctions</code>などを使用して実装するのが一般的らしいですが、せっかくなので分散トランザクションについても簡単に試してみます。</p>
 
 <h3 id="サンプルの流れ">サンプルの流れ</h3>
 <p>複数のmySQLデータベースを用意し、XAトランザクションを使用します。両方のデータベースで操作が成功すればコミットし、どちらかが失敗すればロールバックします。また、<code class="language-plaintext highlighter-rouge">my.cnf</code>ファイルで使用されているMySQLのエンジンが<code class="language-plaintext highlighter-rouge">InnoDB</code>であることを確認します。</p>
@@ -206,7 +206,7 @@ export default responseMiddleware;
 <p>上記を実行すると、すべての操作が正常に終了した場合、<code class="language-plaintext highlighter-rouge">XA COMMIT</code>でトランザクションを確定され、失敗があった場合、<code class="language-plaintext highlighter-rouge">XA ROLLBACK</code>でトランザクションを取り消されます。</p>
 
 <h3 id="まとめ">まとめ</h3>
-<p>上記は非常に単純なSQLのサンプルですが、それでも単一DBのトランザクションと比較して面倒になりました。プログラムで実装するとなると、さらに面倒になりそうです。パフォーマンスも悪いですし、よほどの一貫性が求められるような場面でもなければ、大人しくサーガを使って補填トランザクションで実装したほうが楽だと感じました。</p>]]></content><author><name></name></author><category term="blog" /><category term="MySQL" /><summary type="html"><![CDATA[MySQL + XAトランザクション]]></summary></entry><entry><title type="html">ClientCredential認証</title><link href="https://hogecode.github.io/md/posts/2025-02-21-client-credential" rel="alternate" type="text/html" title="ClientCredential認証" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hogecode.github.io/md/posts/client-credential</id><content type="html" xml:base="https://hogecode.github.io/md/posts/2025-02-21-client-credential"><![CDATA[<p>OAuth認証のうち、<br /></p>
+<p>上記は非常に単純なSQLのサンプルですが、それでも単一DBのトランザクションと比較して面倒になりました。プログラムで実装するとなると、さらに面倒になりそうです。パフォーマンスも悪いですし、よほどの一貫性が求められるような場面でもなければ、大人しくサーガを使って補填トランザクションで実装したほうが楽だと感じました。</p>]]></content><author><name></name></author><category term="blog" /><category term="MySQL" /><summary type="html"><![CDATA[MySQL + XAトランザクション]]></summary></entry><entry><title type="html">ClientCredential認証</title><link href="https://hoge-code.github.io/md/posts/2025-02-21-client-credential" rel="alternate" type="text/html" title="ClientCredential認証" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/client-credential</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-02-21-client-credential"><![CDATA[<p>OAuth認証のうち、<br /></p>
 
 <ul>
   <li><code class="language-plaintext highlighter-rouge">Resource Owner Password Credentials Grant</code>
@@ -287,7 +287,7 @@ Authorization: Bearer &lt;access_token&gt;
 </code></pre></div>    </div>
   </li>
   <li><strong>サーバー側での検証</strong>
-サーバー側で<code class="language-plaintext highlighter-rouge">keycloak</code>の公開鍵エンドポイントから公開鍵を取得し、トークンを検証します。<code class="language-plaintext highlighter-rouge">keycloak</code>と<code class="language-plaintext highlighter-rouge">cognito</code>の公開鍵エンドポイントは以下のようになります。&lt;/br&gt;
+サーバー側で<code class="language-plaintext highlighter-rouge">keycloak</code>の公開鍵エンドポイントから公開鍵を取得し、トークンを検証します。<code class="language-plaintext highlighter-rouge">keycloak</code>と<code class="language-plaintext highlighter-rouge">cognito</code>の公開鍵エンドポイントは以下のようになります。
 ```</li>
   <li>
     <p>Keycloak公開鍵エンドポイント:<br />
@@ -339,7 +339,7 @@ app.use(verifyToken);
 ```</p>
 
 <h3 id="まとめ">まとめ</h3>
-<p><code class="language-plaintext highlighter-rouge">EKS</code>など<code class="language-plaintext highlighter-rouge">k8s</code>環境のマイクロサービス間認証では、<code class="language-plaintext highlighter-rouge">IAM</code>や<code class="language-plaintext highlighter-rouge">k8s</code>の<code class="language-plaintext highlighter-rouge">ServiceAcount</code>を使用する方法や、<code class="language-plaintext highlighter-rouge">AppMesh</code>などサービスメッシュを使用した<code class="language-plaintext highlighter-rouge">mTLS</code>が主流らしいですが、どちらも環境構築の時点で難しすぎるので、手軽な<code class="language-plaintext highlighter-rouge">Client Credential</code>認証について学習してみました。</p>]]></content><author><name></name></author><category term="blog" /><category term="Nodejs" /><summary type="html"><![CDATA[Node.js]]></summary></entry><entry><title type="html">hyperターミナルを設定してみる</title><link href="https://hogecode.github.io/md/posts/2025-02-21-hyper" rel="alternate" type="text/html" title="hyperターミナルを設定してみる" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hogecode.github.io/md/posts/hyper</id><content type="html" xml:base="https://hogecode.github.io/md/posts/2025-02-21-hyper"><![CDATA[<p><a href="https://hyper.is/">Hyper</a>はElectronを使ったターミナルで、プラグインを使った拡張や、tmuxのようにマルチタブが使えるらしいです。正直に言うと、AI補完やコマンド履歴を使える<a href="https://www.warp.dev/">WARP</a>を使いたかったのですが、まだWindowsには対応していないのでHyperを使ってみることにしました。忘備録を兼ねて、セットアップ手順を書きます。</p>
+<p><code class="language-plaintext highlighter-rouge">EKS</code>など<code class="language-plaintext highlighter-rouge">k8s</code>環境のマイクロサービス間認証では、<code class="language-plaintext highlighter-rouge">IAM</code>や<code class="language-plaintext highlighter-rouge">k8s</code>の<code class="language-plaintext highlighter-rouge">ServiceAcount</code>を使用する方法や、<code class="language-plaintext highlighter-rouge">AppMesh</code>などサービスメッシュを使用した<code class="language-plaintext highlighter-rouge">mTLS</code>が主流らしいですが、どちらも環境構築の時点で難しすぎるので、手軽な<code class="language-plaintext highlighter-rouge">Client Credential</code>認証について学習してみました。</p>]]></content><author><name></name></author><category term="blog" /><category term="Nodejs" /><summary type="html"><![CDATA[Node.js]]></summary></entry><entry><title type="html">hyperターミナルを設定してみる</title><link href="https://hoge-code.github.io/md/posts/2025-02-21-hyper" rel="alternate" type="text/html" title="hyperターミナルを設定してみる" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/hyper</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-02-21-hyper"><![CDATA[<p><a href="https://hyper.is/">Hyper</a>はElectronを使ったターミナルで、プラグインを使った拡張や、tmuxのようにマルチタブが使えるらしいです。正直に言うと、AI補完やコマンド履歴を使える<a href="https://www.warp.dev/">WARP</a>を使いたかったのですが、まだWindowsには対応していないのでHyperを使ってみることにしました。忘備録を兼ねて、セットアップ手順を書きます。</p>
 
 <h4 id="hyperをダウンロード">hyperをダウンロード</h4>
 <p>公式サイトにアクセスするか、chocolateyでインストールします。</p>
@@ -361,7 +361,7 @@ app.use(verifyToken);
   </li>
   <li>
     <p><strong>shell</strong>
-デフォルトの空文字からgit bashのパスに変更&lt;/br&gt;
+デフォルトの空文字からgit bashのパスに変更
 この際、基本的なことですが、JSなので\をエスケープすることを忘れないようにします。</p>
   </li>
 </ul>
@@ -391,7 +391,7 @@ pluginsは詳しくないが、適当に追加してみます。</li>
 
 <h4 id="感想">感想</h4>
 
-<p>設定ファイルを編集することで簡単にスタイル変更やプラグイン追加ができるのは便利だと感じました。その一方で、git bashだけでは補完が利かないのでxonshなど他のシェルを試してみたくなりました。</p>]]></content><author><name></name></author><category term="blog" /><category term="ツール" /><summary type="html"><![CDATA[Hyper]]></summary></entry><entry><title type="html">MySQLで全文検索を試してみる</title><link href="https://hogecode.github.io/md/posts/2025-02-21-mysql-full-search" rel="alternate" type="text/html" title="MySQLで全文検索を試してみる" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hogecode.github.io/md/posts/mysql-full-search</id><content type="html" xml:base="https://hogecode.github.io/md/posts/2025-02-21-mysql-full-search"><![CDATA[<p>Docker、VSCode(拡張機能はMySQLとDevContainer)、MySQLで全文検索を試してみます。RDBのLIKE検索は前方一致条件でない限りインデックスが利かないし、Elasticsearchを使ってCQRS的に実装するのは小規模なアプリだとオーバーなのでMySQLの全文検索を使った際の忘備録を残しておきます。</p>
+<p>設定ファイルを編集することで簡単にスタイル変更やプラグイン追加ができるのは便利だと感じました。その一方で、git bashだけでは補完が利かないのでxonshなど他のシェルを試してみたくなりました。</p>]]></content><author><name></name></author><category term="blog" /><category term="ツール" /><summary type="html"><![CDATA[Hyper]]></summary></entry><entry><title type="html">MySQLで全文検索を試してみる</title><link href="https://hoge-code.github.io/md/posts/2025-02-21-mysql-full-search" rel="alternate" type="text/html" title="MySQLで全文検索を試してみる" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/mysql-full-search</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-02-21-mysql-full-search"><![CDATA[<p>Docker、VSCode(拡張機能はMySQLとDevContainer)、MySQLで全文検索を試してみます。RDBのLIKE検索は前方一致条件でない限りインデックスが利かないし、Elasticsearchを使ってCQRS的に実装するのは小規模なアプリだとオーバーなのでMySQLの全文検索を使った際の忘備録を残しておきます。</p>
 
 <h4 id="dockerコンテナ起動"><strong>Dockerコンテナ起動</strong></h4>
 
@@ -441,7 +441,7 @@ pluginsは詳しくないが、適当に追加してみます。</li>
 
 <h4 id="感想">感想</h4>
 
-<p>小規模なアプリで全文検索を試したいと思った時、わざわざ全文検索エンジンを導入する必要がないので便利だと感じました。</p>]]></content><author><name></name></author><category term="blog" /><category term="MySQL" /><summary type="html"><![CDATA[MySQL + 全文検索]]></summary></entry><entry><title type="html">nodejsをプロファイリングしてみる</title><link href="https://hogecode.github.io/md/posts/2025-02-21-nodejs-profiling" rel="alternate" type="text/html" title="nodejsをプロファイリングしてみる" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hogecode.github.io/md/posts/nodejs-profiling</id><content type="html" xml:base="https://hogecode.github.io/md/posts/2025-02-21-nodejs-profiling"><![CDATA[<p>nodejsのデバッグは<code class="language-plaintext highlighter-rouge">inspect-brk</code>や、それを内部的に使用しているvscodeが有名ですが、プロファイリングに使われる<code class="language-plaintext highlighter-rouge">clinic.js</code>を試してみます。</p>
+<p>小規模なアプリで全文検索を試したいと思った時、わざわざ全文検索エンジンを導入する必要がないので便利だと感じました。</p>]]></content><author><name></name></author><category term="blog" /><category term="MySQL" /><summary type="html"><![CDATA[MySQL + 全文検索]]></summary></entry><entry><title type="html">nodejsをプロファイリングしてみる</title><link href="https://hoge-code.github.io/md/posts/2025-02-21-nodejs-profiling" rel="alternate" type="text/html" title="nodejsをプロファイリングしてみる" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/nodejs-profiling</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-02-21-nodejs-profiling"><![CDATA[<p>nodejsのデバッグは<code class="language-plaintext highlighter-rouge">inspect-brk</code>や、それを内部的に使用しているvscodeが有名ですが、プロファイリングに使われる<code class="language-plaintext highlighter-rouge">clinic.js</code>を試してみます。</p>
 
 <h3 id="使用してみる">使用してみる</h3>
 <p>まずはグローバルにインストールします。</p>
@@ -462,11 +462,11 @@ pluginsは詳しくないが、適当に追加してみます。</li>
 <p>Flamegraph（炎グラフ）を使用して、CPU のプロファイルを視覚化します。コマンドは<code class="language-plaintext highlighter-rouge">docter</code>を<code class="language-plaintext highlighter-rouge">flame</code>に変更するだけです。グラフが表示され、関数ごとのCPU使用率を視覚的に確認できます。</p>
 
 <h4 id="3-clinic-bubbleprof">3. <strong><code class="language-plaintext highlighter-rouge">clinic bubbleprof</code></strong></h4>
-<p>関数間の呼び出し関係を視覚化するツール。円の大きさによって関数の依存関係や、ボトルネックを確認できます。</p>]]></content><author><name></name></author><category term="blog" /><category term="Nodejs" /><summary type="html"><![CDATA[Node.js + Clinic.js]]></summary></entry><entry><title type="html">Pandocでmdからwordファイルを作る</title><link href="https://hogecode.github.io/md/posts/2025-02-21-pandoc" rel="alternate" type="text/html" title="Pandocでmdからwordファイルを作る" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hogecode.github.io/md/posts/pandoc</id><content type="html" xml:base="https://hogecode.github.io/md/posts/2025-02-21-pandoc"><![CDATA[<p>ドキュメントをワードで提出しなければならない際に、mdで書て変換したいと思ったので、vscodeとpandocを使ったセットアップ手順を書きます。</p>
+<p>関数間の呼び出し関係を視覚化するツール。円の大きさによって関数の依存関係や、ボトルネックを確認できます。</p>]]></content><author><name></name></author><category term="blog" /><category term="Nodejs" /><summary type="html"><![CDATA[Node.js + Clinic.js]]></summary></entry><entry><title type="html">Pandocでmdからwordファイルを作る</title><link href="https://hoge-code.github.io/md/posts/2025-02-21-pandoc" rel="alternate" type="text/html" title="Pandocでmdからwordファイルを作る" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/pandoc</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-02-21-pandoc"><![CDATA[<p>ドキュメントをワードで提出しなければならない際に、mdで書て変換したいと思ったので、vscodeとpandocを使ったセットアップ手順を書きます。</p>
 
 <h4 id="pandocのインストール">Pandocのインストール</h4>
 
-<p><a href="https://pandoc.org/installing.html">Pandocの公式サイト</a>にアクセスし、windows用のmsiインストーラをダウンロードし、インストールを完了します。&lt;/br&gt;</p>
+<p><a href="https://pandoc.org/installing.html">Pandocの公式サイト</a>にアクセスし、windows用のmsiインストーラをダウンロードし、インストールを完了します。</p>
 
 <p>コマンドプロンプトで確認します。</p>
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pandoc <span class="nt">--version</span>
@@ -495,14 +495,14 @@ pluginsは詳しくないが、適当に追加してみます。</li>
 
 <h4 id="感想">感想</h4>
 
-<p>notionはdocx形式でエキスポートできないし、ワードファイルを簡単に作成したいと思った際に、pandocとvscodeを使えば非常に簡単に作成できると感じました。</p>]]></content><author><name></name></author><category term="blog" /><category term="ツール" /><summary type="html"><![CDATA[Pandoc]]></summary></entry><entry><title type="html">postmanのテスト</title><link href="https://hogecode.github.io/md/posts/2025-02-21-postman-test" rel="alternate" type="text/html" title="postmanのテスト" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hogecode.github.io/md/posts/postman-test</id><content type="html" xml:base="https://hogecode.github.io/md/posts/2025-02-21-postman-test"><![CDATA[<h3 id="stoplight-studio-で-yaml-をダウンロード">Stoplight Studio で yaml をダウンロード</h3>
+<p>notionはdocx形式でエキスポートできないし、ワードファイルを簡単に作成したいと思った際に、pandocとvscodeを使えば非常に簡単に作成できると感じました。</p>]]></content><author><name></name></author><category term="blog" /><category term="ツール" /><summary type="html"><![CDATA[Pandoc]]></summary></entry><entry><title type="html">postmanのテスト</title><link href="https://hoge-code.github.io/md/posts/2025-02-21-postman-test" rel="alternate" type="text/html" title="postmanのテスト" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/postman-test</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-02-21-postman-test"><![CDATA[<h3 id="stoplight-studio-で-yaml-をダウンロード">Stoplight Studio で yaml をダウンロード</h3>
 
 <p>自分でOASを書いてもいいのですが、今回は Stoplight Studio でデフォルトの API コレクションの yaml ファイルをダウンロードします。
 <img src="/md/assets/images/postman_export.png" alt="" /></p>
 
 <h3 id="postman-にアクセス">Postman にアクセス</h3>
 
-<p>Postman で先ほどダウンロードした yaml をインポートし、コレクションを作成します。また、コレクションを右クリックし、モックサーバーを建ててみます。この際、モックサーバーが生成した URL を環境変数に入れます。&lt;/br&gt;</p>
+<p>Postman で先ほどダウンロードした yaml をインポートし、コレクションを作成します。また、コレクションを右クリックし、モックサーバーを建ててみます。この際、モックサーバーが生成した URL を環境変数に入れます。</p>
 
 <p>試しに pm ライブラリを使った簡易的なテストを書いてみます。(モックレスポンスを書いていないので当然 404 になりますが・・・)
 <img src="/md/assets/images/postman_test.png" alt="" /></p>
@@ -549,7 +549,7 @@ newman run ./api.postman_collection.json <span class="nt">-n</span> 10 <span cla
 
 <h4 id="感想">感想</h4>
 
-<p>OASを自動生成してくれるフレームワークに頼るだけでなく、OAS関連の様々なツールに慣れていきたいと思いました。</p>]]></content><author><name></name></author><category term="blog" /><category term="ツール" /><summary type="html"><![CDATA[Stoplight + Postman + pm + newman]]></summary></entry><entry><title type="html">PWAに入門する</title><link href="https://hogecode.github.io/md/posts/2025-02-21-pwa" rel="alternate" type="text/html" title="PWAに入門する" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hogecode.github.io/md/posts/pwa</id><content type="html" xml:base="https://hogecode.github.io/md/posts/2025-02-21-pwa"><![CDATA[<p>PWAに関しては、<code class="language-plaintext highlighter-rouge">service-worker.js</code>や<code class="language-plaintext highlighter-rouge">manifest.json</code>ファイルの基本的な書き方程度の知識しかなかったので、<a href="https://roadmap.sh/frontend">フロントエンドロードマップ</a>のPWAの欄で紹介されていた項目について学習しました。&lt;/br&gt;</p>
+<p>OASを自動生成してくれるフレームワークに頼るだけでなく、OAS関連の様々なツールに慣れていきたいと思いました。</p>]]></content><author><name></name></author><category term="blog" /><category term="ツール" /><summary type="html"><![CDATA[Stoplight + Postman + pm + newman]]></summary></entry><entry><title type="html">PWAに入門する</title><link href="https://hoge-code.github.io/md/posts/2025-02-21-pwa" rel="alternate" type="text/html" title="PWAに入門する" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/pwa</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-02-21-pwa"><![CDATA[<p>PWAに関しては、<code class="language-plaintext highlighter-rouge">service-worker.js</code>や<code class="language-plaintext highlighter-rouge">manifest.json</code>ファイルの基本的な書き方程度の知識しかなかったので、<a href="https://roadmap.sh/frontend">フロントエンドロードマップ</a>のPWAの欄で紹介されていた項目について学習しました。</p>
 
 <p>列挙すると以下のような項目になります。</p>
 
@@ -567,7 +567,7 @@ newman run ./api.postman_collection.json <span class="nt">-n</span> 10 <span cla
 </ul>
 
 <h3 id="browser-apis">Browser APIs</h3>
-<p><code class="language-plaintext highlighter-rouge">Storage</code>、<code class="language-plaintext highlighter-rouge">Server Sent Events</code>、<code class="language-plaintext highlighter-rouge">Service Workers</code>、<code class="language-plaintext highlighter-rouge">Location</code>など全9個が紹介されていましたが、どれもブラウザでも使われる基本APIでした。&lt;/br&gt;
+<p><code class="language-plaintext highlighter-rouge">Storage</code>、<code class="language-plaintext highlighter-rouge">Server Sent Events</code>、<code class="language-plaintext highlighter-rouge">Service Workers</code>、<code class="language-plaintext highlighter-rouge">Location</code>など全9個が紹介されていましたが、どれもブラウザでも使われる基本APIでした。
 ブラウザAPIは自分で実装すると意外とコードが長くなってしまいますが、<code class="language-plaintext highlighter-rouge">react-use</code>や<code class="language-plaintext highlighter-rouge">vue-use</code>などのライブラリはこれらのフックを提供しているので簡潔に書けます。以下がサンプルコードです。</p>
 <div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">useLocation</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react-use</span><span class="dl">'</span><span class="p">;</span>
 
@@ -628,7 +628,7 @@ newman run ./api.postman_collection.json <span class="nt">-n</span> 10 <span cla
 
 <h3 id="lighthouse">Lighthouse</h3>
 
-<p><code class="language-plaintext highlighter-rouge">Lighthouse</code>ではパフォーマンス、アクセシビリティ、ベストプラクティス、SEO、PWAの5つの項目をテストできます。ブラウザから実行するのは面倒なので、CLIやCIで実行します。&lt;/br&gt;
+<p><code class="language-plaintext highlighter-rouge">Lighthouse</code>ではパフォーマンス、アクセシビリティ、ベストプラクティス、SEO、PWAの5つの項目をテストできます。ブラウザから実行するのは面倒なので、CLIやCIで実行します。
 Lighthouse CLIのサンプルコマンドです。</p>
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npx lighthouse https://example.com <span class="nt">--output</span> html <span class="nt">--output-path</span> ./lighthouse-report.html
 </code></pre></div></div>
