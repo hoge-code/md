@@ -21,10 +21,13 @@
       <header>
         <h1>GitHubでの複数アカウント登録</h1>
         <p class="meta">
-          March 16, 2025 in
+          March 16, 2025 
+          <!--
+          in
           <a href="/category/blog"
             >blog</a
           >
+        -->
         </p>
       </header>
 
@@ -128,13 +131,13 @@ Host github.com-Account2
 
 <h3 id="4-ブランチ名の確認">4. ブランチ名の確認</h3>
 
-<p>初期状態で、<code class="language-plaintext highlighter-rouge">git push --set-upstream origin master</code> を実行した場合にエラーが発生することがあります。認証前にリモートブランチを手動で作成し、同じ名前のローカルブランチを作成し、pushします。</p>
+<p>初期状態で、<code class="language-plaintext highlighter-rouge">git push --set-upstream origin master</code> を実行した場合にエラーが発生することがあります。特にファイルを一切作成せずにウェブ上でリポジトリを作成した場合は、認証前にリモートブランチを手動で作成し、同じ名前のローカルブランチを作成し、pushします。</p>
 
 <h3 id="結論">結論</h3>
 
 <ul>
   <li><code class="language-plaintext highlighter-rouge">git@github.com</code> のユーザー名は <strong>常に <code class="language-plaintext highlighter-rouge">git</code></strong> で、GitHubでのユーザー名は関係ありません。</li>
-  <li>SSH接続時には、<code class="language-plaintext highlighter-rouge">ssh-agent</code> の設定が重要です。SSHキーが正しく登録されているか確認してください。</li>
+  <li>SSH接続時には、<code class="language-plaintext highlighter-rouge">ssh-agent</code> の設定が重要です。SSHキーが正しく登録されているか確認します。</li>
   <li>初期のブランチ名の設定に注意します。</li>
 </ul>
 </div>

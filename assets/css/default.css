@@ -1,5 +1,6 @@
 /* assets/css/style.css */
 
+/* 汎用CSS*/
 /* メインコンテンツとサイドバーを横並びにする */
 #content {
   display: flex;
@@ -32,14 +33,42 @@ article {
   margin-top: 10px;
 }
 
+img {
+   max-width: 100% !important;
+   display:block !important;
+}
+
+
+@media (min-width: 700px) {
+  img {
+    max-width: 700px !important;
+  }
+}
+
+/* プラグインのデフォルトSCSSを上書き*/
 body {
-  background: #333333 !important;
-  font-family: 'Roboto', sans-serif !important; 
+  background: white !important;
+  color:black !important;
+  font-family: sans-serif !important; 
   transform: scale(0.8);
   transform-origin: top left; /* スケーリングの基準点を左上に設定 */
   width: 125%; /* スケーリングにより余分に広がるため、幅を調整 */
 }
 
+h1,h2,h3,h4,h5,h6{
+  font-family: sans-serif !important; 
+  color:black !important;
+  font-weight: bold !important;
+}
+
+a {
+  color:blue !important;
+  font-weight: normal !important;
+}
+
+ul li {
+  list-style-image: none !important;
+}
 
 code {
   background-color: rgb(31, 37, 46) !important;
@@ -65,15 +94,5 @@ pre code {
 }
 
 
-img {
-   max-width: 100% !important;
-   display:block !important;
-}
 
-
-@media (min-width: 700px) {
-  img {
-    max-width: 700px !important;
-  }
-}
 
