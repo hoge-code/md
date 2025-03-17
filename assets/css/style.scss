@@ -1,7 +1,8 @@
 // @import "jekyll-theme-slate";
 // @import "jekyll-theme-cayman"
 // @import "jekyll-theme-architect"
-@import "jekyll-theme-hacker"
+// @import "jekyll-theme-hacker"
 // @import "jekyll-theme-slate"
 // @import "minimal-mistakes-jekyll"
 // @import "jekyll-whiteglass"
+@import "{{ site.theme }}";

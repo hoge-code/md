@@ -86,6 +86,7 @@ OAuth認証のうち、<br>
   `https://cognito-idp.<region>.amazonaws.com/<user-pool-id>/.well-known/jwks.json`
 ```
 `express`を使用したサンプルコードは以下のようになります。
+
 ```javascript
 import express from 'express';
 import axios from 'axios';

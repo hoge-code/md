@@ -109,10 +109,10 @@ Hi username! You've successfully authenticated, but GitHub does not provide shel
 
 ### 4. ブランチ名の確認
 
-初期状態で、`git push --set-upstream origin master` を実行した場合にエラーが発生することがあります。認証前にリモートブランチを手動で作成し、同じ名前のローカルブランチを作成し、pushします。
+初期状態で、`git push --set-upstream origin master` を実行した場合にエラーが発生することがあります。特にファイルを一切作成せずにウェブ上でリポジトリを作成した場合は、認証前にリモートブランチを手動で作成し、同じ名前のローカルブランチを作成し、pushします。
 
 ### 結論
 
 - `git@github.com` のユーザー名は **常に `git`** で、GitHubでのユーザー名は関係ありません。
-- SSH接続時には、`ssh-agent` の設定が重要です。SSHキーが正しく登録されているか確認してください。
+- SSH接続時には、`ssh-agent` の設定が重要です。SSHキーが正しく登録されているか確認します。
 - 初期のブランチ名の設定に注意します。
