@@ -3,7 +3,7 @@ layout: post
 title: "github actionsのファイル分割"
 date: 2025-05-04 12:00:00 +0900
 categories: [blog]
-tags: [github-actions]
+tags: [ツール]
 excerpt: "github-actions"
 ---
 

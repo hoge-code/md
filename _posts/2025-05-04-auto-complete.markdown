@@ -3,7 +3,7 @@ layout: post
 title: "自動補完のローカルと全文検索の比較"
 date: 2025-05-04 12:00:00 +0900
 categories: [blog]
-tags: [elasticsearch, react]
+tags: [elasticsearch, React]
 excerpt: "elasticsearch, fuse.js"
 ---
 
