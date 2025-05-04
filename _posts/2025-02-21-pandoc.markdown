@@ -9,6 +9,10 @@ excerpt: "Pandoc"
 
 ドキュメントをワードで提出しなければならない際に、mdで書て変換したいと思ったので、vscodeとpandocを使ったセットアップ手順を書きます。
 
+**目次**
+* ToC
+{:toc}
+
 #### Pandocのインストール
 
 [Pandocの公式サイト](https://pandoc.org/installing.html)にアクセスし、windows用のmsiインストーラをダウンロードし、インストールを完了します。

@@ -9,6 +9,10 @@ excerpt: "MySQL + 全文検索"
 
 Docker、VSCode(拡張機能はMySQLとDevContainer)、MySQLで全文検索を試してみます。RDBのLIKE検索は前方一致条件でない限りインデックスが利かないし、Elasticsearchを使ってCQRS的に実装するのは小規模なアプリだとオーバーなのでMySQLの全文検索を使った際の忘備録を残しておきます。
 
+**目次**
+* ToC
+{:toc}
+
 #### **Dockerコンテナ起動**
 
 docker runだとコマンド入力が面倒なので、docker-compose.ymlを書きます。本当は.envファイルに環境変数を書くべきだけどベタ書きします。Docker拡張機能を入れているので、上のRun All Servicesボタンをクリックし、mysqlコンテナが起動することを確認します。

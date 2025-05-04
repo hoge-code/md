@@ -16,9 +16,19 @@
 }
 
 /* メインコンテンツのスタイル */
+*{
+  font-family: ui-sans-serif !important;
+  /*background-color: rgb(243, 243, 230) !important;*/
+}
+
+a{
+  text-shadow: none !important;
+}
+
 main {
   width: 70%;
   padding: 20px;
+  font-size: 1.1rem !important;
 }
 
 header {
@@ -49,7 +59,7 @@ img {
 body {
   background: white !important;
   color:black !important;
-  font-family: sans-serif !important; 
+  font-family: 'Roboto', sans-serif !important; 
   transform: scale(0.8);
   transform-origin: top left; /* スケーリングの基準点を左上に設定 */
   width: 125%; /* スケーリングにより余分に広がるため、幅を調整 */
@@ -70,12 +80,23 @@ ul li {
   list-style-image: none !important;
 }
 
-code {
-  background-color: rgb(31, 37, 46) !important;
-  color: white !important;
+code:not(pre code) {
+  background-color: rgba(31, 37, 46, 0.126) !important;
+  color: black !important;
   font-family: 'Roboto', sans-serif !important;  
-  font-size: 0.9rem !important;
+  font-size: 1rem !important;
   font-weight: normal !important;
+}
+
+pre {
+  background-color: rgba(31, 37, 46, 0.126) !important;
+  filter: invert(1);  /* 背景と文字を反転 */
+  font-size: 0.9rem !important;
+}
+
+#markdown-toc a{
+  font-weight: normal !important;
+  color: rgb(15, 113, 200) !important;
 }
 
 /*
@@ -87,12 +108,12 @@ code {
   border-radius: 4px !important;
 }
 */
-
+/*
 pre code {
   background: none !important; 
   font-weight: normal !important;
 }
-
+*/
 
 
 

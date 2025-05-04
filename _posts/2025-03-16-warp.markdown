@@ -9,6 +9,10 @@ excerpt: "Warp"
 
 最近Windowsにも対応した**Warpターミナル**を試してみました。
 
+**目次**
+* ToC
+{:toc}
+
 まず、Warpを起動した際に、`Ctrl + Shift + P`を押すと以下のようなパレットが表示されます。さまざまなコマンドや機能に簡単にアクセスできます。
 
 ![warp-palette](/md/assets/images/warp-palette.png)

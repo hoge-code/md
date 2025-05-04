@@ -8,6 +8,10 @@ excerpt: "Node.js + Clinic.js"
 ---
 nodejsのデバッグは`inspect-brk`や、それを内部的に使用しているvscodeが有名ですが、プロファイリングに使われる`clinic.js`を試してみます。
 
+**目次**
+* ToC
+{:toc}
+
 ### 使用してみる
 まずはグローバルにインストールします。
 ```bash

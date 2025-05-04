@@ -9,6 +9,10 @@ excerpt: "Hyper"
 
 [Hyper](https://hyper.is/)はElectronを使ったターミナルで、プラグインを使った拡張や、tmuxのようにマルチタブが使えるらしいです。正直に言うと、AI補完やコマンド履歴を使える[WARP](https://www.warp.dev/)を使いたかったのですが、まだWindowsには対応していないのでHyperを使ってみることにしました。忘備録を兼ねて、セットアップ手順を書きます。
 
+**目次**
+* ToC
+{:toc}
+
 #### hyperをダウンロード
 公式サイトにアクセスするか、chocolateyでインストールします。
 

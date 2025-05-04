@@ -9,6 +9,10 @@ excerpt: "FastAPIやNode.jsでレスポンス形式を統一する"
 
 APIレスポンスの形式を統一する方法を考えてみます。
 
+**目次**
+* ToC
+{:toc}
+
 ### FastAPIの場合
 
 FastAPIはエンドポイントの`response_model`のDTOクラスの構造をもとにOASドキュメントを生成しますが、ミドルウェアを使って、レスポンス後に返却するJSONの構造を変更すると上手く表示されないのでDTOを使って実装してみます。
@@ -16,7 +20,7 @@ FastAPIはエンドポイントの`response_model`のDTOクラスの構造をも
 #### DTOの生成
 適当な`Item`と汎用的な`ResponseDTO`を作成します。`ResponseDTO`も本来ならステータスコードや、エラーならエラーメッセージを詳細に含めるべきですが、簡略化します。
 
-```
+```python
 from typing import TypeVar, Generic, List
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -37,7 +41,7 @@ class Item(BaseModel):
 
 #### エンドポイントの作成
 こちらも本来ならクエリパラメータなどを使ってページネーションを実装し、それらのメタデータもレスポンスに含めるべきですが簡略化します。
-```
+```typescript
 app = FastAPI()
 
 @app.get("/items", response_model=ResponseDTO[List[Item]])
@@ -52,7 +56,7 @@ async def get_items():
 ### Expressの場合
 Expressでも一応`Response`の型定義にDTOを使うこともできますが、OASを使わないし、ミドルウェアで作成してみます。この際、`X-Forwarded-For`ヘッダーを消し、エラーレスポンスは標準の`RFC7807`形式で返却するように実装してみます。以下がサンプルコードです。
 
-```
+```typescript
 import { Request, Response, NextFunction } from 'express';
 
 // 成功時のレスポンス形式

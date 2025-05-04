@@ -20,6 +20,9 @@ PWAに関しては、`service-worker.js`や`manifest.json`ファイルの基本�
 
 - Browser APIs
 
+**目次**
+* ToC
+{:toc}
 
 ### Browser APIs
 `Storage`、`Server Sent Events`、`Service Workers`、`Location`など全9個が紹介されていましたが、どれもブラウザでも使われる基本APIでした。

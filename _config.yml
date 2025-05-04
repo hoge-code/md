@@ -46,7 +46,10 @@ plugins:
   - jekyll-archives
 
 markdown: kramdown
-
+kramdown:
+  toc: true
+  toc_levels: 1..3
+  
 paginate: 5 # ページネーションの設定（1ページあたりの投稿数）
 paginate_path: "/page:num/"
 

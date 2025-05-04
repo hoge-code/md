@@ -9,6 +9,10 @@ excerpt: "GitHub"
 
 GitHubで複数アカウントを登録する際にいくつかの問題に直面したため、忘備録として残しておきます。基本的な内容ですが、登録したのがかなり前で、忘れており、忘れやすいない内容のため、記事に残しておきます。
 
+**目次**
+* ToC
+{:toc}
+
 ### GitHubの認証方式
 
 GitHubの認証方式には、主に2つの方法があります。
@@ -61,7 +65,7 @@ Host github.com-Account2
 git remote set-url origin git@github.com-Account1:username/repository.git
 ```
 
-### SSH接続の確認
+### 3. SSH接続の確認
 
 SSHキーが正しく設定されているか確認するためには、以下のコマンドで接続のテストができます。
 
@@ -77,7 +81,7 @@ Hi username! You've successfully authenticated, but GitHub does not provide shel
 
 もしこのメッセージが表示されない場合、設定に問題がある可能性があります。
 
-### SSHキーの登録確認
+### 4. SSHキーの登録確認
 
 `ssh-agent` を使用してSSHキーが正しく登録されているか確認します。
 
@@ -107,7 +111,7 @@ Hi username! You've successfully authenticated, but GitHub does not provide shel
 
    登録されているキーのリストが表示されればOKです。もし何も表示されない場合は、SSHキーが正しく登録されていません。
 
-### 4. ブランチ名の確認
+### 5. ブランチ名の確認
 
 初期状態で、`git push --set-upstream origin master` を実行した場合にエラーが発生することがあります。特にファイルを一切作成せずにウェブ上でリポジトリを作成した場合は、認証前にリモートブランチを手動で作成し、同じ名前のローカルブランチを作成し、pushします。
 
