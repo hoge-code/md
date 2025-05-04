@@ -1,0 +1,249 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/md/assets/css/default.css">
+  <link rel="stylesheet" href="/md/assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <title>ツールの忘備録</title>
+</head>
+<body>
+
+<header>
+  <h1><a href="/md/">ツールの忘備録</a></h1></h1>
+</header>
+
+<div id="content">
+  <!-- メインコンテンツ部分 -->
+  <main>
+        <article>
+      <header>
+        <h1>github小技2</h1>
+        <p class="meta">
+          May 04, 2025 
+          <!--
+          in
+          <a href="/category/blog"
+            >blog</a
+          >
+        -->
+        </p>
+      </header>
+
+      <div class="content"><p>忘れがちやネットに情報が少ないGitHub関連の操作について忘備録を兼ねてまとめてみます。</p>
+
+<p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#1-gfmの引用" id="markdown-toc-1-gfmの引用">1. GFMの引用</a></li>
+  <li><a href="#2slack-チャンネルで-github-を連携登録するコマンド" id="markdown-toc-2slack-チャンネルで-github-を連携登録するコマンド">2.Slack チャンネルで GitHub を連携登録するコマンド</a></li>
+  <li><a href="#3-git-filter-repo" id="markdown-toc-3-git-filter-repo">3. <code class="language-plaintext highlighter-rouge">git-filter-repo</code></a></li>
+  <li><a href="#4-git-でワークツリーに別リポジトリを含める方法" id="markdown-toc-4-git-でワークツリーに別リポジトリを含める方法">4. Git でワークツリーに別リポジトリを含める方法</a></li>
+  <li><a href="#5-git-lfslarge-file-storage" id="markdown-toc-5-git-lfslarge-file-storage">5. Git LFS（Large File Storage）</a></li>
+</ul>
+
+<hr />
+
+<h3 id="1-gfmの引用">1. GFMの引用</h3>
+
+<p>引用が色分けされて便利ですが、何故かネットで検索しても情報が少ないです。</p>
+
+<div class="language-md highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gt">&gt; [!NOTE]  </span>
+<span class="gt">&gt; note</span>
+<span class="gt">
+&gt; [!TIP]</span>
+<span class="gt">&gt; tip</span>
+<span class="gt">
+&gt; [!IMPORTANT]  </span>
+<span class="gt">&gt; important</span>
+<span class="gt">
+&gt; [!WARNING]  </span>
+<span class="gt">&gt; warning</span>
+<span class="gt">
+&gt; [!CAUTION]</span>
+<span class="gt">&gt; caution</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="2slack-チャンネルで-github-を連携登録するコマンド">2.Slack チャンネルで GitHub を連携登録するコマンド</h3>
+
+<h4 id="前提">前提：</h4>
+
+<ul>
+  <li>Slack に GitHub アプリをインストール済み</li>
+  <li>GitHub に Slack 通知を送るための連携設定済み（OAuth連携）</li>
+</ul>
+
+<h4 id="チャンネルに連携リポジトリを登録するコマンド">チャンネルに連携リポジトリを登録するコマンド：</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/github subscribe owner/repo issues pulls commits
+</code></pre></div></div>
+
+<h4 id="解除">解除：</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/github unsubscribe owner/repo
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="3-git-filter-repo">3. <code class="language-plaintext highlighter-rouge">git-filter-repo</code></h3>
+
+<p><code class="language-plaintext highlighter-rouge">git-filter-repo</code> は [<code class="language-plaintext highlighter-rouge">git filter-branch</code>] や [<code class="language-plaintext highlighter-rouge">BFG Repo-Cleaner</code>] の高速・安全な後継ツールです。</p>
+
+<p>特定ディレクトリだけを抽出して新リポジトリ化したい場合、コミット履歴から機密ファイルを完全に除去したい場合、メールアドレス・名前の一括変換（匿名化）したい場合などに使用します。</p>
+
+<h4 id="特定のディレクトリを抽出">特定のディレクトリを抽出</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone <span class="nt">--no-local</span> <span class="nt">--mirror</span> https://github.com/owner/repo.git
+<span class="nb">cd </span>repo.git
+
+git filter-repo <span class="nt">--subdirectory-filter</span> src
+</code></pre></div></div>
+
+<h4 id="ファイル除去">ファイル除去</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git filter-repo <span class="nt">--path</span> secrets.env <span class="nt">--invert-paths</span>
+</code></pre></div></div>
+
+<p>バックアップを取ることを忘れないようにします。</p>
+
+<hr />
+
+<h3 id="4-git-でワークツリーに別リポジトリを含める方法">4. Git でワークツリーに別リポジトリを含める方法</h3>
+
+<h4 id="サブモジュール公式一般的">サブモジュール（公式・一般的）</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git submodule add https://github.com/owner/other-repo.git external/other-repo
+</code></pre></div></div>
+
+<ul>
+  <li>外部リポジトリを自分のリポジトリの下に「リンク」する</li>
+  <li>バージョン固定（コミット単位）できる</li>
+  <li><code class="language-plaintext highlighter-rouge">git clone --recurse-submodules</code> が必要</li>
+</ul>
+
+<h4 id="ワークツリー外部管理高度">ワークツリー＋外部管理（高度）</h4>
+
+<p><code class="language-plaintext highlighter-rouge">git worktree</code>は同じリポジトリの別ブランチを別のフォルダに展開する機能です。</p>
+
+<p>例：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git worktree add ../build-dir build-branch
+</code></pre></div></div>
+
+<p>同一リポジトリの別ブランチを別ディレクトリに展開する仕組みです。</p>
+
+<hr />
+
+<h3 id="5-git-lfslarge-file-storage">5. Git LFS（Large File Storage）</h3>
+
+<p>Git で扱いにくい大容量ファイル（画像、動画、バイナリなど）を効率的に管理する仕組みです。</p>
+
+<h4 id="セットアップ手順">セットアップ手順：</h4>
+
+<ol>
+  <li>LFS をインストール</li>
+</ol>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git lfs <span class="nb">install</span>
+</code></pre></div></div>
+
+<ol>
+  <li>追跡するファイルタイプを指定</li>
+</ol>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git lfs track <span class="s2">"*.psd"</span>
+<span class="nb">echo</span> <span class="s2">"*.psd"</span> <span class="o">&gt;&gt;</span> .gitattributes
+</code></pre></div></div>
+
+<ol>
+  <li>通常通りコミット・Push</li>
+</ol>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git add file.psd
+git commit <span class="nt">-m</span> <span class="s2">"Add large PSD"</span>
+git push origin main
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">.gitattributes</code> に LFS の追跡対象が記録され、push 時に実体は Git LFS サーバーへ送信されるようになります。大容量のファイルを効率的に扱うことができるようになりますが、ストレージに制限があるので注意が必要です。GitHub, GitLab, Bitbucket などで対応しています。</p>
+
+<hr />
+
+<h4 id="参考">参考</h4>
+
+<p><a href="https://roadmap.sh/git-github">roadmap.sh</a></p>
+
+</div>
+
+      <footer>
+        <p>
+          Tags: 
+          <a href="/md/tag/ツール">ツール</a> 
+        </p>
+      </footer>
+    </article>
+
+  </main>
+
+  <!-- サイドバー部分 -->
+  <aside id="sidebar">
+    <h2><a href="/md/about/">About</a></h2>
+
+    <!--
+    <h2><a href="/md/categories/">Categories</a></h2>
+    <ul>
+      
+        <li><a href="/md/category/blog"">blog</a></li>
+      
+    </ul>
+    -->
+    
+    <h2><a href="/md/tags/">Tags</a></h2>
+    <ul>
+      
+        <li><a href="/md/tag/fastapi">FastAPI</a></li>
+      
+        <li><a href="/md/tag/nodejs">Nodejs</a></li>
+      
+        <li><a href="/md/tag/ツール">ツール</a></li>
+      
+        <li><a href="/md/tag/mysql">MySQL</a></li>
+      
+        <li><a href="/md/tag/react">React</a></li>
+      
+        <li><a href="/md/tag/開発">開発</a></li>
+      
+        <li><a href="/md/tag/elasticsearch">elasticsearch</a></li>
+      
+        <li><a href="/md/tag/react">react</a></li>
+      
+        <li><a href="/md/tag/firebase">firebase</a></li>
+      
+        <li><a href="/md/tag/sqlite">sqlite</a></li>
+      
+        <li><a href="/md/tag/github-actions">github-actions</a></li>
+      
+        <li><a href="/md/tag/k8s">k8s</a></li>
+      
+    </ul>
+    <h2><a href="/md/archives/">Archives</a></h2>
+    <ul>
+      
+      
+        <li><a href="/md/2025/05/">2025-05</a></li>
+      
+        <li><a href="/md/2025/03/">2025-03</a></li>
+      
+        <li><a href="/md/2025/02/">2025-02</a></li>
+      
+    </ul>
+  </aside>
+</div>
+
+<footer>
+  <p>&copy; 2025 ツールの忘備録</p>
+</footer>
+
+</body>
+</html>

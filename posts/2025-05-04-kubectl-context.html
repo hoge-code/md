@@ -1,0 +1,198 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/md/assets/css/default.css">
+  <link rel="stylesheet" href="/md/assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <title>ツールの忘備録</title>
+</head>
+<body>
+
+<header>
+  <h1><a href="/md/">ツールの忘備録</a></h1></h1>
+</header>
+
+<div id="content">
+  <!-- メインコンテンツ部分 -->
+  <main>
+        <article>
+      <header>
+        <h1>kubectl contextの設定と確認</h1>
+        <p class="meta">
+          May 04, 2025 
+          <!--
+          in
+          <a href="/category/blog"
+            >blog</a
+          >
+        -->
+        </p>
+      </header>
+
+      <div class="content"><p>k8sでコンテキストを切り替える動作に躓いてしまったので、<code class="language-plaintext highlighter-rouge">kubectl context</code>関連の設定と確認コマンドをまとめてみます。</p>
+
+<p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#1-eksクラスターと-kubectl-の関係性" id="markdown-toc-1-eksクラスターと-kubectl-の関係性">1. EKSクラスターと <code class="language-plaintext highlighter-rouge">kubectl</code> の関係性</a></li>
+  <li><a href="#2-docker-desktop-の-k8s-初期化と設定" id="markdown-toc-2-docker-desktop-の-k8s-初期化と設定">2. Docker Desktop の K8s 初期化と設定</a></li>
+  <li><a href="#3-kubectl-の-context-設定ファイルと管理方法" id="markdown-toc-3-kubectl-の-context-設定ファイルと管理方法">3. <code class="language-plaintext highlighter-rouge">kubectl</code> の context 設定ファイルと管理方法</a></li>
+  <li><a href="#4-istioctl-との関係性" id="markdown-toc-4-istioctl-との関係性">4. <code class="language-plaintext highlighter-rouge">istioctl</code> との関係性</a></li>
+</ul>
+
+<hr />
+
+<h3 id="1-eksクラスターと-kubectl-の関係性">1. EKSクラスターと <code class="language-plaintext highlighter-rouge">kubectl</code> の関係性</h3>
+
+<h4 id="eksctlコマンドでのクラスター初期化"><code class="language-plaintext highlighter-rouge">eksctl</code>コマンドでのクラスター初期化</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>eksctl create cluster <span class="nt">--name</span> my-cluster <span class="nt">--region</span> ap-northeast-1 <span class="nt">--nodes</span> 2
+</code></pre></div></div>
+
+<p>eksctl を実行してクラスターを作成するだけでは、kubectl コンテキストの設定が自動的に反映されないので注意する必要があります。</p>
+
+<h4 id="kubectl-設定の取得と追加"><code class="language-plaintext highlighter-rouge">kubectl</code> 設定の取得と追加</h4>
+
+<p>eksctl create cluster コマンドでクラスターが作成された後、kubectl がそのクラスターにアクセスできるように設定するために、次のコマンドを実行します。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>aws eks <span class="nt">--region</span> ap-northeast-1 update-kubeconfig <span class="nt">--name</span> my-cluster
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">~/.kube/config</code> でcontext を確認できます。</p>
+
+<h4 id="context-切り替えと確認コマンド">context 切り替えと確認コマンド</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl config get-contexts
+kubectl config use-context arn:aws:eks:ap-northeast-1:123456789012:cluster/my-cluster
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="2-docker-desktop-の-k8s-初期化と設定">2. Docker Desktop の K8s 初期化と設定</h3>
+
+<p>Docker Desktopを使うと、ローカルでk8sクラスターを構築することができます。</p>
+
+<h4 id="初期化方法">初期化方法</h4>
+
+<p>Docker Desktop の設定画面で「Kubernetes を有効化（Enable Kubernetes）」をオンにします。これにより <code class="language-plaintext highlighter-rouge">docker-desktop</code> という context が自動的に <code class="language-plaintext highlighter-rouge">~/.kube/config</code> に追加されます。</p>
+
+<h4 id="context-切り替えと確認">context 切り替えと確認</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl config use-context docker-desktop
+kubectl get nodes
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="3-kubectl-の-context-設定ファイルと管理方法">3. <code class="language-plaintext highlighter-rouge">kubectl</code> の context 設定ファイルと管理方法</h3>
+
+<p><code class="language-plaintext highlighter-rouge">kubectl</code> は <code class="language-plaintext highlighter-rouge">~/.kube/config</code> ファイルで複数のクラスタと context を管理します。</p>
+
+<h4 id="主なコマンド">主なコマンド</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># context の一覧</span>
+kubectl config get-contexts
+
+<span class="c"># 現在の context</span>
+kubectl config current-context
+
+<span class="c"># context の切り替え</span>
+kubectl config use-context &lt;context-name&gt;
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="4-istioctl-との関係性">4. <code class="language-plaintext highlighter-rouge">istioctl</code> との関係性</h3>
+
+<h4 id="istioctl-の役割"><code class="language-plaintext highlighter-rouge">istioctl</code> の役割</h4>
+
+<p><code class="language-plaintext highlighter-rouge">istio</code>はk8sネイティブのサービスメッシュツールなので、<code class="language-plaintext highlighter-rouge">istioctl</code>コマンドを使うと、<code class="language-plaintext highlighter-rouge">kubectl</code> と同様、現在アクティブな Kubernetes context を使って自動的にクラスタに接続します。</p>
+
+<h4 id="使用例">使用例</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Istio のインストール（現在の context に対して）</span>
+istioctl <span class="nb">install</span> <span class="nt">--set</span> <span class="nv">profile</span><span class="o">=</span>demo <span class="nt">-y</span>
+
+<span class="c"># Istio コンポーネントの状態確認</span>
+istioctl proxy-status
+
+<span class="c"># サイドカー自動注入をネームスペースに適用</span>
+kubectl label namespace default istio-injection<span class="o">=</span>enabled
+</code></pre></div></div>
+
+<hr />
+
+</div>
+
+      <footer>
+        <p>
+          Tags: 
+          <a href="/md/tag/k8s">k8s</a> 
+        </p>
+      </footer>
+    </article>
+
+  </main>
+
+  <!-- サイドバー部分 -->
+  <aside id="sidebar">
+    <h2><a href="/md/about/">About</a></h2>
+
+    <!--
+    <h2><a href="/md/categories/">Categories</a></h2>
+    <ul>
+      
+        <li><a href="/md/category/blog"">blog</a></li>
+      
+    </ul>
+    -->
+    
+    <h2><a href="/md/tags/">Tags</a></h2>
+    <ul>
+      
+        <li><a href="/md/tag/fastapi">FastAPI</a></li>
+      
+        <li><a href="/md/tag/nodejs">Nodejs</a></li>
+      
+        <li><a href="/md/tag/ツール">ツール</a></li>
+      
+        <li><a href="/md/tag/mysql">MySQL</a></li>
+      
+        <li><a href="/md/tag/react">React</a></li>
+      
+        <li><a href="/md/tag/開発">開発</a></li>
+      
+        <li><a href="/md/tag/elasticsearch">elasticsearch</a></li>
+      
+        <li><a href="/md/tag/react">react</a></li>
+      
+        <li><a href="/md/tag/firebase">firebase</a></li>
+      
+        <li><a href="/md/tag/sqlite">sqlite</a></li>
+      
+        <li><a href="/md/tag/github-actions">github-actions</a></li>
+      
+        <li><a href="/md/tag/k8s">k8s</a></li>
+      
+    </ul>
+    <h2><a href="/md/archives/">Archives</a></h2>
+    <ul>
+      
+      
+        <li><a href="/md/2025/05/">2025-05</a></li>
+      
+        <li><a href="/md/2025/03/">2025-03</a></li>
+      
+        <li><a href="/md/2025/02/">2025-02</a></li>
+      
+    </ul>
+  </aside>
+</div>
+
+<footer>
+  <p>&copy; 2025 ツールの忘備録</p>
+</footer>
+
+</body>
+</html>

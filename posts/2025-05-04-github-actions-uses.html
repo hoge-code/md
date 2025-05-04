@@ -1,0 +1,170 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/md/assets/css/default.css">
+  <link rel="stylesheet" href="/md/assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <title>ツールの忘備録</title>
+</head>
+<body>
+
+<header>
+  <h1><a href="/md/">ツールの忘備録</a></h1></h1>
+</header>
+
+<div id="content">
+  <!-- メインコンテンツ部分 -->
+  <main>
+        <article>
+      <header>
+        <h1>github actionsのファイル分割</h1>
+        <p class="meta">
+          May 04, 2025 
+          <!--
+          in
+          <a href="/category/blog"
+            >blog</a
+          >
+        -->
+        </p>
+      </header>
+
+      <div class="content"><p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#1-再利用可能なワークフロー" id="markdown-toc-1-再利用可能なワークフロー">1. 再利用可能なワークフロー</a></li>
+  <li><a href="#2-アクションを作成する方法" id="markdown-toc-2-アクションを作成する方法">2. アクションを作成する方法</a></li>
+  <li><a href="#感想" id="markdown-toc-感想">感想</a></li>
+</ul>
+
+<hr />
+
+<p>最近は<code class="language-plaintext highlighter-rouge">GitLabCI</code>について学習していて、<code class="language-plaintext highlighter-rouge">GitHubActions</code>でも<code class="language-plaintext highlighter-rouge">GitLabCI</code>のように柔軟に他のyamlファイルをインポートできないか気になったので調べてみました。</p>
+
+<h3 id="1-再利用可能なワークフロー">1. 再利用可能なワークフロー</h3>
+
+<h4 id="workflow-を-extends-と-uses-で再利用する">workflow を extends と uses で再利用する</h4>
+
+<p>uses キーワードを使用して、共通のアクションを呼び出すことができます。</p>
+
+<h4 id="再利用可能なワークフローの例">再利用可能なワークフローの例</h4>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># .github/workflows/main.yml</span>
+<span class="na">jobs</span><span class="pi">:</span>
+  <span class="na">build</span><span class="pi">:</span>
+    <span class="na">uses</span><span class="pi">:</span> <span class="s">./.github/workflows/build.yml</span>
+    <span class="na">with</span><span class="pi">:</span>
+      <span class="na">some-input</span><span class="pi">:</span> <span class="s2">"</span><span class="s">value"</span>
+</code></pre></div></div>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># .github/workflows/build.yml</span>
+<span class="na">name</span><span class="pi">:</span> <span class="s">Build</span>
+<span class="na">on</span><span class="pi">:</span>
+  <span class="na">workflow_call</span><span class="pi">:</span>
+    <span class="na">inputs</span><span class="pi">:</span>
+      <span class="na">some-input</span><span class="pi">:</span>
+        <span class="na">required</span><span class="pi">:</span> <span class="kc">true</span>
+        <span class="na">type</span><span class="pi">:</span> <span class="s">string</span>
+<span class="na">jobs</span><span class="pi">:</span>
+  <span class="na">build-job</span><span class="pi">:</span>
+    <span class="na">runs-on</span><span class="pi">:</span> <span class="s">ubuntu-latest</span>
+    <span class="na">steps</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Checkout</span>
+        <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/checkout@v2</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Run Build</span>
+        <span class="na">run</span><span class="pi">:</span> <span class="s">echo "Building the project with input</span><span class="err">:</span> <span class="s">$"</span>
+</code></pre></div></div>
+
+<p>また、<code class="language-plaintext highlighter-rouge">GitLabCI</code>と同様に別リポジトリのyamlファイルも読み込むことができます。</p>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">jobs</span><span class="pi">:</span>
+  <span class="na">lint</span><span class="pi">:</span>
+    <span class="na">uses</span><span class="pi">:</span> <span class="s">my-org/shared-workflows/.github/workflows/lint.yml@v1</span>
+</code></pre></div></div>
+
+<p>この方法を使うことで、build.yml のようなワークフローを複数の他のワークフローから呼び出すことができ、GitLab CI のようなファイルの分割と再利用が可能になります。</p>
+
+<hr />
+
+<h3 id="2-アクションを作成する方法">2. アクションを作成する方法</h3>
+
+<p>TSを使ってサードパーティーアクションも作成できますが、リポジトリを分ける必要があるので面倒です。</p>
+
+<hr />
+
+<h3 id="感想">感想</h3>
+
+<p>デブオペについて体系的に学習してこなかったため、プログラムと同様にCICDファイルも分割するという発想がありませんでしたが、ファイル分割することでより柔軟にCICDを構築できると感じました。</p>
+
+</div>
+
+      <footer>
+        <p>
+          Tags: 
+          <a href="/md/tag/github-actions">github-actions</a> 
+        </p>
+      </footer>
+    </article>
+
+  </main>
+
+  <!-- サイドバー部分 -->
+  <aside id="sidebar">
+    <h2><a href="/md/about/">About</a></h2>
+
+    <!--
+    <h2><a href="/md/categories/">Categories</a></h2>
+    <ul>
+      
+        <li><a href="/md/category/blog"">blog</a></li>
+      
+    </ul>
+    -->
+    
+    <h2><a href="/md/tags/">Tags</a></h2>
+    <ul>
+      
+        <li><a href="/md/tag/fastapi">FastAPI</a></li>
+      
+        <li><a href="/md/tag/nodejs">Nodejs</a></li>
+      
+        <li><a href="/md/tag/ツール">ツール</a></li>
+      
+        <li><a href="/md/tag/mysql">MySQL</a></li>
+      
+        <li><a href="/md/tag/react">React</a></li>
+      
+        <li><a href="/md/tag/開発">開発</a></li>
+      
+        <li><a href="/md/tag/elasticsearch">elasticsearch</a></li>
+      
+        <li><a href="/md/tag/react">react</a></li>
+      
+        <li><a href="/md/tag/firebase">firebase</a></li>
+      
+        <li><a href="/md/tag/sqlite">sqlite</a></li>
+      
+        <li><a href="/md/tag/github-actions">github-actions</a></li>
+      
+        <li><a href="/md/tag/k8s">k8s</a></li>
+      
+    </ul>
+    <h2><a href="/md/archives/">Archives</a></h2>
+    <ul>
+      
+      
+        <li><a href="/md/2025/05/">2025-05</a></li>
+      
+        <li><a href="/md/2025/03/">2025-03</a></li>
+      
+        <li><a href="/md/2025/02/">2025-02</a></li>
+      
+    </ul>
+  </aside>
+</div>
+
+<footer>
+  <p>&copy; 2025 ツールの忘備録</p>
+</footer>
+
+</body>
+</html>

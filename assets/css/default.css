@@ -80,6 +80,11 @@ ul li {
   list-style-image: none !important;
 }
 
+code .err{
+  background-color: inherit !important;
+  color:inherit !important;
+}
+
 article{
   margin-bottom: 15px !important;
   border-bottom-color: gray !important ;

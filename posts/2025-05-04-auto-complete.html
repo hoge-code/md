@@ -1,0 +1,326 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/md/assets/css/default.css">
+  <link rel="stylesheet" href="/md/assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <title>ツールの忘備録</title>
+</head>
+<body>
+
+<header>
+  <h1><a href="/md/">ツールの忘備録</a></h1></h1>
+</header>
+
+<div id="content">
+  <!-- メインコンテンツ部分 -->
+  <main>
+        <article>
+      <header>
+        <h1>自動補完のローカルと全文検索の比較</h1>
+        <p class="meta">
+          May 04, 2025 
+          <!--
+          in
+          <a href="/category/blog"
+            >blog</a
+          >
+        -->
+        </p>
+      </header>
+
+      <div class="content"><p>検索機能などで使われるオートコンプリートをクライアント側のJSONファイルと、リモートの全文検索を実装する方法を比較して考えてみます。</p>
+
+<p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#ローカルで実装する場合" id="markdown-toc-ローカルで実装する場合">ローカルで実装する場合</a></li>
+  <li><a href="#elasticsearchを使用する場合" id="markdown-toc-elasticsearchを使用する場合">Elasticsearchを使用する場合</a></li>
+  <li><a href="#elasticsearchを使用する場合2" id="markdown-toc-elasticsearchを使用する場合2">Elasticsearchを使用する場合2</a></li>
+</ul>
+
+<hr />
+
+<h3 id="ローカルで実装する場合">ローカルで実装する場合</h3>
+
+<p>今回は<code class="language-plaintext highlighter-rouge">React</code>を使い、オートコンプリートライブラリに<code class="language-plaintext highlighter-rouge">fuse.js</code>、UIライブラリに<code class="language-plaintext highlighter-rouge">MUI</code>を使用してみます。</p>
+
+<h4 id="依存">依存</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm <span class="nb">install</span> @mui/material fuse.js
+</code></pre></div></div>
+
+<h4 id="検索対象例datajs">検索対象例（data.js）</h4>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">const</span> <span class="nx">data</span> <span class="o">=</span> <span class="p">[</span>
+  <span class="p">{</span> <span class="na">title</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Apple Pie</span><span class="dl">'</span><span class="p">,</span> <span class="na">id</span><span class="p">:</span> <span class="mi">1</span> <span class="p">},</span>
+  <span class="p">{</span> <span class="na">title</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Banana Bread</span><span class="dl">'</span><span class="p">,</span> <span class="na">id</span><span class="p">:</span> <span class="mi">2</span> <span class="p">},</span>
+  <span class="p">{</span> <span class="na">title</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Cherry Tart</span><span class="dl">'</span><span class="p">,</span> <span class="na">id</span><span class="p">:</span> <span class="mi">3</span> <span class="p">}</span>
+<span class="p">];</span>
+</code></pre></div></div>
+
+<h4 id="autocomplete-コンポーネント">Autocomplete コンポーネント</h4>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">Autocomplete</span><span class="p">,</span> <span class="nx">TextField</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@mui/material</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">Fuse</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">fuse.js</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">useState</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">data</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./data</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="kd">const</span> <span class="nx">fuse</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Fuse</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="p">{</span>
+  <span class="na">keys</span><span class="p">:</span> <span class="p">[</span><span class="dl">'</span><span class="s1">title</span><span class="dl">'</span><span class="p">],</span>
+  <span class="na">includeScore</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+<span class="p">});</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="kd">function</span> <span class="nf">Search</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="p">[</span><span class="nx">options</span><span class="p">,</span> <span class="nx">setOptions</span><span class="p">]</span> <span class="o">=</span> <span class="nf">useState</span><span class="p">([]);</span>
+
+  <span class="kd">const</span> <span class="nx">handleInput</span> <span class="o">=</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">input</span> <span class="o">=</span> <span class="nx">e</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+    <span class="kd">const</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">fuse</span><span class="p">.</span><span class="nf">search</span><span class="p">(</span><span class="nx">input</span><span class="p">).</span><span class="nf">map</span><span class="p">(</span><span class="nx">r</span> <span class="o">=&gt;</span> <span class="nx">r</span><span class="p">.</span><span class="nx">item</span><span class="p">);</span>
+    <span class="nf">setOptions</span><span class="p">(</span><span class="nx">result</span><span class="p">);</span>
+  <span class="p">};</span>
+
+  <span class="k">return </span><span class="p">(</span>
+    <span class="p">&lt;</span><span class="nc">Autocomplete</span>
+      <span class="na">options</span><span class="p">=</span><span class="si">{</span><span class="nx">options</span><span class="si">}</span>
+      <span class="na">getOptionLabel</span><span class="p">=</span><span class="si">{</span><span class="p">(</span><span class="nx">option</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">option</span><span class="p">.</span><span class="nx">title</span><span class="si">}</span>
+      <span class="na">renderInput</span><span class="p">=</span><span class="si">{</span><span class="p">(</span><span class="nx">params</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">(</span>
+        <span class="p">&lt;</span><span class="nc">TextField</span> <span class="si">{</span><span class="p">...</span><span class="nx">params</span><span class="si">}</span> <span class="na">label</span><span class="p">=</span><span class="s">"Search"</span> <span class="na">onChange</span><span class="p">=</span><span class="si">{</span><span class="nx">handleInput</span><span class="si">}</span> <span class="p">/&gt;</span>
+      <span class="p">)</span><span class="si">}</span>
+    <span class="p">/&gt;</span>
+  <span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>都道府県情報のようにあまり変化しないデータや、ローカルストレージに保存した検索履歴などを使用する場合にはパフォーマンス的によさそうです。その一方で、動的なデータやデバイス間でデータを共有したい場合には向いていません。</p>
+
+<hr />
+
+<h3 id="elasticsearchを使用する場合">Elasticsearchを使用する場合</h3>
+
+<h4 id="api例apisearch">API例（/api/search）</h4>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">app</span><span class="p">.</span><span class="nf">post</span><span class="p">(</span><span class="dl">'</span><span class="s1">/api/search</span><span class="dl">'</span><span class="p">,</span> <span class="k">async </span><span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">q</span> <span class="o">=</span> <span class="nx">req</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">query</span><span class="p">;</span>
+  <span class="kd">const</span> <span class="nx">result</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">es</span><span class="p">.</span><span class="nf">search</span><span class="p">({</span>
+    <span class="na">index</span><span class="p">:</span> <span class="dl">'</span><span class="s1">documents</span><span class="dl">'</span><span class="p">,</span>
+    <span class="na">body</span><span class="p">:</span> <span class="p">{</span>
+      <span class="na">query</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">match</span><span class="p">:</span> <span class="p">{</span> <span class="na">title</span><span class="p">:</span> <span class="nx">q</span> <span class="p">}</span>
+      <span class="p">},</span>
+      <span class="na">highlight</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">fields</span><span class="p">:</span> <span class="p">{</span> <span class="na">title</span><span class="p">:</span> <span class="p">{}</span> <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">});</span>
+
+  <span class="kd">const</span> <span class="nx">hits</span> <span class="o">=</span> <span class="nx">result</span><span class="p">.</span><span class="nx">hits</span><span class="p">.</span><span class="nx">hits</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="nx">hit</span> <span class="o">=&gt;</span> <span class="p">({</span>
+    <span class="na">id</span><span class="p">:</span> <span class="nx">hit</span><span class="p">.</span><span class="nx">_id</span><span class="p">,</span>
+    <span class="na">title</span><span class="p">:</span> <span class="nx">hit</span><span class="p">.</span><span class="nx">_source</span><span class="p">.</span><span class="nx">title</span><span class="p">,</span>
+    <span class="na">highlight</span><span class="p">:</span> <span class="nx">hit</span><span class="p">.</span><span class="nx">highlight</span><span class="p">?.</span><span class="nx">title</span><span class="p">?.[</span><span class="mi">0</span><span class="p">]</span> <span class="o">||</span> <span class="nx">hit</span><span class="p">.</span><span class="nx">_source</span><span class="p">.</span><span class="nx">title</span>
+  <span class="p">}));</span>
+
+  <span class="nx">res</span><span class="p">.</span><span class="nf">json</span><span class="p">(</span><span class="nx">hits</span><span class="p">);</span>
+<span class="p">});</span>
+</code></pre></div></div>
+
+<h4 id="フロントエンド側">フロントエンド側</h4>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">Autocomplete</span><span class="p">,</span> <span class="nx">TextField</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@mui/material</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">useState</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">axios</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">axios</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="kd">function</span> <span class="nf">Search</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="p">[</span><span class="nx">options</span><span class="p">,</span> <span class="nx">setOptions</span><span class="p">]</span> <span class="o">=</span> <span class="nf">useState</span><span class="p">([]);</span>
+
+  <span class="kd">const</span> <span class="nx">handleInput</span> <span class="o">=</span> <span class="k">async </span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">input</span> <span class="o">=</span> <span class="nx">e</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+    <span class="kd">const</span> <span class="nx">res</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">axios</span><span class="p">.</span><span class="nf">post</span><span class="p">(</span><span class="dl">'</span><span class="s1">/api/search</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span> <span class="na">query</span><span class="p">:</span> <span class="nx">input</span> <span class="p">});</span>
+    <span class="nf">setOptions</span><span class="p">(</span><span class="nx">res</span><span class="p">.</span><span class="nx">data</span><span class="p">);</span>
+  <span class="p">};</span>
+
+  <span class="k">return </span><span class="p">(</span>
+    <span class="p">&lt;</span><span class="nc">Autocomplete</span>
+      <span class="na">options</span><span class="p">=</span><span class="si">{</span><span class="nx">options</span><span class="si">}</span>
+      <span class="na">getOptionLabel</span><span class="p">=</span><span class="si">{</span><span class="p">(</span><span class="nx">option</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">option</span><span class="p">.</span><span class="nx">title</span><span class="si">}</span>
+      <span class="na">renderOption</span><span class="p">=</span><span class="si">{</span><span class="p">(</span><span class="nx">props</span><span class="p">,</span> <span class="nx">option</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">(</span>
+        <span class="p">&lt;</span><span class="nt">li</span> <span class="si">{</span><span class="p">...</span><span class="nx">props</span><span class="si">}</span> <span class="na">dangerouslySetInnerHTML</span><span class="p">=</span> <span class="p">/&gt;</span>
+      <span class="p">)</span><span class="si">}</span>
+      <span class="na">renderInput</span><span class="p">=</span><span class="si">{</span><span class="p">(</span><span class="nx">params</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">(</span>
+        <span class="p">&lt;</span><span class="nc">TextField</span> <span class="si">{</span><span class="p">...</span><span class="nx">params</span><span class="si">}</span> <span class="na">label</span><span class="p">=</span><span class="s">"Search"</span> <span class="na">onChange</span><span class="p">=</span><span class="si">{</span><span class="nx">handleInput</span><span class="si">}</span> <span class="p">/&gt;</span>
+      <span class="p">)</span><span class="si">}</span>
+    <span class="p">/&gt;</span>
+  <span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>大規模な検索には向いていますが、入力ごとにAPIに送信していてはパフォーマンスに問題が生じてしまうので、適切なキャッシュ戦略やデバウンス処理を考える必要がありそうです。</p>
+
+<h3 id="elasticsearchを使用する場合2">Elasticsearchを使用する場合2</h3>
+
+<p>また、<code class="language-plaintext highlighter-rouge">Elasticsearch</code>にはオートコンプリートに特化した機能が存在します。厳密な候補リストを素早く提示する場合は<code class="language-plaintext highlighter-rouge">completion</code>機能、全文検索ベースで自然な補完をしたい場合は<code class="language-plaintext highlighter-rouge">search_as_you_type + bool_prefix</code>機能で実装します。</p>
+
+<hr />
+
+<h4 id="方法1-completion-サジェスターサジェスト専用">方法1: <code class="language-plaintext highlighter-rouge">completion</code> サジェスター（サジェスト専用）</h4>
+
+<h5 id="インデックス設定mapping">インデックス設定（mapping）</h5>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">PUT</span><span class="w"> </span><span class="err">/my_index</span><span class="w">
+</span><span class="p">{</span><span class="w">
+  </span><span class="nl">"mappings"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"properties"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"title_suggest"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"completion"</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h5 id="ドキュメント登録">ドキュメント登録</h5>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">POST</span><span class="w"> </span><span class="err">/my_index/_doc/</span><span class="mi">1</span><span class="w">
+</span><span class="p">{</span><span class="w">
+  </span><span class="nl">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Apple Pie"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"title_suggest"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"input"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"Apple Pie"</span><span class="p">,</span><span class="w"> </span><span class="s2">"Pie"</span><span class="p">]</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h5 id="サジェストクエリ">サジェストクエリ</h5>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">POST</span><span class="w"> </span><span class="err">/my_index/_search</span><span class="w">
+</span><span class="p">{</span><span class="w"> 
+  </span><span class="nl">"suggest"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"title-suggest"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"prefix"</span><span class="p">:</span><span class="w"> </span><span class="s2">"app"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"completion"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"field"</span><span class="p">:</span><span class="w"> </span><span class="s2">"title_suggest"</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<hr />
+
+<h4 id="方法-2-search_as_you_type-フィールドタイプ">方法 2: <code class="language-plaintext highlighter-rouge">search_as_you_type</code> フィールドタイプ</h4>
+
+<h5 id="インデックス設定">インデックス設定</h5>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">PUT</span><span class="w"> </span><span class="err">/my_index</span><span class="w">
+</span><span class="p">{</span><span class="w">
+  </span><span class="nl">"mappings"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"properties"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"title"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"search_as_you_type"</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h5 id="ドキュメント登録-1">ドキュメント登録</h5>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">POST</span><span class="w"> </span><span class="err">/my_index/_doc/</span><span class="mi">1</span><span class="w">
+</span><span class="p">{</span><span class="w">
+  </span><span class="nl">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Banana Bread"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h5 id="クエリ部分一致">クエリ（部分一致）</h5>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">POST</span><span class="w"> </span><span class="err">/my_index/_search</span><span class="w">
+</span><span class="p">{</span><span class="w">
+  </span><span class="nl">"query"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"multi_match"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"query"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ban"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"bool_prefix"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"fields"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="s2">"title"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"title._2gram"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"title._3gram"</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+<hr />
+
+</div>
+
+      <footer>
+        <p>
+          Tags: 
+          <a href="/md/tag/elasticsearch">elasticsearch</a>,  
+          <a href="/md/tag/react">react</a> 
+        </p>
+      </footer>
+    </article>
+
+  </main>
+
+  <!-- サイドバー部分 -->
+  <aside id="sidebar">
+    <h2><a href="/md/about/">About</a></h2>
+
+    <!--
+    <h2><a href="/md/categories/">Categories</a></h2>
+    <ul>
+      
+        <li><a href="/md/category/blog"">blog</a></li>
+      
+    </ul>
+    -->
+    
+    <h2><a href="/md/tags/">Tags</a></h2>
+    <ul>
+      
+        <li><a href="/md/tag/fastapi">FastAPI</a></li>
+      
+        <li><a href="/md/tag/nodejs">Nodejs</a></li>
+      
+        <li><a href="/md/tag/ツール">ツール</a></li>
+      
+        <li><a href="/md/tag/mysql">MySQL</a></li>
+      
+        <li><a href="/md/tag/react">React</a></li>
+      
+        <li><a href="/md/tag/開発">開発</a></li>
+      
+        <li><a href="/md/tag/elasticsearch">elasticsearch</a></li>
+      
+        <li><a href="/md/tag/react">react</a></li>
+      
+        <li><a href="/md/tag/firebase">firebase</a></li>
+      
+        <li><a href="/md/tag/sqlite">sqlite</a></li>
+      
+        <li><a href="/md/tag/github-actions">github-actions</a></li>
+      
+        <li><a href="/md/tag/k8s">k8s</a></li>
+      
+    </ul>
+    <h2><a href="/md/archives/">Archives</a></h2>
+    <ul>
+      
+      
+        <li><a href="/md/2025/05/">2025-05</a></li>
+      
+        <li><a href="/md/2025/03/">2025-03</a></li>
+      
+        <li><a href="/md/2025/02/">2025-02</a></li>
+      
+    </ul>
+  </aside>
+</div>
+
+<footer>
+  <p>&copy; 2025 ツールの忘備録</p>
+</footer>
+
+</body>
+</html>

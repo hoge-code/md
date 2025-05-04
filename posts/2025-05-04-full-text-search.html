@@ -1,0 +1,224 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/md/assets/css/default.css">
+  <link rel="stylesheet" href="/md/assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <title>ツールの忘備録</title>
+</head>
+<body>
+
+<header>
+  <h1><a href="/md/">ツールの忘備録</a></h1></h1>
+</header>
+
+<div id="content">
+  <!-- メインコンテンツ部分 -->
+  <main>
+        <article>
+      <header>
+        <h1>主要DBで全文検索を試してみる</h1>
+        <p class="meta">
+          May 04, 2025 
+          <!--
+          in
+          <a href="/category/blog"
+            >blog</a
+          >
+        -->
+        </p>
+      </header>
+
+      <div class="content"><p>最近は全文検索について学習しているので主要DBごとの全文検索の特徴を簡単にまとめてみます。</p>
+
+<p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#elasticsearch" id="markdown-toc-elasticsearch">Elasticsearch</a></li>
+  <li><a href="#mysql" id="markdown-toc-mysql">MySQL</a></li>
+  <li><a href="#postgresql" id="markdown-toc-postgresql">PostgreSQL</a></li>
+  <li><a href="#sqlite" id="markdown-toc-sqlite">SQLite</a></li>
+  <li><a href="#感想" id="markdown-toc-感想">感想</a></li>
+</ul>
+
+<p>全文検索とハイライトはElasticsearchではネイティブに対応していますが、MySQL、PostgreSQL、SQLiteではそれぞれ手法が異なり、制限もあります。以下にそれぞれの全文検索＋ハイライトのクエリ例と（可能な限り）レスポンス例を示します。</p>
+
+<hr />
+
+<h3 id="elasticsearch">Elasticsearch</h3>
+
+<h4 id="クエリ例全文検索ハイライト">クエリ例（全文検索＋ハイライト）:</h4>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">GET</span><span class="w"> </span><span class="err">/my_index/_search</span><span class="w">
+</span><span class="p">{</span><span class="w">
+  </span><span class="nl">"query"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"match"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"content"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Elasticsearch tutorial"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"highlight"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"fields"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"content"</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h4 id="レスポンス例">レスポンス例:</h4>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"hits"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"hits"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+      </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"_source"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"content"</span><span class="p">:</span><span class="w"> </span><span class="s2">"This is an Elasticsearch tutorial for beginners."</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="nl">"highlight"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"content"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+            </span><span class="s2">"This is an &lt;em&gt;Elasticsearch&lt;/em&gt; &lt;em&gt;tutorial&lt;/em&gt; for beginners."</span><span class="w">
+          </span><span class="p">]</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+<p>Elasticsearchはタイトルに対する重み付けなどにも対応しており、ハイライトも<code class="language-plaintext highlighter-rouge">&lt;em&gt;</code>をつけてレスポンスが返されるのでフロントで簡単にUIに反映できます。</p>
+
+<hr />
+
+<h3 id="mysql">MySQL</h3>
+
+<p>MySQLのFULLTEXTインデックスは <code class="language-plaintext highlighter-rouge">MATCH ... AGAINST</code> 構文で全文検索ができますが、ハイライトは自前で文字列を置換して処理する必要があります。</p>
+
+<h4 id="クエリ例">クエリ例:</h4>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span> 
+  <span class="n">id</span><span class="p">,</span>
+  <span class="n">content</span><span class="p">,</span>
+  <span class="k">REPLACE</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="s1">'Elasticsearch'</span><span class="p">,</span> <span class="s1">'&lt;em&gt;Elasticsearch&lt;/em&gt;'</span><span class="p">)</span> <span class="k">AS</span> <span class="n">highlighted_content</span>
+<span class="k">FROM</span> <span class="n">articles</span>
+<span class="k">WHERE</span> <span class="k">MATCH</span><span class="p">(</span><span class="n">content</span><span class="p">)</span> <span class="n">AGAINST</span><span class="p">(</span><span class="s1">'Elasticsearch'</span> <span class="k">IN</span> <span class="k">NATURAL</span> <span class="k">LANGUAGE</span> <span class="k">MODE</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>MySQLはPostgreに比べて機能が少ないので、部分一致や複数キーワードには非対応です。また、ハイライトも使えないので全文検索にはあまり向いていません。</p>
+
+<hr />
+
+<h3 id="postgresql">PostgreSQL</h3>
+
+<p>tsvector + tsquery + ts_headlineを使います。PostgreSQLは全文検索に強く、<code class="language-plaintext highlighter-rouge">ts_headline</code>でハイライトが可能です。</p>
+
+<h4 id="クエリ例-1">クエリ例:</h4>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span> 
+  <span class="n">id</span><span class="p">,</span>
+  <span class="n">ts_headline</span><span class="p">(</span><span class="s1">'english'</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">to_tsquery</span><span class="p">(</span><span class="s1">'Elasticsearch'</span><span class="p">))</span> <span class="k">AS</span> <span class="n">highlighted_content</span>
+<span class="k">FROM</span> <span class="n">articles</span>
+<span class="k">WHERE</span> <span class="n">to_tsvector</span><span class="p">(</span><span class="s1">'english'</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span> <span class="o">@@</span> <span class="n">to_tsquery</span><span class="p">(</span><span class="s1">'Elasticsearch'</span><span class="p">);</span>
+</code></pre></div></div>
+
+<h4 id="出力例">出力例:</h4>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>This is an &lt;b&gt;Elasticsearch&lt;/b&gt; tutorial for beginners.
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="sqlite">SQLite</h3>
+
+<p>SQLiteはネイティブな全文検索 (<code class="language-plaintext highlighter-rouge">FTS5</code>) をサポートしていますが、ハイライト機能は組み込み関数 <code class="language-plaintext highlighter-rouge">highlight()</code> を使う必要があります。</p>
+
+<h4 id="クエリ例-fts5">クエリ例 (FTS5):</h4>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span> 
+  <span class="n">highlight</span><span class="p">(</span><span class="n">articles_fts</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">'&lt;em&gt;'</span><span class="p">,</span> <span class="s1">'&lt;/em&gt;'</span><span class="p">)</span> <span class="k">AS</span> <span class="n">highlighted_content</span>
+<span class="k">FROM</span> <span class="n">articles_fts</span>
+<span class="k">WHERE</span> <span class="n">articles_fts</span> <span class="k">MATCH</span> <span class="s1">'Elasticsearch'</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>※ <code class="language-plaintext highlighter-rouge">articles_fts</code> は <code class="language-plaintext highlighter-rouge">CREATE VIRTUAL TABLE articles_fts USING fts5(content)</code> で作成された仮想テーブル。</p>
+
+<hr />
+
+<h3 id="感想">感想</h3>
+
+<p>最近はPostgreSQLを使うことがあるのですが、全文検索だけでなく、B-Tree以外のインデックスが豊富だったり、カスタムデータ型が作れたりと、MySQLと比べてかなり高機能であるように感じます。</p>
+
+<p>また、SQLiteはファイルベースの小規模なDBですが、基本的な全文検索やハイライトが出来たりと、PCやモバイルでローカルに使うには十分な機能があるように感じます。</p>
+</div>
+
+      <footer>
+        <p>
+          Tags: 
+          <a href="/md/tag/elasticsearch">elasticsearch</a>,  
+          <a href="/md/tag/mysql">MySQL</a>,  
+          <a href="/md/tag/sqlite">sqlite</a> 
+        </p>
+      </footer>
+    </article>
+
+  </main>
+
+  <!-- サイドバー部分 -->
+  <aside id="sidebar">
+    <h2><a href="/md/about/">About</a></h2>
+
+    <!--
+    <h2><a href="/md/categories/">Categories</a></h2>
+    <ul>
+      
+        <li><a href="/md/category/blog"">blog</a></li>
+      
+    </ul>
+    -->
+    
+    <h2><a href="/md/tags/">Tags</a></h2>
+    <ul>
+      
+        <li><a href="/md/tag/fastapi">FastAPI</a></li>
+      
+        <li><a href="/md/tag/nodejs">Nodejs</a></li>
+      
+        <li><a href="/md/tag/ツール">ツール</a></li>
+      
+        <li><a href="/md/tag/mysql">MySQL</a></li>
+      
+        <li><a href="/md/tag/react">React</a></li>
+      
+        <li><a href="/md/tag/開発">開発</a></li>
+      
+        <li><a href="/md/tag/elasticsearch">elasticsearch</a></li>
+      
+        <li><a href="/md/tag/react">react</a></li>
+      
+        <li><a href="/md/tag/firebase">firebase</a></li>
+      
+        <li><a href="/md/tag/sqlite">sqlite</a></li>
+      
+        <li><a href="/md/tag/github-actions">github-actions</a></li>
+      
+        <li><a href="/md/tag/k8s">k8s</a></li>
+      
+    </ul>
+    <h2><a href="/md/archives/">Archives</a></h2>
+    <ul>
+      
+      
+        <li><a href="/md/2025/05/">2025-05</a></li>
+      
+        <li><a href="/md/2025/03/">2025-03</a></li>
+      
+        <li><a href="/md/2025/02/">2025-02</a></li>
+      
+    </ul>
+  </aside>
+</div>
+
+<footer>
+  <p>&copy; 2025 ツールの忘備録</p>
+</footer>
+
+</body>
+</html>

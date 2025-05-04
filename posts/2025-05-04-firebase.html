@@ -1,0 +1,217 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/md/assets/css/default.css">
+  <link rel="stylesheet" href="/md/assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <title>ツールの忘備録</title>
+</head>
+<body>
+
+<header>
+  <h1><a href="/md/">ツールの忘備録</a></h1></h1>
+</header>
+
+<div id="content">
+  <!-- メインコンテンツ部分 -->
+  <main>
+        <article>
+      <header>
+        <h1>firebase-authの小技</h1>
+        <p class="meta">
+          May 04, 2025 
+          <!--
+          in
+          <a href="/category/blog"
+            >blog</a
+          >
+        -->
+        </p>
+      </header>
+
+      <div class="content"><p>自分用の忘備録です。他に何か思いついたら更新します。</p>
+
+<p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#oauthにスコープを追加する方法" id="markdown-toc-oauthにスコープを追加する方法">OAuthにスコープを追加する方法</a></li>
+  <li><a href="#firebase-authが内部で使うエンドポイント" id="markdown-toc-firebase-authが内部で使うエンドポイント">Firebase Authが内部で使うエンドポイント</a></li>
+</ul>
+
+<hr />
+
+<h3 id="oauthにスコープを追加する方法">OAuthにスコープを追加する方法</h3>
+
+<p>以下は Google OAuth プロバイダを例にしたコードです。他のプロバイダでも同様に <code class="language-plaintext highlighter-rouge">.addScope()</code> メソッドが使えます。</p>
+
+<p><code class="language-plaintext highlighter-rouge">Firebase</code>はSDK9以降でAPIが大きく変更されましたが、ネットのサンプルコードの多くがSDK8以前なので注意します。</p>
+
+<h4 id="google-プロバイダでスコープ追加">Google プロバイダでスコープ追加</h4>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">initializeApp</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">firebase/app</span><span class="dl">"</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span>
+  <span class="nx">getAuth</span><span class="p">,</span>
+  <span class="nx">GoogleAuthProvider</span><span class="p">,</span>
+  <span class="nx">signInWithPopup</span>
+<span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">firebase/auth</span><span class="dl">"</span><span class="p">;</span>
+
+<span class="kd">const</span> <span class="nx">firebaseConfig</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">apiKey</span><span class="p">:</span> <span class="dl">"</span><span class="s2">YOUR_API_KEY</span><span class="dl">"</span><span class="p">,</span>
+  <span class="na">authDomain</span><span class="p">:</span> <span class="dl">"</span><span class="s2">YOUR_PROJECT.firebaseapp.com</span><span class="dl">"</span><span class="p">,</span>
+  <span class="c1">// ...</span>
+<span class="p">};</span>
+
+<span class="kd">const</span> <span class="nx">app</span> <span class="o">=</span> <span class="nf">initializeApp</span><span class="p">(</span><span class="nx">firebaseConfig</span><span class="p">);</span>
+<span class="kd">const</span> <span class="nx">auth</span> <span class="o">=</span> <span class="nf">getAuth</span><span class="p">(</span><span class="nx">app</span><span class="p">);</span>
+
+<span class="c1">// Google プロバイダに追加スコープを指定</span>
+<span class="kd">const</span> <span class="nx">provider</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">GoogleAuthProvider</span><span class="p">();</span>
+<span class="nx">provider</span><span class="p">.</span><span class="nf">addScope</span><span class="p">(</span><span class="dl">"</span><span class="s2">https://www.googleapis.com/auth/calendar.readonly</span><span class="dl">"</span><span class="p">);</span>
+<span class="nx">provider</span><span class="p">.</span><span class="nf">addScope</span><span class="p">(</span><span class="dl">"</span><span class="s2">https://www.googleapis.com/auth/userinfo.profile</span><span class="dl">"</span><span class="p">);</span>
+
+<span class="c1">// 認証実行</span>
+<span class="nf">signInWithPopup</span><span class="p">(</span><span class="nx">auth</span><span class="p">,</span> <span class="nx">provider</span><span class="p">)</span>
+  <span class="p">.</span><span class="nf">then</span><span class="p">((</span><span class="nx">result</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">user</span> <span class="o">=</span> <span class="nx">result</span><span class="p">.</span><span class="nx">user</span><span class="p">;</span>
+    <span class="kd">const</span> <span class="nx">credential</span> <span class="o">=</span> <span class="nx">GoogleAuthProvider</span><span class="p">.</span><span class="nf">credentialFromResult</span><span class="p">(</span><span class="nx">result</span><span class="p">);</span>
+    <span class="kd">const</span> <span class="nx">accessToken</span> <span class="o">=</span> <span class="nx">credential</span><span class="p">?.</span><span class="nx">accessToken</span><span class="p">;</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">AccessToken:</span><span class="dl">"</span><span class="p">,</span> <span class="nx">accessToken</span><span class="p">);</span>
+  <span class="p">})</span>
+  <span class="p">.</span><span class="k">catch</span><span class="p">((</span><span class="nx">error</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="dl">"</span><span class="s2">OAuth error:</span><span class="dl">"</span><span class="p">,</span> <span class="nx">error</span><span class="p">.</span><span class="nx">code</span><span class="p">,</span> <span class="nx">error</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>
+  <span class="p">});</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">GoogleAPI</code>のスコープは長くて忘れやすいです。</p>
+
+<h4 id="他のプロバイダ例github">他のプロバイダ例（GitHub）</h4>
+
+<p>その一方で、<code class="language-plaintext highlighter-rouge">GitHub</code>や<code class="language-plaintext highlighter-rouge">Twitter</code>のスコープは覚えやすいです。</p>
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">GithubAuthProvider</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">firebase/auth</span><span class="dl">"</span><span class="p">;</span>
+
+<span class="kd">const</span> <span class="nx">provider</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">GithubAuthProvider</span><span class="p">();</span>
+<span class="nx">provider</span><span class="p">.</span><span class="nf">addScope</span><span class="p">(</span><span class="dl">"</span><span class="s2">repo</span><span class="dl">"</span><span class="p">);</span> <span class="c1">// GitHubのリポジトリアクセス権</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="firebase-authが内部で使うエンドポイント">Firebase Authが内部で使うエンドポイント</h3>
+
+<p>Firebase Authは、Google の Identity Platform 上に構築されており、認証時に以下のようなエンドポイントが内部で使用されます。これらは<code class="language-plaintext highlighter-rouge">Astro</code>などCSRが推奨されない環境や、<code class="language-plaintext highlighter-rouge">Postman</code>を使ってOAuth認証をセットアップする場合で使うことがあります。</p>
+
+<h4 id="oauth-認可リクエスト">OAuth 認可リクエスト</h4>
+
+<p>Firebase SDK は OAuth プロバイダ（Google, GitHub など）へ以下の形式で認可リクエストを送ります：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET https://accounts.google.com/o/oauth2/v2/auth
+  ?client_id=...
+  &amp;redirect_uri=...
+  &amp;response_type=token
+  &amp;scope=...（addScope で指定）
+  &amp;state=...
+</code></pre></div></div>
+
+<p>Firebase SDK がこれをブラウザ上で動的に構成して送信します。</p>
+
+<hr />
+
+<h4 id="firebase-のトークン交換-api">Firebase のトークン交換 API</h4>
+
+<p>OAuth 認証後、アクセストークンなどを Firebase のサーバーに送り、Firebase 独自のID トークンに変換します。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>POST https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=YOUR_API_KEY
+
+{
+  postBody: "access_token=...&amp;providerId=google.com",
+  requestUri: "http://localhost",
+  returnIdpCredential: true,
+  returnSecureToken: true
+}
+</code></pre></div></div>
+
+<hr />
+
+<h4 id="firebase-id-トークンの取得クライアント側">Firebase ID トークンの取得（クライアント側）</h4>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">token</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">auth</span><span class="p">.</span><span class="nx">currentUser</span><span class="p">?.</span><span class="nf">getIdToken</span><span class="p">();</span>
+</code></pre></div></div>
+
+<p>これらのトークンをサーバ側のセッションなどに保存し、トークンを使って<code class="language-plaintext highlighter-rouge">GoogleAPI</code>などにリクエストを送ることで、<code class="language-plaintext highlighter-rouge">GDrive</code>を操作するようなアプリを実装できます。</p>
+
+<h4 id="参考">参考</h4>
+
+<p><a href="https://firebase.google.com/docs/reference/rest/auth?hl=ja#section-sign-in-with-oauth-credential">firebase-auth RESTAPI</a></p>
+</div>
+
+      <footer>
+        <p>
+          Tags: 
+          <a href="/md/tag/firebase">firebase</a> 
+        </p>
+      </footer>
+    </article>
+
+  </main>
+
+  <!-- サイドバー部分 -->
+  <aside id="sidebar">
+    <h2><a href="/md/about/">About</a></h2>
+
+    <!--
+    <h2><a href="/md/categories/">Categories</a></h2>
+    <ul>
+      
+        <li><a href="/md/category/blog"">blog</a></li>
+      
+    </ul>
+    -->
+    
+    <h2><a href="/md/tags/">Tags</a></h2>
+    <ul>
+      
+        <li><a href="/md/tag/fastapi">FastAPI</a></li>
+      
+        <li><a href="/md/tag/nodejs">Nodejs</a></li>
+      
+        <li><a href="/md/tag/ツール">ツール</a></li>
+      
+        <li><a href="/md/tag/mysql">MySQL</a></li>
+      
+        <li><a href="/md/tag/react">React</a></li>
+      
+        <li><a href="/md/tag/開発">開発</a></li>
+      
+        <li><a href="/md/tag/elasticsearch">elasticsearch</a></li>
+      
+        <li><a href="/md/tag/react">react</a></li>
+      
+        <li><a href="/md/tag/firebase">firebase</a></li>
+      
+        <li><a href="/md/tag/sqlite">sqlite</a></li>
+      
+        <li><a href="/md/tag/github-actions">github-actions</a></li>
+      
+        <li><a href="/md/tag/k8s">k8s</a></li>
+      
+    </ul>
+    <h2><a href="/md/archives/">Archives</a></h2>
+    <ul>
+      
+      
+        <li><a href="/md/2025/05/">2025-05</a></li>
+      
+        <li><a href="/md/2025/03/">2025-03</a></li>
+      
+        <li><a href="/md/2025/02/">2025-02</a></li>
+      
+    </ul>
+  </aside>
+</div>
+
+<footer>
+  <p>&copy; 2025 ツールの忘備録</p>
+</footer>
+
+</body>
+</html>

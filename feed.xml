@@ -1,4 +1,937 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://hoge-code.github.io/md/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hoge-code.github.io/md/" rel="alternate" type="text/html" /><updated>2025-05-04T04:55:23+00:00</updated><id>https://hoge-code.github.io/md/feed.xml</id><title type="html">ツールの忘備録</title><subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle><entry><title type="html">GitHubでの複数アカウント登録</title><link href="https://hoge-code.github.io/md/posts/2025-03-16-github-multi-account" rel="alternate" type="text/html" title="GitHubでの複数アカウント登録" /><published>2025-03-16T03:00:00+00:00</published><updated>2025-03-16T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/github-multi-account</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-03-16-github-multi-account"><![CDATA[<p>GitHubで複数アカウントを登録する際にいくつかの問題に直面したため、忘備録として残しておきます。基本的な内容ですが、登録したのがかなり前で、忘れており、忘れやすいない内容のため、記事に残しておきます。</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://hoge-code.github.io/md/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hoge-code.github.io/md/" rel="alternate" type="text/html" /><updated>2025-05-04T15:47:05+00:00</updated><id>https://hoge-code.github.io/md/feed.xml</id><title type="html">ツールの忘備録</title><subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle><entry><title type="html">自動補完のローカルと全文検索の比較</title><link href="https://hoge-code.github.io/md/posts/2025-05-04-auto-complete" rel="alternate" type="text/html" title="自動補完のローカルと全文検索の比較" /><published>2025-05-04T03:00:00+00:00</published><updated>2025-05-04T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/auto-complete</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-04-auto-complete"><![CDATA[<p>検索機能などで使われるオートコンプリートをクライアント側のJSONファイルと、リモートの全文検索を実装する方法を比較して考えてみます。</p>
+
+<p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#ローカルで実装する場合" id="markdown-toc-ローカルで実装する場合">ローカルで実装する場合</a></li>
+  <li><a href="#elasticsearchを使用する場合" id="markdown-toc-elasticsearchを使用する場合">Elasticsearchを使用する場合</a></li>
+  <li><a href="#elasticsearchを使用する場合2" id="markdown-toc-elasticsearchを使用する場合2">Elasticsearchを使用する場合2</a></li>
+</ul>
+
+<hr />
+
+<h3 id="ローカルで実装する場合">ローカルで実装する場合</h3>
+
+<p>今回は<code class="language-plaintext highlighter-rouge">React</code>を使い、オートコンプリートライブラリに<code class="language-plaintext highlighter-rouge">fuse.js</code>、UIライブラリに<code class="language-plaintext highlighter-rouge">MUI</code>を使用してみます。</p>
+
+<h4 id="依存">依存</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm <span class="nb">install</span> @mui/material fuse.js
+</code></pre></div></div>
+
+<h4 id="検索対象例datajs">検索対象例（data.js）</h4>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">const</span> <span class="nx">data</span> <span class="o">=</span> <span class="p">[</span>
+  <span class="p">{</span> <span class="na">title</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Apple Pie</span><span class="dl">'</span><span class="p">,</span> <span class="na">id</span><span class="p">:</span> <span class="mi">1</span> <span class="p">},</span>
+  <span class="p">{</span> <span class="na">title</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Banana Bread</span><span class="dl">'</span><span class="p">,</span> <span class="na">id</span><span class="p">:</span> <span class="mi">2</span> <span class="p">},</span>
+  <span class="p">{</span> <span class="na">title</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Cherry Tart</span><span class="dl">'</span><span class="p">,</span> <span class="na">id</span><span class="p">:</span> <span class="mi">3</span> <span class="p">}</span>
+<span class="p">];</span>
+</code></pre></div></div>
+
+<h4 id="autocomplete-コンポーネント">Autocomplete コンポーネント</h4>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">Autocomplete</span><span class="p">,</span> <span class="nx">TextField</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@mui/material</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">Fuse</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">fuse.js</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">useState</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">data</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./data</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="kd">const</span> <span class="nx">fuse</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Fuse</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="p">{</span>
+  <span class="na">keys</span><span class="p">:</span> <span class="p">[</span><span class="dl">'</span><span class="s1">title</span><span class="dl">'</span><span class="p">],</span>
+  <span class="na">includeScore</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+<span class="p">});</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="kd">function</span> <span class="nf">Search</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="p">[</span><span class="nx">options</span><span class="p">,</span> <span class="nx">setOptions</span><span class="p">]</span> <span class="o">=</span> <span class="nf">useState</span><span class="p">([]);</span>
+
+  <span class="kd">const</span> <span class="nx">handleInput</span> <span class="o">=</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">input</span> <span class="o">=</span> <span class="nx">e</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+    <span class="kd">const</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">fuse</span><span class="p">.</span><span class="nf">search</span><span class="p">(</span><span class="nx">input</span><span class="p">).</span><span class="nf">map</span><span class="p">(</span><span class="nx">r</span> <span class="o">=&gt;</span> <span class="nx">r</span><span class="p">.</span><span class="nx">item</span><span class="p">);</span>
+    <span class="nf">setOptions</span><span class="p">(</span><span class="nx">result</span><span class="p">);</span>
+  <span class="p">};</span>
+
+  <span class="k">return </span><span class="p">(</span>
+    <span class="p">&lt;</span><span class="nc">Autocomplete</span>
+      <span class="na">options</span><span class="p">=</span><span class="si">{</span><span class="nx">options</span><span class="si">}</span>
+      <span class="na">getOptionLabel</span><span class="p">=</span><span class="si">{</span><span class="p">(</span><span class="nx">option</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">option</span><span class="p">.</span><span class="nx">title</span><span class="si">}</span>
+      <span class="na">renderInput</span><span class="p">=</span><span class="si">{</span><span class="p">(</span><span class="nx">params</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">(</span>
+        <span class="p">&lt;</span><span class="nc">TextField</span> <span class="si">{</span><span class="p">...</span><span class="nx">params</span><span class="si">}</span> <span class="na">label</span><span class="p">=</span><span class="s">"Search"</span> <span class="na">onChange</span><span class="p">=</span><span class="si">{</span><span class="nx">handleInput</span><span class="si">}</span> <span class="p">/&gt;</span>
+      <span class="p">)</span><span class="si">}</span>
+    <span class="p">/&gt;</span>
+  <span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>都道府県情報のようにあまり変化しないデータや、ローカルストレージに保存した検索履歴などを使用する場合にはパフォーマンス的によさそうです。その一方で、動的なデータやデバイス間でデータを共有したい場合には向いていません。</p>
+
+<hr />
+
+<h3 id="elasticsearchを使用する場合">Elasticsearchを使用する場合</h3>
+
+<h4 id="api例apisearch">API例（/api/search）</h4>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">app</span><span class="p">.</span><span class="nf">post</span><span class="p">(</span><span class="dl">'</span><span class="s1">/api/search</span><span class="dl">'</span><span class="p">,</span> <span class="k">async </span><span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">q</span> <span class="o">=</span> <span class="nx">req</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">query</span><span class="p">;</span>
+  <span class="kd">const</span> <span class="nx">result</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">es</span><span class="p">.</span><span class="nf">search</span><span class="p">({</span>
+    <span class="na">index</span><span class="p">:</span> <span class="dl">'</span><span class="s1">documents</span><span class="dl">'</span><span class="p">,</span>
+    <span class="na">body</span><span class="p">:</span> <span class="p">{</span>
+      <span class="na">query</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">match</span><span class="p">:</span> <span class="p">{</span> <span class="na">title</span><span class="p">:</span> <span class="nx">q</span> <span class="p">}</span>
+      <span class="p">},</span>
+      <span class="na">highlight</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">fields</span><span class="p">:</span> <span class="p">{</span> <span class="na">title</span><span class="p">:</span> <span class="p">{}</span> <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">});</span>
+
+  <span class="kd">const</span> <span class="nx">hits</span> <span class="o">=</span> <span class="nx">result</span><span class="p">.</span><span class="nx">hits</span><span class="p">.</span><span class="nx">hits</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="nx">hit</span> <span class="o">=&gt;</span> <span class="p">({</span>
+    <span class="na">id</span><span class="p">:</span> <span class="nx">hit</span><span class="p">.</span><span class="nx">_id</span><span class="p">,</span>
+    <span class="na">title</span><span class="p">:</span> <span class="nx">hit</span><span class="p">.</span><span class="nx">_source</span><span class="p">.</span><span class="nx">title</span><span class="p">,</span>
+    <span class="na">highlight</span><span class="p">:</span> <span class="nx">hit</span><span class="p">.</span><span class="nx">highlight</span><span class="p">?.</span><span class="nx">title</span><span class="p">?.[</span><span class="mi">0</span><span class="p">]</span> <span class="o">||</span> <span class="nx">hit</span><span class="p">.</span><span class="nx">_source</span><span class="p">.</span><span class="nx">title</span>
+  <span class="p">}));</span>
+
+  <span class="nx">res</span><span class="p">.</span><span class="nf">json</span><span class="p">(</span><span class="nx">hits</span><span class="p">);</span>
+<span class="p">});</span>
+</code></pre></div></div>
+
+<h4 id="フロントエンド側">フロントエンド側</h4>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">Autocomplete</span><span class="p">,</span> <span class="nx">TextField</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@mui/material</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">useState</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">axios</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">axios</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="kd">function</span> <span class="nf">Search</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="p">[</span><span class="nx">options</span><span class="p">,</span> <span class="nx">setOptions</span><span class="p">]</span> <span class="o">=</span> <span class="nf">useState</span><span class="p">([]);</span>
+
+  <span class="kd">const</span> <span class="nx">handleInput</span> <span class="o">=</span> <span class="k">async </span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">input</span> <span class="o">=</span> <span class="nx">e</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+    <span class="kd">const</span> <span class="nx">res</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">axios</span><span class="p">.</span><span class="nf">post</span><span class="p">(</span><span class="dl">'</span><span class="s1">/api/search</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span> <span class="na">query</span><span class="p">:</span> <span class="nx">input</span> <span class="p">});</span>
+    <span class="nf">setOptions</span><span class="p">(</span><span class="nx">res</span><span class="p">.</span><span class="nx">data</span><span class="p">);</span>
+  <span class="p">};</span>
+
+  <span class="k">return </span><span class="p">(</span>
+    <span class="p">&lt;</span><span class="nc">Autocomplete</span>
+      <span class="na">options</span><span class="p">=</span><span class="si">{</span><span class="nx">options</span><span class="si">}</span>
+      <span class="na">getOptionLabel</span><span class="p">=</span><span class="si">{</span><span class="p">(</span><span class="nx">option</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">option</span><span class="p">.</span><span class="nx">title</span><span class="si">}</span>
+      <span class="na">renderOption</span><span class="p">=</span><span class="si">{</span><span class="p">(</span><span class="nx">props</span><span class="p">,</span> <span class="nx">option</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">(</span>
+        <span class="p">&lt;</span><span class="nt">li</span> <span class="si">{</span><span class="p">...</span><span class="nx">props</span><span class="si">}</span> <span class="na">dangerouslySetInnerHTML</span><span class="p">=</span> <span class="p">/&gt;</span>
+      <span class="p">)</span><span class="si">}</span>
+      <span class="na">renderInput</span><span class="p">=</span><span class="si">{</span><span class="p">(</span><span class="nx">params</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">(</span>
+        <span class="p">&lt;</span><span class="nc">TextField</span> <span class="si">{</span><span class="p">...</span><span class="nx">params</span><span class="si">}</span> <span class="na">label</span><span class="p">=</span><span class="s">"Search"</span> <span class="na">onChange</span><span class="p">=</span><span class="si">{</span><span class="nx">handleInput</span><span class="si">}</span> <span class="p">/&gt;</span>
+      <span class="p">)</span><span class="si">}</span>
+    <span class="p">/&gt;</span>
+  <span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>大規模な検索には向いていますが、入力ごとにAPIに送信していてはパフォーマンスに問題が生じてしまうので、適切なキャッシュ戦略やデバウンス処理を考える必要がありそうです。</p>
+
+<h3 id="elasticsearchを使用する場合2">Elasticsearchを使用する場合2</h3>
+
+<p>また、<code class="language-plaintext highlighter-rouge">Elasticsearch</code>にはオートコンプリートに特化した機能が存在します。厳密な候補リストを素早く提示する場合は<code class="language-plaintext highlighter-rouge">completion</code>機能、全文検索ベースで自然な補完をしたい場合は<code class="language-plaintext highlighter-rouge">search_as_you_type + bool_prefix</code>機能で実装します。</p>
+
+<hr />
+
+<h4 id="方法1-completion-サジェスターサジェスト専用">方法1: <code class="language-plaintext highlighter-rouge">completion</code> サジェスター（サジェスト専用）</h4>
+
+<h5 id="インデックス設定mapping">インデックス設定（mapping）</h5>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">PUT</span><span class="w"> </span><span class="err">/my_index</span><span class="w">
+</span><span class="p">{</span><span class="w">
+  </span><span class="nl">"mappings"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"properties"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"title_suggest"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"completion"</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h5 id="ドキュメント登録">ドキュメント登録</h5>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">POST</span><span class="w"> </span><span class="err">/my_index/_doc/</span><span class="mi">1</span><span class="w">
+</span><span class="p">{</span><span class="w">
+  </span><span class="nl">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Apple Pie"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"title_suggest"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"input"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"Apple Pie"</span><span class="p">,</span><span class="w"> </span><span class="s2">"Pie"</span><span class="p">]</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h5 id="サジェストクエリ">サジェストクエリ</h5>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">POST</span><span class="w"> </span><span class="err">/my_index/_search</span><span class="w">
+</span><span class="p">{</span><span class="w"> 
+  </span><span class="nl">"suggest"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"title-suggest"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"prefix"</span><span class="p">:</span><span class="w"> </span><span class="s2">"app"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"completion"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"field"</span><span class="p">:</span><span class="w"> </span><span class="s2">"title_suggest"</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<hr />
+
+<h4 id="方法-2-search_as_you_type-フィールドタイプ">方法 2: <code class="language-plaintext highlighter-rouge">search_as_you_type</code> フィールドタイプ</h4>
+
+<h5 id="インデックス設定">インデックス設定</h5>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">PUT</span><span class="w"> </span><span class="err">/my_index</span><span class="w">
+</span><span class="p">{</span><span class="w">
+  </span><span class="nl">"mappings"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"properties"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"title"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"search_as_you_type"</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h5 id="ドキュメント登録-1">ドキュメント登録</h5>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">POST</span><span class="w"> </span><span class="err">/my_index/_doc/</span><span class="mi">1</span><span class="w">
+</span><span class="p">{</span><span class="w">
+  </span><span class="nl">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Banana Bread"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h5 id="クエリ部分一致">クエリ（部分一致）</h5>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">POST</span><span class="w"> </span><span class="err">/my_index/_search</span><span class="w">
+</span><span class="p">{</span><span class="w">
+  </span><span class="nl">"query"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"multi_match"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"query"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ban"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"bool_prefix"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"fields"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="s2">"title"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"title._2gram"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"title._3gram"</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+<hr />]]></content><author><name></name></author><category term="blog" /><category term="elasticsearch" /><category term="react" /><summary type="html"><![CDATA[elasticsearch, fuse.js]]></summary></entry><entry><title type="html">firebase-authの小技</title><link href="https://hoge-code.github.io/md/posts/2025-05-04-firebase" rel="alternate" type="text/html" title="firebase-authの小技" /><published>2025-05-04T03:00:00+00:00</published><updated>2025-05-04T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/firebase</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-04-firebase"><![CDATA[<p>自分用の忘備録です。他に何か思いついたら更新します。</p>
+
+<p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#oauthにスコープを追加する方法" id="markdown-toc-oauthにスコープを追加する方法">OAuthにスコープを追加する方法</a></li>
+  <li><a href="#firebase-authが内部で使うエンドポイント" id="markdown-toc-firebase-authが内部で使うエンドポイント">Firebase Authが内部で使うエンドポイント</a></li>
+</ul>
+
+<hr />
+
+<h3 id="oauthにスコープを追加する方法">OAuthにスコープを追加する方法</h3>
+
+<p>以下は Google OAuth プロバイダを例にしたコードです。他のプロバイダでも同様に <code class="language-plaintext highlighter-rouge">.addScope()</code> メソッドが使えます。</p>
+
+<p><code class="language-plaintext highlighter-rouge">Firebase</code>はSDK9以降でAPIが大きく変更されましたが、ネットのサンプルコードの多くがSDK8以前なので注意します。</p>
+
+<h4 id="google-プロバイダでスコープ追加">Google プロバイダでスコープ追加</h4>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">initializeApp</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">firebase/app</span><span class="dl">"</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span>
+  <span class="nx">getAuth</span><span class="p">,</span>
+  <span class="nx">GoogleAuthProvider</span><span class="p">,</span>
+  <span class="nx">signInWithPopup</span>
+<span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">firebase/auth</span><span class="dl">"</span><span class="p">;</span>
+
+<span class="kd">const</span> <span class="nx">firebaseConfig</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">apiKey</span><span class="p">:</span> <span class="dl">"</span><span class="s2">YOUR_API_KEY</span><span class="dl">"</span><span class="p">,</span>
+  <span class="na">authDomain</span><span class="p">:</span> <span class="dl">"</span><span class="s2">YOUR_PROJECT.firebaseapp.com</span><span class="dl">"</span><span class="p">,</span>
+  <span class="c1">// ...</span>
+<span class="p">};</span>
+
+<span class="kd">const</span> <span class="nx">app</span> <span class="o">=</span> <span class="nf">initializeApp</span><span class="p">(</span><span class="nx">firebaseConfig</span><span class="p">);</span>
+<span class="kd">const</span> <span class="nx">auth</span> <span class="o">=</span> <span class="nf">getAuth</span><span class="p">(</span><span class="nx">app</span><span class="p">);</span>
+
+<span class="c1">// Google プロバイダに追加スコープを指定</span>
+<span class="kd">const</span> <span class="nx">provider</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">GoogleAuthProvider</span><span class="p">();</span>
+<span class="nx">provider</span><span class="p">.</span><span class="nf">addScope</span><span class="p">(</span><span class="dl">"</span><span class="s2">https://www.googleapis.com/auth/calendar.readonly</span><span class="dl">"</span><span class="p">);</span>
+<span class="nx">provider</span><span class="p">.</span><span class="nf">addScope</span><span class="p">(</span><span class="dl">"</span><span class="s2">https://www.googleapis.com/auth/userinfo.profile</span><span class="dl">"</span><span class="p">);</span>
+
+<span class="c1">// 認証実行</span>
+<span class="nf">signInWithPopup</span><span class="p">(</span><span class="nx">auth</span><span class="p">,</span> <span class="nx">provider</span><span class="p">)</span>
+  <span class="p">.</span><span class="nf">then</span><span class="p">((</span><span class="nx">result</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">user</span> <span class="o">=</span> <span class="nx">result</span><span class="p">.</span><span class="nx">user</span><span class="p">;</span>
+    <span class="kd">const</span> <span class="nx">credential</span> <span class="o">=</span> <span class="nx">GoogleAuthProvider</span><span class="p">.</span><span class="nf">credentialFromResult</span><span class="p">(</span><span class="nx">result</span><span class="p">);</span>
+    <span class="kd">const</span> <span class="nx">accessToken</span> <span class="o">=</span> <span class="nx">credential</span><span class="p">?.</span><span class="nx">accessToken</span><span class="p">;</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">AccessToken:</span><span class="dl">"</span><span class="p">,</span> <span class="nx">accessToken</span><span class="p">);</span>
+  <span class="p">})</span>
+  <span class="p">.</span><span class="k">catch</span><span class="p">((</span><span class="nx">error</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="dl">"</span><span class="s2">OAuth error:</span><span class="dl">"</span><span class="p">,</span> <span class="nx">error</span><span class="p">.</span><span class="nx">code</span><span class="p">,</span> <span class="nx">error</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>
+  <span class="p">});</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">GoogleAPI</code>のスコープは長くて忘れやすいです。</p>
+
+<h4 id="他のプロバイダ例github">他のプロバイダ例（GitHub）</h4>
+
+<p>その一方で、<code class="language-plaintext highlighter-rouge">GitHub</code>や<code class="language-plaintext highlighter-rouge">Twitter</code>のスコープは覚えやすいです。</p>
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">GithubAuthProvider</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">firebase/auth</span><span class="dl">"</span><span class="p">;</span>
+
+<span class="kd">const</span> <span class="nx">provider</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">GithubAuthProvider</span><span class="p">();</span>
+<span class="nx">provider</span><span class="p">.</span><span class="nf">addScope</span><span class="p">(</span><span class="dl">"</span><span class="s2">repo</span><span class="dl">"</span><span class="p">);</span> <span class="c1">// GitHubのリポジトリアクセス権</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="firebase-authが内部で使うエンドポイント">Firebase Authが内部で使うエンドポイント</h3>
+
+<p>Firebase Authは、Google の Identity Platform 上に構築されており、認証時に以下のようなエンドポイントが内部で使用されます。これらは<code class="language-plaintext highlighter-rouge">Astro</code>などCSRが推奨されない環境や、<code class="language-plaintext highlighter-rouge">Postman</code>を使ってOAuth認証をセットアップする場合で使うことがあります。</p>
+
+<h4 id="oauth-認可リクエスト">OAuth 認可リクエスト</h4>
+
+<p>Firebase SDK は OAuth プロバイダ（Google, GitHub など）へ以下の形式で認可リクエストを送ります：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET https://accounts.google.com/o/oauth2/v2/auth
+  ?client_id=...
+  &amp;redirect_uri=...
+  &amp;response_type=token
+  &amp;scope=...（addScope で指定）
+  &amp;state=...
+</code></pre></div></div>
+
+<p>Firebase SDK がこれをブラウザ上で動的に構成して送信します。</p>
+
+<hr />
+
+<h4 id="firebase-のトークン交換-api">Firebase のトークン交換 API</h4>
+
+<p>OAuth 認証後、アクセストークンなどを Firebase のサーバーに送り、Firebase 独自のID トークンに変換します。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>POST https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=YOUR_API_KEY
+
+{
+  postBody: "access_token=...&amp;providerId=google.com",
+  requestUri: "http://localhost",
+  returnIdpCredential: true,
+  returnSecureToken: true
+}
+</code></pre></div></div>
+
+<hr />
+
+<h4 id="firebase-id-トークンの取得クライアント側">Firebase ID トークンの取得（クライアント側）</h4>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">token</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">auth</span><span class="p">.</span><span class="nx">currentUser</span><span class="p">?.</span><span class="nf">getIdToken</span><span class="p">();</span>
+</code></pre></div></div>
+
+<p>これらのトークンをサーバ側のセッションなどに保存し、トークンを使って<code class="language-plaintext highlighter-rouge">GoogleAPI</code>などにリクエストを送ることで、<code class="language-plaintext highlighter-rouge">GDrive</code>を操作するようなアプリを実装できます。</p>
+
+<h4 id="参考">参考</h4>
+
+<p><a href="https://firebase.google.com/docs/reference/rest/auth?hl=ja#section-sign-in-with-oauth-credential">firebase-auth RESTAPI</a></p>]]></content><author><name></name></author><category term="blog" /><category term="firebase" /><summary type="html"><![CDATA[firebase]]></summary></entry><entry><title type="html">主要DBで全文検索を試してみる</title><link href="https://hoge-code.github.io/md/posts/2025-05-04-full-text-search" rel="alternate" type="text/html" title="主要DBで全文検索を試してみる" /><published>2025-05-04T03:00:00+00:00</published><updated>2025-05-04T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/full-text-search</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-04-full-text-search"><![CDATA[<p>最近は全文検索について学習しているので主要DBごとの全文検索の特徴を簡単にまとめてみます。</p>
+
+<p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#elasticsearch" id="markdown-toc-elasticsearch">Elasticsearch</a></li>
+  <li><a href="#mysql" id="markdown-toc-mysql">MySQL</a></li>
+  <li><a href="#postgresql" id="markdown-toc-postgresql">PostgreSQL</a></li>
+  <li><a href="#sqlite" id="markdown-toc-sqlite">SQLite</a></li>
+  <li><a href="#感想" id="markdown-toc-感想">感想</a></li>
+</ul>
+
+<p>全文検索とハイライトはElasticsearchではネイティブに対応していますが、MySQL、PostgreSQL、SQLiteではそれぞれ手法が異なり、制限もあります。以下にそれぞれの全文検索＋ハイライトのクエリ例と（可能な限り）レスポンス例を示します。</p>
+
+<hr />
+
+<h3 id="elasticsearch">Elasticsearch</h3>
+
+<h4 id="クエリ例全文検索ハイライト">クエリ例（全文検索＋ハイライト）:</h4>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">GET</span><span class="w"> </span><span class="err">/my_index/_search</span><span class="w">
+</span><span class="p">{</span><span class="w">
+  </span><span class="nl">"query"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"match"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"content"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Elasticsearch tutorial"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"highlight"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"fields"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"content"</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h4 id="レスポンス例">レスポンス例:</h4>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"hits"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"hits"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+      </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"_source"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"content"</span><span class="p">:</span><span class="w"> </span><span class="s2">"This is an Elasticsearch tutorial for beginners."</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="nl">"highlight"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"content"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+            </span><span class="s2">"This is an &lt;em&gt;Elasticsearch&lt;/em&gt; &lt;em&gt;tutorial&lt;/em&gt; for beginners."</span><span class="w">
+          </span><span class="p">]</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+<p>Elasticsearchはタイトルに対する重み付けなどにも対応しており、ハイライトも<code class="language-plaintext highlighter-rouge">&lt;em&gt;</code>をつけてレスポンスが返されるのでフロントで簡単にUIに反映できます。</p>
+
+<hr />
+
+<h3 id="mysql">MySQL</h3>
+
+<p>MySQLのFULLTEXTインデックスは <code class="language-plaintext highlighter-rouge">MATCH ... AGAINST</code> 構文で全文検索ができますが、ハイライトは自前で文字列を置換して処理する必要があります。</p>
+
+<h4 id="クエリ例">クエリ例:</h4>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span> 
+  <span class="n">id</span><span class="p">,</span>
+  <span class="n">content</span><span class="p">,</span>
+  <span class="k">REPLACE</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="s1">'Elasticsearch'</span><span class="p">,</span> <span class="s1">'&lt;em&gt;Elasticsearch&lt;/em&gt;'</span><span class="p">)</span> <span class="k">AS</span> <span class="n">highlighted_content</span>
+<span class="k">FROM</span> <span class="n">articles</span>
+<span class="k">WHERE</span> <span class="k">MATCH</span><span class="p">(</span><span class="n">content</span><span class="p">)</span> <span class="n">AGAINST</span><span class="p">(</span><span class="s1">'Elasticsearch'</span> <span class="k">IN</span> <span class="k">NATURAL</span> <span class="k">LANGUAGE</span> <span class="k">MODE</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>MySQLはPostgreに比べて機能が少ないので、部分一致や複数キーワードには非対応です。また、ハイライトも使えないので全文検索にはあまり向いていません。</p>
+
+<hr />
+
+<h3 id="postgresql">PostgreSQL</h3>
+
+<p>tsvector + tsquery + ts_headlineを使います。PostgreSQLは全文検索に強く、<code class="language-plaintext highlighter-rouge">ts_headline</code>でハイライトが可能です。</p>
+
+<h4 id="クエリ例-1">クエリ例:</h4>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span> 
+  <span class="n">id</span><span class="p">,</span>
+  <span class="n">ts_headline</span><span class="p">(</span><span class="s1">'english'</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">to_tsquery</span><span class="p">(</span><span class="s1">'Elasticsearch'</span><span class="p">))</span> <span class="k">AS</span> <span class="n">highlighted_content</span>
+<span class="k">FROM</span> <span class="n">articles</span>
+<span class="k">WHERE</span> <span class="n">to_tsvector</span><span class="p">(</span><span class="s1">'english'</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span> <span class="o">@@</span> <span class="n">to_tsquery</span><span class="p">(</span><span class="s1">'Elasticsearch'</span><span class="p">);</span>
+</code></pre></div></div>
+
+<h4 id="出力例">出力例:</h4>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>This is an &lt;b&gt;Elasticsearch&lt;/b&gt; tutorial for beginners.
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="sqlite">SQLite</h3>
+
+<p>SQLiteはネイティブな全文検索 (<code class="language-plaintext highlighter-rouge">FTS5</code>) をサポートしていますが、ハイライト機能は組み込み関数 <code class="language-plaintext highlighter-rouge">highlight()</code> を使う必要があります。</p>
+
+<h4 id="クエリ例-fts5">クエリ例 (FTS5):</h4>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span> 
+  <span class="n">highlight</span><span class="p">(</span><span class="n">articles_fts</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">'&lt;em&gt;'</span><span class="p">,</span> <span class="s1">'&lt;/em&gt;'</span><span class="p">)</span> <span class="k">AS</span> <span class="n">highlighted_content</span>
+<span class="k">FROM</span> <span class="n">articles_fts</span>
+<span class="k">WHERE</span> <span class="n">articles_fts</span> <span class="k">MATCH</span> <span class="s1">'Elasticsearch'</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>※ <code class="language-plaintext highlighter-rouge">articles_fts</code> は <code class="language-plaintext highlighter-rouge">CREATE VIRTUAL TABLE articles_fts USING fts5(content)</code> で作成された仮想テーブル。</p>
+
+<hr />
+
+<h3 id="感想">感想</h3>
+
+<p>最近はPostgreSQLを使うことがあるのですが、全文検索だけでなく、B-Tree以外のインデックスが豊富だったり、カスタムデータ型が作れたりと、MySQLと比べてかなり高機能であるように感じます。</p>
+
+<p>また、SQLiteはファイルベースの小規模なDBですが、基本的な全文検索やハイライトが出来たりと、PCやモバイルでローカルに使うには十分な機能があるように感じます。</p>]]></content><author><name></name></author><category term="blog" /><category term="elasticsearch" /><category term="MySQL" /><category term="sqlite" /><summary type="html"><![CDATA[elasticsearch, MySQL, sqlite]]></summary></entry><entry><title type="html">github actionsのファイル分割</title><link href="https://hoge-code.github.io/md/posts/2025-05-04-github-actions-uses" rel="alternate" type="text/html" title="github actionsのファイル分割" /><published>2025-05-04T03:00:00+00:00</published><updated>2025-05-04T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/github-actions-uses</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-04-github-actions-uses"><![CDATA[<p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#1-再利用可能なワークフロー" id="markdown-toc-1-再利用可能なワークフロー">1. 再利用可能なワークフロー</a></li>
+  <li><a href="#2-アクションを作成する方法" id="markdown-toc-2-アクションを作成する方法">2. アクションを作成する方法</a></li>
+  <li><a href="#感想" id="markdown-toc-感想">感想</a></li>
+</ul>
+
+<hr />
+
+<p>最近は<code class="language-plaintext highlighter-rouge">GitLabCI</code>について学習していて、<code class="language-plaintext highlighter-rouge">GitHubActions</code>でも<code class="language-plaintext highlighter-rouge">GitLabCI</code>のように柔軟に他のyamlファイルをインポートできないか気になったので調べてみました。</p>
+
+<h3 id="1-再利用可能なワークフロー">1. 再利用可能なワークフロー</h3>
+
+<h4 id="workflow-を-extends-と-uses-で再利用する">workflow を extends と uses で再利用する</h4>
+
+<p>uses キーワードを使用して、共通のアクションを呼び出すことができます。</p>
+
+<h4 id="再利用可能なワークフローの例">再利用可能なワークフローの例</h4>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># .github/workflows/main.yml</span>
+<span class="na">jobs</span><span class="pi">:</span>
+  <span class="na">build</span><span class="pi">:</span>
+    <span class="na">uses</span><span class="pi">:</span> <span class="s">./.github/workflows/build.yml</span>
+    <span class="na">with</span><span class="pi">:</span>
+      <span class="na">some-input</span><span class="pi">:</span> <span class="s2">"</span><span class="s">value"</span>
+</code></pre></div></div>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># .github/workflows/build.yml</span>
+<span class="na">name</span><span class="pi">:</span> <span class="s">Build</span>
+<span class="na">on</span><span class="pi">:</span>
+  <span class="na">workflow_call</span><span class="pi">:</span>
+    <span class="na">inputs</span><span class="pi">:</span>
+      <span class="na">some-input</span><span class="pi">:</span>
+        <span class="na">required</span><span class="pi">:</span> <span class="kc">true</span>
+        <span class="na">type</span><span class="pi">:</span> <span class="s">string</span>
+<span class="na">jobs</span><span class="pi">:</span>
+  <span class="na">build-job</span><span class="pi">:</span>
+    <span class="na">runs-on</span><span class="pi">:</span> <span class="s">ubuntu-latest</span>
+    <span class="na">steps</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Checkout</span>
+        <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/checkout@v2</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Run Build</span>
+        <span class="na">run</span><span class="pi">:</span> <span class="s">echo "Building the project with input</span><span class="err">:</span> <span class="s">$"</span>
+</code></pre></div></div>
+
+<p>また、<code class="language-plaintext highlighter-rouge">GitLabCI</code>と同様に別リポジトリのyamlファイルも読み込むことができます。</p>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">jobs</span><span class="pi">:</span>
+  <span class="na">lint</span><span class="pi">:</span>
+    <span class="na">uses</span><span class="pi">:</span> <span class="s">my-org/shared-workflows/.github/workflows/lint.yml@v1</span>
+</code></pre></div></div>
+
+<p>この方法を使うことで、build.yml のようなワークフローを複数の他のワークフローから呼び出すことができ、GitLab CI のようなファイルの分割と再利用が可能になります。</p>
+
+<hr />
+
+<h3 id="2-アクションを作成する方法">2. アクションを作成する方法</h3>
+
+<p>TSを使ってサードパーティーアクションも作成できますが、リポジトリを分ける必要があるので面倒です。</p>
+
+<hr />
+
+<h3 id="感想">感想</h3>
+
+<p>デブオペについて体系的に学習してこなかったため、プログラムと同様にCICDファイルも分割するという発想がありませんでしたが、ファイル分割することでより柔軟にCICDを構築できると感じました。</p>]]></content><author><name></name></author><category term="blog" /><category term="github-actions" /><summary type="html"><![CDATA[github-actions]]></summary></entry><entry><title type="html">github小技</title><link href="https://hoge-code.github.io/md/posts/2025-05-04-github" rel="alternate" type="text/html" title="github小技" /><published>2025-05-04T03:00:00+00:00</published><updated>2025-05-04T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/github</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-04-github"><![CDATA[<p>忘れがちやネットに情報が少ないGitHub関連の操作について忘備録を兼ねてまとめてみます。</p>
+
+<p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#1-github-の-pull-requestとissue-テンプレート" id="markdown-toc-1-github-の-pull-requestとissue-テンプレート">1. GitHub の Pull RequestとIssue テンプレート</a></li>
+  <li><a href="#2-issue-からブランチを作成" id="markdown-toc-2-issue-からブランチを作成">2. Issue からブランチを作成</a></li>
+  <li><a href="#3-conventional-commit--自動リリースノート生成" id="markdown-toc-3-conventional-commit--自動リリースノート生成">3. Conventional Commit &amp; 自動リリースノート生成</a></li>
+  <li><a href="#4-前回のコミットに少しだけ変更を追加" id="markdown-toc-4-前回のコミットに少しだけ変更を追加">4. 前回のコミットに少しだけ変更を追加</a></li>
+</ul>
+
+<hr />
+
+<h3 id="1-github-の-pull-requestとissue-テンプレート">1. GitHub の Pull RequestとIssue テンプレート</h3>
+
+<h4 id="テンプレートの設置方法">テンプレートの設置方法</h4>
+
+<p><code class="language-plaintext highlighter-rouge">.github/</code> ディレクトリ以下に以下のように配置すると、自動でテンプレートとして認識されます。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>.github/
+├── PULL_REQUEST_TEMPLATE.md
+├── ISSUE_TEMPLATE/
+│   ├── bug_report.md
+│   ├── feature_request.md
+│   └── config.yml
+</code></pre></div></div>
+
+<h4 id="pull-request-テンプレート例">Pull Request テンプレート例</h4>
+
+<div class="language-md highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gu">## 概要</span>
+
+<span class="gu">## 変更内容</span>
+
+<span class="gu">## 関連Issue</span>
+
+Fixes #123
+
+<span class="gu">## 動作確認手順</span>
+</code></pre></div></div>
+
+<hr />
+
+<h4 id="issue-テンプレート例-bug_reportmd">Issue テンプレート（例: <code class="language-plaintext highlighter-rouge">bug_report.md</code>）</h4>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">name</span><span class="pi">:</span> <span class="s">Bug Report</span>
+<span class="na">description</span><span class="pi">:</span> <span class="s">バグの報告</span>
+<span class="na">title</span><span class="pi">:</span> <span class="s2">"</span><span class="s">[BUG]</span><span class="nv"> </span><span class="s">"</span>
+<span class="na">labels</span><span class="pi">:</span> <span class="pi">[</span><span class="nv">bug</span><span class="pi">]</span>
+<span class="na">body</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">type</span><span class="pi">:</span> <span class="s">textarea</span>
+    <span class="na">attributes</span><span class="pi">:</span>
+      <span class="na">label</span><span class="pi">:</span> <span class="s">概要</span>
+  <span class="pi">-</span> <span class="na">type</span><span class="pi">:</span> <span class="s">textarea</span>
+    <span class="na">attributes</span><span class="pi">:</span>
+      <span class="na">label</span><span class="pi">:</span> <span class="s">再現手順</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="2-issue-からブランチを作成">2. Issue からブランチを作成</h3>
+
+<p>VSCodeなら<code class="language-plaintext highlighter-rouge">GitHub PullRequest + Issue</code>という拡張機能を利用して、Issueからブランチを作成できます。ブランチにはIssue番号を含めることがありますが、コミット名にIssue番号を書かない限り、Issueが自動でクローズされることがないことに注意します。</p>
+
+<h4 id="例">例：</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git checkout <span class="nt">-b</span> feature/123-add-login
+</code></pre></div></div>
+
+<h4 id="issue-をクローズするコミットメッセージの書き方">Issue をクローズするコミットメッセージの書き方</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">Fixes #123</code></li>
+  <li><code class="language-plaintext highlighter-rouge">Closes #123</code></li>
+  <li><code class="language-plaintext highlighter-rouge">Resolves #123</code></li>
+</ul>
+
+<p>GitHub 上でこのコミットが PR にマージされると、該当 issue が自動でクローズされます。</p>
+
+<hr />
+
+<h3 id="3-conventional-commit--自動リリースノート生成">3. Conventional Commit &amp; 自動リリースノート生成</h3>
+
+<p>取り敢えず<code class="language-plaintext highlighter-rouge">Conventional Commit</code>に従っておけば、<code class="language-plaintext highlighter-rouge">GitHub Copilot</code>での補完、リリースノートの自動生成などのメリットが得られます。コミットメッセージが<code class="language-plaintext highlighter-rouge">Conventional Commit</code>に従っているか確認するためにフックを使用することもできます。</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;type&gt;(&lt;scope&gt;): &lt;subject&gt;
+</code></pre></div></div>
+
+<h4 id="例-1">例：</h4>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>feat(auth): ログイン機能を追加
+fix(api): 500エラーの原因を修正
+docs(readme): セットアップ手順を追加
+</code></pre></div></div>
+
+<hr />
+
+<h4 id="自動リリースノート生成">自動リリースノート生成</h4>
+
+<p><code class="language-plaintext highlighter-rouge">semantic-release</code>など`を使うと、PRやコミットから changelog や GitHub Release を自動生成することができます。</p>
+
+<ol>
+  <li><code class="language-plaintext highlighter-rouge">semantic-release</code> をインストール</li>
+  <li><code class="language-plaintext highlighter-rouge">release.config.js</code> でルールを定義</li>
+  <li>GitHub Actions に <code class="language-plaintext highlighter-rouge">semantic-release</code> ワークフローを追加</li>
+</ol>
+
+<h3 id="4-前回のコミットに少しだけ変更を追加">4. 前回のコミットに少しだけ変更を追加</h3>
+
+<p>コミットメッセージの変更で紹介される<code class="language-plaintext highlighter-rouge">amend</code>コマンドですが、直前のコミットに変更を付け足す場面で使用することのほうが多い気がします。プッシュした後だと、<code class="language-plaintext highlighter-rouge">git push --force</code>する必要があります。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git commit <span class="nt">--amend</span> <span class="nt">--no-edit</span>
+</code></pre></div></div>
+
+<h4 id="参考">参考</h4>
+
+<p><a href="https://roadmap.sh/git-github">roadmap.sh</a></p>]]></content><author><name></name></author><category term="blog" /><category term="ツール" /><summary type="html"><![CDATA[github]]></summary></entry><entry><title type="html">github小技2</title><link href="https://hoge-code.github.io/md/posts/2025-05-04-github2" rel="alternate" type="text/html" title="github小技2" /><published>2025-05-04T03:00:00+00:00</published><updated>2025-05-04T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/github2</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-04-github2"><![CDATA[<p>忘れがちやネットに情報が少ないGitHub関連の操作について忘備録を兼ねてまとめてみます。</p>
+
+<p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#1-gfmの引用" id="markdown-toc-1-gfmの引用">1. GFMの引用</a></li>
+  <li><a href="#2slack-チャンネルで-github-を連携登録するコマンド" id="markdown-toc-2slack-チャンネルで-github-を連携登録するコマンド">2.Slack チャンネルで GitHub を連携登録するコマンド</a></li>
+  <li><a href="#3-git-filter-repo" id="markdown-toc-3-git-filter-repo">3. <code class="language-plaintext highlighter-rouge">git-filter-repo</code></a></li>
+  <li><a href="#4-git-でワークツリーに別リポジトリを含める方法" id="markdown-toc-4-git-でワークツリーに別リポジトリを含める方法">4. Git でワークツリーに別リポジトリを含める方法</a></li>
+  <li><a href="#5-git-lfslarge-file-storage" id="markdown-toc-5-git-lfslarge-file-storage">5. Git LFS（Large File Storage）</a></li>
+</ul>
+
+<hr />
+
+<h3 id="1-gfmの引用">1. GFMの引用</h3>
+
+<p>引用が色分けされて便利ですが、何故かネットで検索しても情報が少ないです。</p>
+
+<div class="language-md highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gt">&gt; [!NOTE]  </span>
+<span class="gt">&gt; note</span>
+<span class="gt">
+&gt; [!TIP]</span>
+<span class="gt">&gt; tip</span>
+<span class="gt">
+&gt; [!IMPORTANT]  </span>
+<span class="gt">&gt; important</span>
+<span class="gt">
+&gt; [!WARNING]  </span>
+<span class="gt">&gt; warning</span>
+<span class="gt">
+&gt; [!CAUTION]</span>
+<span class="gt">&gt; caution</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="2slack-チャンネルで-github-を連携登録するコマンド">2.Slack チャンネルで GitHub を連携登録するコマンド</h3>
+
+<h4 id="前提">前提：</h4>
+
+<ul>
+  <li>Slack に GitHub アプリをインストール済み</li>
+  <li>GitHub に Slack 通知を送るための連携設定済み（OAuth連携）</li>
+</ul>
+
+<h4 id="チャンネルに連携リポジトリを登録するコマンド">チャンネルに連携リポジトリを登録するコマンド：</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/github subscribe owner/repo issues pulls commits
+</code></pre></div></div>
+
+<h4 id="解除">解除：</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/github unsubscribe owner/repo
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="3-git-filter-repo">3. <code class="language-plaintext highlighter-rouge">git-filter-repo</code></h3>
+
+<p><code class="language-plaintext highlighter-rouge">git-filter-repo</code> は [<code class="language-plaintext highlighter-rouge">git filter-branch</code>] や [<code class="language-plaintext highlighter-rouge">BFG Repo-Cleaner</code>] の高速・安全な後継ツールです。</p>
+
+<p>特定ディレクトリだけを抽出して新リポジトリ化したい場合、コミット履歴から機密ファイルを完全に除去したい場合、メールアドレス・名前の一括変換（匿名化）したい場合などに使用します。</p>
+
+<h4 id="特定のディレクトリを抽出">特定のディレクトリを抽出</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone <span class="nt">--no-local</span> <span class="nt">--mirror</span> https://github.com/owner/repo.git
+<span class="nb">cd </span>repo.git
+
+git filter-repo <span class="nt">--subdirectory-filter</span> src
+</code></pre></div></div>
+
+<h4 id="ファイル除去">ファイル除去</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git filter-repo <span class="nt">--path</span> secrets.env <span class="nt">--invert-paths</span>
+</code></pre></div></div>
+
+<p>バックアップを取ることを忘れないようにします。</p>
+
+<hr />
+
+<h3 id="4-git-でワークツリーに別リポジトリを含める方法">4. Git でワークツリーに別リポジトリを含める方法</h3>
+
+<h4 id="サブモジュール公式一般的">サブモジュール（公式・一般的）</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git submodule add https://github.com/owner/other-repo.git external/other-repo
+</code></pre></div></div>
+
+<ul>
+  <li>外部リポジトリを自分のリポジトリの下に「リンク」する</li>
+  <li>バージョン固定（コミット単位）できる</li>
+  <li><code class="language-plaintext highlighter-rouge">git clone --recurse-submodules</code> が必要</li>
+</ul>
+
+<h4 id="ワークツリー外部管理高度">ワークツリー＋外部管理（高度）</h4>
+
+<p><code class="language-plaintext highlighter-rouge">git worktree</code>は同じリポジトリの別ブランチを別のフォルダに展開する機能です。</p>
+
+<p>例：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git worktree add ../build-dir build-branch
+</code></pre></div></div>
+
+<p>同一リポジトリの別ブランチを別ディレクトリに展開する仕組みです。</p>
+
+<hr />
+
+<h3 id="5-git-lfslarge-file-storage">5. Git LFS（Large File Storage）</h3>
+
+<p>Git で扱いにくい大容量ファイル（画像、動画、バイナリなど）を効率的に管理する仕組みです。</p>
+
+<h4 id="セットアップ手順">セットアップ手順：</h4>
+
+<ol>
+  <li>LFS をインストール</li>
+</ol>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git lfs <span class="nb">install</span>
+</code></pre></div></div>
+
+<ol>
+  <li>追跡するファイルタイプを指定</li>
+</ol>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git lfs track <span class="s2">"*.psd"</span>
+<span class="nb">echo</span> <span class="s2">"*.psd"</span> <span class="o">&gt;&gt;</span> .gitattributes
+</code></pre></div></div>
+
+<ol>
+  <li>通常通りコミット・Push</li>
+</ol>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git add file.psd
+git commit <span class="nt">-m</span> <span class="s2">"Add large PSD"</span>
+git push origin main
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">.gitattributes</code> に LFS の追跡対象が記録され、push 時に実体は Git LFS サーバーへ送信されるようになります。大容量のファイルを効率的に扱うことができるようになりますが、ストレージに制限があるので注意が必要です。GitHub, GitLab, Bitbucket などで対応しています。</p>
+
+<hr />
+
+<h4 id="参考">参考</h4>
+
+<p><a href="https://roadmap.sh/git-github">roadmap.sh</a></p>]]></content><author><name></name></author><category term="blog" /><category term="ツール" /><summary type="html"><![CDATA[github]]></summary></entry><entry><title type="html">kubectl contextの設定と確認</title><link href="https://hoge-code.github.io/md/posts/2025-05-04-kubectl-context" rel="alternate" type="text/html" title="kubectl contextの設定と確認" /><published>2025-05-04T03:00:00+00:00</published><updated>2025-05-04T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/kubectl-context</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-04-kubectl-context"><![CDATA[<p>k8sでコンテキストを切り替える動作に躓いてしまったので、<code class="language-plaintext highlighter-rouge">kubectl context</code>関連の設定と確認コマンドをまとめてみます。</p>
+
+<p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#1-eksクラスターと-kubectl-の関係性" id="markdown-toc-1-eksクラスターと-kubectl-の関係性">1. EKSクラスターと <code class="language-plaintext highlighter-rouge">kubectl</code> の関係性</a></li>
+  <li><a href="#2-docker-desktop-の-k8s-初期化と設定" id="markdown-toc-2-docker-desktop-の-k8s-初期化と設定">2. Docker Desktop の K8s 初期化と設定</a></li>
+  <li><a href="#3-kubectl-の-context-設定ファイルと管理方法" id="markdown-toc-3-kubectl-の-context-設定ファイルと管理方法">3. <code class="language-plaintext highlighter-rouge">kubectl</code> の context 設定ファイルと管理方法</a></li>
+  <li><a href="#4-istioctl-との関係性" id="markdown-toc-4-istioctl-との関係性">4. <code class="language-plaintext highlighter-rouge">istioctl</code> との関係性</a></li>
+</ul>
+
+<hr />
+
+<h3 id="1-eksクラスターと-kubectl-の関係性">1. EKSクラスターと <code class="language-plaintext highlighter-rouge">kubectl</code> の関係性</h3>
+
+<h4 id="eksctlコマンドでのクラスター初期化"><code class="language-plaintext highlighter-rouge">eksctl</code>コマンドでのクラスター初期化</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>eksctl create cluster <span class="nt">--name</span> my-cluster <span class="nt">--region</span> ap-northeast-1 <span class="nt">--nodes</span> 2
+</code></pre></div></div>
+
+<p>eksctl を実行してクラスターを作成するだけでは、kubectl コンテキストの設定が自動的に反映されないので注意する必要があります。</p>
+
+<h4 id="kubectl-設定の取得と追加"><code class="language-plaintext highlighter-rouge">kubectl</code> 設定の取得と追加</h4>
+
+<p>eksctl create cluster コマンドでクラスターが作成された後、kubectl がそのクラスターにアクセスできるように設定するために、次のコマンドを実行します。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>aws eks <span class="nt">--region</span> ap-northeast-1 update-kubeconfig <span class="nt">--name</span> my-cluster
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">~/.kube/config</code> でcontext を確認できます。</p>
+
+<h4 id="context-切り替えと確認コマンド">context 切り替えと確認コマンド</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl config get-contexts
+kubectl config use-context arn:aws:eks:ap-northeast-1:123456789012:cluster/my-cluster
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="2-docker-desktop-の-k8s-初期化と設定">2. Docker Desktop の K8s 初期化と設定</h3>
+
+<p>Docker Desktopを使うと、ローカルでk8sクラスターを構築することができます。</p>
+
+<h4 id="初期化方法">初期化方法</h4>
+
+<p>Docker Desktop の設定画面で「Kubernetes を有効化（Enable Kubernetes）」をオンにします。これにより <code class="language-plaintext highlighter-rouge">docker-desktop</code> という context が自動的に <code class="language-plaintext highlighter-rouge">~/.kube/config</code> に追加されます。</p>
+
+<h4 id="context-切り替えと確認">context 切り替えと確認</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl config use-context docker-desktop
+kubectl get nodes
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="3-kubectl-の-context-設定ファイルと管理方法">3. <code class="language-plaintext highlighter-rouge">kubectl</code> の context 設定ファイルと管理方法</h3>
+
+<p><code class="language-plaintext highlighter-rouge">kubectl</code> は <code class="language-plaintext highlighter-rouge">~/.kube/config</code> ファイルで複数のクラスタと context を管理します。</p>
+
+<h4 id="主なコマンド">主なコマンド</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># context の一覧</span>
+kubectl config get-contexts
+
+<span class="c"># 現在の context</span>
+kubectl config current-context
+
+<span class="c"># context の切り替え</span>
+kubectl config use-context &lt;context-name&gt;
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="4-istioctl-との関係性">4. <code class="language-plaintext highlighter-rouge">istioctl</code> との関係性</h3>
+
+<h4 id="istioctl-の役割"><code class="language-plaintext highlighter-rouge">istioctl</code> の役割</h4>
+
+<p><code class="language-plaintext highlighter-rouge">istio</code>はk8sネイティブのサービスメッシュツールなので、<code class="language-plaintext highlighter-rouge">istioctl</code>コマンドを使うと、<code class="language-plaintext highlighter-rouge">kubectl</code> と同様、現在アクティブな Kubernetes context を使って自動的にクラスタに接続します。</p>
+
+<h4 id="使用例">使用例</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Istio のインストール（現在の context に対して）</span>
+istioctl <span class="nb">install</span> <span class="nt">--set</span> <span class="nv">profile</span><span class="o">=</span>demo <span class="nt">-y</span>
+
+<span class="c"># Istio コンポーネントの状態確認</span>
+istioctl proxy-status
+
+<span class="c"># サイドカー自動注入をネームスペースに適用</span>
+kubectl label namespace default istio-injection<span class="o">=</span>enabled
+</code></pre></div></div>
+
+<hr />]]></content><author><name></name></author><category term="blog" /><category term="k8s" /><summary type="html"><![CDATA[k8s]]></summary></entry><entry><title type="html">sqliteの復習</title><link href="https://hoge-code.github.io/md/posts/2025-05-04-sqlite" rel="alternate" type="text/html" title="sqliteの復習" /><published>2025-05-04T03:00:00+00:00</published><updated>2025-05-04T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/sqlite</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-04-sqlite"><![CDATA[<p>モバイルやPC、<code class="language-plaintext highlighter-rouge">cloudflare workers</code>で用いられるD1データベースなど、本番環境でも広く用いられる<code class="language-plaintext highlighter-rouge">sqlite</code>について整理してみます。</p>
+
+<p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#1-設定ファイルがない" id="markdown-toc-1-設定ファイルがない">1. 設定ファイルがない</a></li>
+  <li><a href="#2-全文検索full-text-search" id="markdown-toc-2-全文検索full-text-search">2. 全文検索（Full-Text Search）</a></li>
+  <li><a href="#3-json-サポート" id="markdown-toc-3-json-サポート">3. <strong>JSON サポート</strong></a></li>
+  <li><a href="#4-ユーザー認証権限管理がない" id="markdown-toc-4-ユーザー認証権限管理がない">4. <strong>ユーザー・認証・権限管理がない</strong></a></li>
+</ul>
+
+<hr />
+
+<p>SQLite は<strong>設定ファイルが存在しないこと</strong>や<strong>ユーザー・権限管理がほとんどない</strong>といった、特有の性質を持っています。</p>
+
+<hr />
+
+<h3 id="1-設定ファイルがない">1. 設定ファイルがない</h3>
+
+<h4 id="特徴">特徴：</h4>
+
+<p>SQLite には <code class="language-plaintext highlighter-rouge">my.cnf</code>や<code class="language-plaintext highlighter-rouge">postgresql.conf</code> のような設定ファイルは存在しないので、<strong>データベース接続時に指定</strong>するか、<strong>SQL コマンドを通じて変更</strong>します。そのために、以下のようにPRAGMAコマンドを通じて設定します。</p>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- 外部キー制約の有効化</span>
+<span class="n">PRAGMA</span> <span class="n">foreign_keys</span> <span class="o">=</span> <span class="k">ON</span><span class="p">;</span>
+
+<span class="c1">-- 自動インデックスの有効化</span>
+<span class="n">PRAGMA</span> <span class="n">automatic_index</span> <span class="o">=</span> <span class="k">ON</span><span class="p">;</span>
+
+<span class="c1">-- キャッシュサイズの変更</span>
+<span class="n">PRAGMA</span> <span class="n">cache_size</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">;</span>
+
+<span class="c1">-- 永続化される設定（WALモードなど）</span>
+<span class="n">PRAGMA</span> <span class="n">journal_mode</span> <span class="o">=</span> <span class="n">WAL</span><span class="p">;</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="2-全文検索full-text-search">2. 全文検索（Full-Text Search）</h3>
+
+<p>SQLite は全文検索にも対応しているので、例えば日記アプリなどでオフラインでも簡単に条件を含むエントリーを検索できます。</p>
+
+<h4 id="利用可能な全文検索モジュール">利用可能な全文検索モジュール：</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">FTS3</code> / <code class="language-plaintext highlighter-rouge">FTS4</code>: シンプルな全文検索</li>
+  <li><code class="language-plaintext highlighter-rouge">FTS5</code>: より高速で柔軟（推奨）</li>
+</ul>
+
+<h4 id="fts5-の使用例">FTS5 の使用例：</h4>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">CREATE</span> <span class="n">VIRTUAL</span> <span class="k">TABLE</span> <span class="n">documents</span> <span class="k">USING</span> <span class="n">fts5</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">content</span><span class="p">);</span>
+
+<span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">documents</span> <span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+<span class="k">VALUES</span> <span class="p">(</span><span class="s1">'Hello'</span><span class="p">,</span> <span class="s1">'This is a test document'</span><span class="p">);</span>
+
+<span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">documents</span> <span class="k">WHERE</span> <span class="n">content</span> <span class="k">MATCH</span> <span class="s1">'test'</span><span class="p">;</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="3-json-サポート">3. <strong>JSON サポート</strong></h3>
+
+<p>SQLite は JSON の保存と操作にも対応しています。</p>
+
+<h4 id="主な-json-関数sqlite-338-推奨">主な JSON 関数（SQLite 3.38+ 推奨）：</h4>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- JSONオブジェクトから値を取得</span>
+<span class="k">SELECT</span> <span class="n">json_extract</span><span class="p">(</span><span class="s1">'{"user": {"id": 1}}'</span><span class="p">,</span> <span class="s1">'$.user.id'</span><span class="p">);</span>  <span class="c1">-- → 1</span>
+
+<span class="c1">-- 値の更新</span>
+<span class="k">SELECT</span> <span class="n">json_set</span><span class="p">(</span><span class="s1">'{"a":1}'</span><span class="p">,</span> <span class="s1">'$.a'</span><span class="p">,</span> <span class="mi">100</span><span class="p">);</span>  <span class="c1">-- → {"a":100}</span>
+
+<span class="c1">-- オブジェクトの整形</span>
+<span class="k">SELECT</span> <span class="n">json_object</span><span class="p">(</span><span class="s1">'name'</span><span class="p">,</span> <span class="s1">'Alice'</span><span class="p">,</span> <span class="s1">'age'</span><span class="p">,</span> <span class="mi">30</span><span class="p">);</span>  <span class="c1">-- → {"name":"Alice","age":30}</span>
+</code></pre></div></div>
+
+<p>一応JSONにも対応していますが、PostgreSQL よりも型が緩いです。</p>
+
+<hr />
+
+<h3 id="4-ユーザー認証権限管理がない">4. <strong>ユーザー・認証・権限管理がない</strong></h3>
+
+<p>SQLiteにはユーザーやロールという概念がないので、sqliteファイル自体にchmod、chownなどで権限をつける場合があります。</p>
+
+<hr />]]></content><author><name></name></author><category term="blog" /><category term="sqlite" /><summary type="html"><![CDATA[sqlite]]></summary></entry><entry><title type="html">GitHubでの複数アカウント登録</title><link href="https://hoge-code.github.io/md/posts/2025-03-16-github-multi-account" rel="alternate" type="text/html" title="GitHubでの複数アカウント登録" /><published>2025-03-16T03:00:00+00:00</published><updated>2025-03-16T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/github-multi-account</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-03-16-github-multi-account"><![CDATA[<p>GitHubで複数アカウントを登録する際にいくつかの問題に直面したため、忘備録として残しておきます。基本的な内容ですが、登録したのがかなり前で、忘れており、忘れやすいない内容のため、記事に残しておきます。</p>
 
 <p><strong>目次</strong></p>
 <ul id="markdown-toc">
@@ -121,13 +1054,13 @@ Host github.com-Account2
 
 <p><strong>目次</strong></p>
 <ul id="markdown-toc">
-  <li><a href="#1-workflows" id="markdown-toc-1-workflows">1. <strong>Workflows</strong></a></li>
-  <li><a href="#2-notebooks" id="markdown-toc-2-notebooks">2. <strong>Notebooks</strong></a></li>
-  <li><a href="#3-environment-variables" id="markdown-toc-3-environment-variables">3. <strong>Environment Variables</strong></a></li>
-  <li><a href="#4-warp-drive" id="markdown-toc-4-warp-drive">4. <strong>Warp Drive</strong></a></li>
-  <li><a href="#5-actions" id="markdown-toc-5-actions">5. <strong>Actions</strong></a></li>
-  <li><a href="#6-sessions" id="markdown-toc-6-sessions">6. <strong>Sessions</strong></a></li>
-  <li><a href="#7-launch-configurations" id="markdown-toc-7-launch-configurations">7. <strong>Launch Configurations</strong></a></li>
+  <li><a href="#1-workflows" id="markdown-toc-1-workflows">1. Workflows</a></li>
+  <li><a href="#2-notebooks" id="markdown-toc-2-notebooks">2. Notebooks</a></li>
+  <li><a href="#3-environment-variables" id="markdown-toc-3-environment-variables">3. Environment Variables</a></li>
+  <li><a href="#4-warp-drive" id="markdown-toc-4-warp-drive">4. Warp Drive</a></li>
+  <li><a href="#5-actions" id="markdown-toc-5-actions">5. Actions</a></li>
+  <li><a href="#6-sessions" id="markdown-toc-6-sessions">6. Sessions</a></li>
+  <li><a href="#7-launch-configurations" id="markdown-toc-7-launch-configurations">7. Launch Configurations</a></li>
   <li><a href="#感想" id="markdown-toc-感想">感想</a></li>
 </ul>
 
@@ -135,11 +1068,11 @@ Host github.com-Account2
 
 <p><img src="/md/assets/images/warp-palette.png" alt="warp-palette" /></p>
 
-<h3 id="1-workflows">1. <strong>Workflows</strong></h3>
+<h3 id="1-workflows">1. Workflows</h3>
 
 <p><strong>Workflows</strong>は、よく使うコマンドを事前に登録できる機能です。プレースホルダやエイリアス機能もあり、長いコマンドや忘れがちなコマンドを簡単に呼び出すことができます。</p>
 
-<h3 id="2-notebooks">2. <strong>Notebooks</strong></h3>
+<h3 id="2-notebooks">2. Notebooks</h3>
 
 <p><strong>Notebooks</strong>は、Markdown形式でメモやコマンドを記述できる機能です。この機能を使うと、コードブロックを<code class="language-plaintext highlighter-rouge">Ctrl + ↑</code>または<code class="language-plaintext highlighter-rouge">Ctrl + ↓</code>で簡単に移動でき、エンターを押すとコマンドが自動で入力されます。Markdown形式なので、例えばChatGPTにコマンドスニペットを求めて、そのまま貼り付けて実行することができます。</p>
 
@@ -147,23 +1080,23 @@ Host github.com-Account2
 
 <p><img src="/md/assets/images/warp-notebook.png" alt="warp-notebook" /></p>
 
-<h3 id="3-environment-variables">3. <strong>Environment Variables</strong></h3>
+<h3 id="3-environment-variables">3. Environment Variables</h3>
 
 <p><strong>環境変数</strong>を設定することで、例えばAPIのURLなどを簡単に管理できます。これにより、<code class="language-plaintext highlighter-rouge">curl</code>でそのURLを簡単に呼び出せるようになったり、<strong>Workflows</strong>でプレースホルダとして環境変数を使うこともできます。</p>
 
-<h3 id="4-warp-drive">4. <strong>Warp Drive</strong></h3>
+<h3 id="4-warp-drive">4. Warp Drive</h3>
 
 <p><strong>Warp Drive</strong>は、上記のワークフローやノートブックを保存しておけるドライブ機能です。さらに、同期が可能で、<strong>YAML形式</strong>でのインポート・エクスポートもサポートしています。この機能を使えば、複数のマシンで状態を共有できそうです。</p>
 
-<h3 id="5-actions">5. <strong>Actions</strong></h3>
+<h3 id="5-actions">5. Actions</h3>
 
 <p><strong>Actions</strong>は、VSCodeのコマンドパレットのような機能です。コマンドを簡単に検索できます。</p>
 
-<h3 id="6-sessions">6. <strong>Sessions</strong></h3>
+<h3 id="6-sessions">6. Sessions</h3>
 
 <p><strong>Sessions</strong>は、現在のターミナルセッションを他のユーザーと共有できる機能です。<strong>tmux</strong>のように、セッションを共有できます。</p>
 
-<h3 id="7-launch-configurations">7. <strong>Launch Configurations</strong></h3>
+<h3 id="7-launch-configurations">7. Launch Configurations</h3>
 
 <p><strong>Launch Configurations</strong>では、現在のタブの状態をYAML形式で出力でき、簡単に復元することができます。</p>
 
@@ -171,542 +1104,4 @@ Host github.com-Account2
 
 <p>特に<strong>Notebooks</strong>機能が便利だと感じました。よく忘れてしまうGitやSSHのコマンドを、ChatGPTに質問してその回答をコピペするだけで簡単に呼び出すことができました。</p>
 
-<p>また、AI機能などはまだ試していないので、今後試してみたいと思っています。</p>]]></content><author><name></name></author><category term="blog" /><category term="ツール" /><summary type="html"><![CDATA[Warp]]></summary></entry><entry><title type="html">はてなブログからJekyllに移行してみる</title><link href="https://hoge-code.github.io/md/posts/2025-03-13-jekyll-blog-copy" rel="alternate" type="text/html" title="はてなブログからJekyllに移行してみる" /><published>2025-03-13T03:00:00+00:00</published><updated>2025-03-13T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/jekyll-blog%20copy</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-03-13-jekyll-blog-copy"><![CDATA[<p>はてなブログからJekyllに移行する際、いくつかの点で躓きました。<code class="language-plaintext highlighter-rouge">ruby</code>やSSGにあまり慣れていなかったため、セットアップに多少時間がかかってしまいました。移行を決めたきっかけとして、はてなブログでは何故か記事を物理的に削除できなかったり、mdの編集がしづらかったりといった問題があり、<code class="language-plaintext highlighter-rouge">git</code>リポジトリでmdを管理できる環境にしたいと考えたからです。</p>
-
-<p><strong>目次</strong></p>
-<ul id="markdown-toc">
-  <li><a href="#jekyllのメリット" id="markdown-toc-jekyllのメリット">Jekyllのメリット</a></li>
-  <li><a href="#苦労した点" id="markdown-toc-苦労した点">苦労した点</a></li>
-  <li><a href="#結論" id="markdown-toc-結論">結論</a></li>
-</ul>
-
-<h3 id="jekyllのメリット">Jekyllのメリット</h3>
-
-<ul>
-  <li><strong>プラグインでUIのカスタマイズが可能</strong></li>
-  <li><strong>ローカル環境でサイトを確認できる</strong> (<code class="language-plaintext highlighter-rouge">bundle exec jekyll serve</code> で確認)</li>
-  <li><strong>ウェブ上でMarkdownを編集する必要がなく、CI/CDで簡単に更新できる</strong></li>
-</ul>
-
-<p>これらのメリットがあり、Jekyllを使うことに決めました。</p>
-
-<h3 id="苦労した点">苦労した点</h3>
-
-<h4 id="1-そもそもrubyが分からない">1. そもそも<code class="language-plaintext highlighter-rouge">ruby</code>が分からない</h4>
-
-<p><code class="language-plaintext highlighter-rouge">bundle exec jekyll serve</code>や<code class="language-plaintext highlighter-rouge">gem install</code>などのコマンドすら知りませんでした。しかし、最近Windows用にもAIが搭載されたターミナル<code class="language-plaintext highlighter-rouge">warp</code>が登場したことで、VSCodeのコードスニペットのように一度登録すれば簡単にコマンドを呼び出せるようになり、少し楽になりました。</p>
-
-<h4 id="2-htmlテンプレートエンジン--ssgに慣れていない">2. HTMLテンプレートエンジン + SSGに慣れていない</h4>
-
-<p>フロントエンドで<code class="language-plaintext highlighter-rouge">React</code>のコンポーネントベースに慣れすぎていたため、昔ながらのテンプレートエンジンの構文を思い出すのにも時間がかかりました。</p>
-
-<h4 id="3-jekyllのプラグイン設定">3. <code class="language-plaintext highlighter-rouge">jekyll</code>のプラグイン設定</h4>
-
-<p>SSGサイトを構築する際に、以下のプラグインを使用しました。</p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">jekyll-paginate</code></li>
-  <li><code class="language-plaintext highlighter-rouge">jekyll-theme-cayman</code></li>
-  <li><code class="language-plaintext highlighter-rouge">jekyll-archives</code></li>
-</ul>
-
-<p>これらのプラグインの設定に少し手間がかかりました。</p>
-
-<h5 id="jekyll-theme-cayman">jekyll-theme-cayman</h5>
-
-<p>このプラグインはSCSSを使用しているため、以下の手順で設定を行う必要がありました。</p>
-
-<ol>
-  <li><code class="language-plaintext highlighter-rouge">/assets/css/style.scss</code>ファイルで<code class="language-plaintext highlighter-rouge">@import "jekyll-theme-cayman"</code>をインポート</li>
-  <li><code class="language-plaintext highlighter-rouge">index.html</code>でビルドされたCSSファイルをインポート</li>
-  <li><code class="language-plaintext highlighter-rouge">_config.yml</code>ファイルでSCSSのビルド情報を設定</li>
-</ol>
-
-<p>これらを正しく設定しないと、テーマがうまく反映されませんでした。</p>
-
-<h5 id="jekyll-archives">jekyll-archives</h5>
-
-<p>タグや日付ごとの表示が可能なプラグインですが、どうやら<code class="language-plaintext highlighter-rouge">github-pages</code>では動作しないようです。Jekyllは本来、<code class="language-plaintext highlighter-rouge">github-actions</code>を自動的に使うことができるのが特徴ですが、<code class="language-plaintext highlighter-rouge">github-pages</code>に対応させるためには手動でCI/CDを設定しなければならず、結果的に自分でCI/CDを構築する羽目になりました。</p>
-
-<p>また、<code class="language-plaintext highlighter-rouge">github-pages</code>自体の設定を久々に行ったため、公開先のブランチを変更する必要があることすら忘れており、少し手間取りました。</p>
-
-<h3 id="結論">結論</h3>
-
-<p>色々と面倒な点がありましたが、特にローカル環境でmdを編集できる点が大きな利点だと感じました。デメリットとしては、無料枠だとパブリックリポジトリにする必要があることくらいかと思います。</p>]]></content><author><name></name></author><category term="blog" /><category term="開発" /><summary type="html"><![CDATA[Jekyll + GitHubPages]]></summary></entry><entry><title type="html">APIのレスポンス形式を統一する</title><link href="https://hoge-code.github.io/md/posts/2025-02-21-api-response" rel="alternate" type="text/html" title="APIのレスポンス形式を統一する" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/api-response</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-02-21-api-response"><![CDATA[<p>APIレスポンスの形式を統一する方法を考えてみます。</p>
-
-<p><strong>目次</strong></p>
-<ul id="markdown-toc">
-  <li><a href="#fastapiの場合" id="markdown-toc-fastapiの場合">FastAPIの場合</a></li>
-  <li><a href="#expressの場合" id="markdown-toc-expressの場合">Expressの場合</a></li>
-  <li><a href="#まとめ" id="markdown-toc-まとめ">まとめ</a></li>
-</ul>
-
-<h3 id="fastapiの場合">FastAPIの場合</h3>
-
-<p>FastAPIはエンドポイントの<code class="language-plaintext highlighter-rouge">response_model</code>のDTOクラスの構造をもとにOASドキュメントを生成しますが、ミドルウェアを使って、レスポンス後に返却するJSONの構造を変更すると上手く表示されないのでDTOを使って実装してみます。</p>
-
-<h4 id="dtoの生成">DTOの生成</h4>
-<p>適当な<code class="language-plaintext highlighter-rouge">Item</code>と汎用的な<code class="language-plaintext highlighter-rouge">ResponseDTO</code>を作成します。<code class="language-plaintext highlighter-rouge">ResponseDTO</code>も本来ならステータスコードや、エラーならエラーメッセージを詳細に含めるべきですが、簡略化します。</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">typing</span> <span class="kn">import</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">List</span>
-<span class="kn">from</span> <span class="n">fastapi</span> <span class="kn">import</span> <span class="n">FastAPI</span>
-<span class="kn">from</span> <span class="n">pydantic</span> <span class="kn">import</span> <span class="n">BaseModel</span>
-
-<span class="c1"># 総称型の定義
-</span><span class="n">T</span> <span class="o">=</span> <span class="nc">TypeVar</span><span class="p">(</span><span class="sh">'</span><span class="s">T</span><span class="sh">'</span><span class="p">)</span>  <span class="c1"># Tは任意の型
-</span>
-<span class="k">class</span> <span class="nc">ResponseDTO</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">BaseModel</span><span class="p">):</span>
-    <span class="n">success</span><span class="p">:</span> <span class="nb">bool</span>
-    <span class="n">data</span><span class="p">:</span> <span class="n">T</span>
-    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
-
-<span class="c1"># レスポンス用のDTOクラス
-</span><span class="k">class</span> <span class="nc">Item</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
-    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
-    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
-</code></pre></div></div>
-
-<h4 id="エンドポイントの作成">エンドポイントの作成</h4>
-<p>こちらも本来ならクエリパラメータなどを使ってページネーションを実装し、それらのメタデータもレスポンスに含めるべきですが簡略化します。</p>
-<div class="language-typescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">app</span> <span class="o">=</span> <span class="nc">FastAPI</span><span class="p">()</span>
-
-<span class="p">@</span><span class="nd">app</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">"</span><span class="s2">/items</span><span class="dl">"</span><span class="p">,</span> <span class="nx">response_model</span><span class="o">=</span><span class="nx">ResponseDTO</span><span class="p">[</span><span class="nx">List</span><span class="p">[</span><span class="nx">Item</span><span class="p">]])</span>
-<span class="k">async</span> <span class="nx">def</span> <span class="nf">get_items</span><span class="p">():</span>
-    <span class="nx">items</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="nc">Item</span><span class="p">(</span><span class="nx">id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nx">name</span><span class="o">=</span><span class="dl">"</span><span class="s2">Item 1</span><span class="dl">"</span><span class="p">),</span>
-        <span class="nc">Item</span><span class="p">(</span><span class="nx">id</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="nx">name</span><span class="o">=</span><span class="dl">"</span><span class="s2">Item 2</span><span class="dl">"</span><span class="p">)</span>
-    <span class="p">]</span>
-    <span class="k">return</span> <span class="nc">ResponseDTO</span><span class="p">(</span><span class="nx">success</span><span class="o">=</span><span class="nx">True</span><span class="p">,</span> <span class="nx">data</span><span class="o">=</span><span class="nx">items</span><span class="p">,</span> <span class="nx">message</span><span class="o">=</span><span class="dl">"</span><span class="s2">Items fetched successfully</span><span class="dl">"</span><span class="p">)</span>
-</code></pre></div></div>
-
-<h3 id="expressの場合">Expressの場合</h3>
-<p>Expressでも一応<code class="language-plaintext highlighter-rouge">Response</code>の型定義にDTOを使うこともできますが、OASを使わないし、ミドルウェアで作成してみます。この際、<code class="language-plaintext highlighter-rouge">X-Forwarded-For</code>ヘッダーを消し、エラーレスポンスは標準の<code class="language-plaintext highlighter-rouge">RFC7807</code>形式で返却するように実装してみます。以下がサンプルコードです。</p>
-
-<div class="language-typescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">Request</span><span class="p">,</span> <span class="nx">Response</span><span class="p">,</span> <span class="nx">NextFunction</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">express</span><span class="dl">'</span><span class="p">;</span>
-
-<span class="c1">// 成功時のレスポンス形式</span>
-<span class="kr">interface</span> <span class="nx">SuccessResponse</span> <span class="p">{</span>
-  <span class="nl">status</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
-  <span class="nl">data</span><span class="p">:</span> <span class="kr">any</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="c1">// エラーレスポンスのRFC7807形式</span>
-<span class="kr">interface</span> <span class="nx">ErrorResponse</span> <span class="p">{</span>
-  <span class="nl">type</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
-  <span class="nl">title</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
-  <span class="nl">status</span><span class="p">:</span> <span class="kr">number</span><span class="p">;</span>
-  <span class="nl">detail</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="kd">const</span> <span class="nx">responseMiddleware</span> <span class="o">=</span> <span class="p">(</span><span class="nx">req</span><span class="p">:</span> <span class="nx">Request</span><span class="p">,</span> <span class="nx">res</span><span class="p">:</span> <span class="nx">Response</span><span class="p">,</span> <span class="nx">next</span><span class="p">:</span> <span class="nx">NextFunction</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
-  <span class="kd">const</span> <span class="nx">originalJson</span> <span class="o">=</span> <span class="nx">res</span><span class="p">.</span><span class="nx">json</span><span class="p">;</span>
-
-  <span class="nx">res</span><span class="p">.</span><span class="nx">json</span> <span class="o">=</span> <span class="p">(</span><span class="na">body</span><span class="p">:</span> <span class="kr">any</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
-    <span class="c1">// X-Forwarded-Forを消す</span>
-    <span class="nx">res</span><span class="p">.</span><span class="nf">removeHeader</span><span class="p">(</span><span class="dl">'</span><span class="s1">X-Forwarded-For</span><span class="dl">'</span><span class="p">);</span>
-
-    <span class="k">if </span><span class="p">(</span><span class="nx">res</span><span class="p">.</span><span class="nx">statusCode</span> <span class="o">&gt;=</span> <span class="mi">200</span> <span class="o">&amp;&amp;</span> <span class="nx">res</span><span class="p">.</span><span class="nx">statusCode</span> <span class="o">&lt;</span> <span class="mi">300</span><span class="p">)</span> <span class="p">{</span>
-      <span class="c1">// 成功時のレスポンス形式</span>
-      <span class="kd">const</span> <span class="na">successResponse</span><span class="p">:</span> <span class="nx">SuccessResponse</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="na">status</span><span class="p">:</span> <span class="dl">'</span><span class="s1">success</span><span class="dl">'</span><span class="p">,</span>
-        <span class="na">data</span><span class="p">:</span> <span class="nx">body</span><span class="p">,</span>
-      <span class="p">};</span>
-      <span class="k">return</span> <span class="nx">originalJson</span><span class="p">.</span><span class="nf">call</span><span class="p">(</span><span class="nx">res</span><span class="p">,</span> <span class="nx">successResponse</span><span class="p">);</span>
-    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-      <span class="c1">// 失敗時のRFC7807形式</span>
-      <span class="kd">const</span> <span class="na">errorResponse</span><span class="p">:</span> <span class="nx">ErrorResponse</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">about:blank</span><span class="dl">'</span><span class="p">,</span>
-        <span class="na">title</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Error</span><span class="dl">'</span><span class="p">,</span>
-        <span class="na">status</span><span class="p">:</span> <span class="nx">res</span><span class="p">.</span><span class="nx">statusCode</span><span class="p">,</span>
-        <span class="na">detail</span><span class="p">:</span> <span class="nx">body</span><span class="p">.</span><span class="nx">message</span> <span class="o">||</span> <span class="dl">'</span><span class="s1">Unknown error</span><span class="dl">'</span><span class="p">,</span>
-      <span class="p">};</span>
-      <span class="k">return</span> <span class="nx">originalJson</span><span class="p">.</span><span class="nf">call</span><span class="p">(</span><span class="nx">res</span><span class="p">,</span> <span class="nx">errorResponse</span><span class="p">);</span>
-    <span class="p">}</span>
-  <span class="p">};</span>
-
-  <span class="nf">next</span><span class="p">();</span>
-<span class="p">};</span>
-
-<span class="k">export</span> <span class="k">default</span> <span class="nx">responseMiddleware</span><span class="p">;</span>
-</code></pre></div></div>
-
-<h3 id="まとめ">まとめ</h3>
-<p>上記は単純な例ですが、一度レスポンス形式を統一する処理を書いておけば繰り返し使えそうです。</p>]]></content><author><name></name></author><category term="blog" /><category term="FastAPI" /><category term="Nodejs" /><summary type="html"><![CDATA[FastAPIやNode.jsでレスポンス形式を統一する]]></summary></entry><entry><title type="html">XAトランザクション</title><link href="https://hoge-code.github.io/md/posts/2025-02-21-aws" rel="alternate" type="text/html" title="XAトランザクション" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/aws</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-02-21-aws"><![CDATA[<p>マイクロサービス間で整合性を保つには、CAP定理でいうC(整合性)の一部を妥協して、最終整合性を維持できるサーガパターンを<code class="language-plaintext highlighter-rouge">AWS StepFunctions</code>などを使用して実装するのが一般的らしいですが、せっかくなので分散トランザクションについても簡単に試してみます。</p>
-
-<p><strong>目次</strong></p>
-<ul id="markdown-toc">
-  <li><a href="#サンプルの流れ" id="markdown-toc-サンプルの流れ">サンプルの流れ</a></li>
-  <li><a href="#テーブルの用意" id="markdown-toc-テーブルの用意">テーブルの用意</a></li>
-  <li><a href="#まとめ" id="markdown-toc-まとめ">まとめ</a></li>
-</ul>
-
-<h3 id="サンプルの流れ">サンプルの流れ</h3>
-<p>複数のmySQLデータベースを用意し、XAトランザクションを使用します。両方のデータベースで操作が成功すればコミットし、どちらかが失敗すればロールバックします。また、<code class="language-plaintext highlighter-rouge">my.cnf</code>ファイルで使用されているMySQLのエンジンが<code class="language-plaintext highlighter-rouge">InnoDB</code>であることを確認します。</p>
-
-<h3 id="テーブルの用意">テーブルの用意</h3>
-<p><code class="language-plaintext highlighter-rouge">docker-compose.yml</code>などを使って別のポートでmySQLサーバを二つ起動し、テーブルを作成します。</p>
-
-<h4 id="データベース1-db1"><strong>データベース1: <code class="language-plaintext highlighter-rouge">db1</code></strong></h4>
-<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">CREATE</span> <span class="k">DATABASE</span> <span class="n">db1</span><span class="p">;</span>
-<span class="n">USE</span> <span class="n">db1</span><span class="p">;</span>
-
-<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">account_balance</span> <span class="p">(</span>
-    <span class="n">account_id</span> <span class="nb">INT</span> <span class="k">PRIMARY</span> <span class="k">KEY</span><span class="p">,</span>
-    <span class="n">balance</span> <span class="nb">DECIMAL</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-<span class="p">);</span>
-
-<span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">account_balance</span> <span class="p">(</span><span class="n">account_id</span><span class="p">,</span> <span class="n">balance</span><span class="p">)</span> <span class="k">VALUES</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1000</span><span class="p">.</span><span class="mi">00</span><span class="p">);</span>
-</code></pre></div></div>
-
-<h4 id="データベース2-db2"><strong>データベース2: <code class="language-plaintext highlighter-rouge">db2</code></strong></h4>
-<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">CREATE</span> <span class="k">DATABASE</span> <span class="n">db2</span><span class="p">;</span>
-<span class="n">USE</span> <span class="n">db2</span><span class="p">;</span>
-
-<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">transaction_log</span> <span class="p">(</span>
-    <span class="n">transaction_id</span> <span class="nb">INT</span> <span class="n">AUTO_INCREMENT</span> <span class="k">PRIMARY</span> <span class="k">KEY</span><span class="p">,</span>
-    <span class="n">account_id</span> <span class="nb">INT</span><span class="p">,</span>
-    <span class="n">amount</span> <span class="nb">DECIMAL</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
-    <span class="n">created_at</span> <span class="nb">TIMESTAMP</span> <span class="k">DEFAULT</span> <span class="k">CURRENT_TIMESTAMP</span>
-<span class="p">);</span>
-
-<span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">transaction_log</span> <span class="p">(</span><span class="n">account_id</span><span class="p">,</span> <span class="n">amount</span><span class="p">)</span> <span class="k">VALUES</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">.</span><span class="mi">00</span><span class="p">);</span>
-</code></pre></div></div>
-
-<h4 id="xaトランザクションを使用">XAトランザクションを使用</h4>
-<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- db1 で XA トランザクションを開始</span>
-<span class="n">XA</span> <span class="k">START</span> <span class="s1">'txn1'</span><span class="p">;</span>
-<span class="k">UPDATE</span> <span class="n">db1</span><span class="p">.</span><span class="n">account_balance</span> 
-<span class="k">SET</span> <span class="n">balance</span> <span class="o">=</span> <span class="n">balance</span> <span class="o">-</span> <span class="mi">100</span><span class="p">.</span><span class="mi">00</span> 
-<span class="k">WHERE</span> <span class="n">account_id</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-<span class="n">XA</span> <span class="k">END</span> <span class="s1">'txn1'</span><span class="p">;</span>
-<span class="n">XA</span> <span class="k">PREPARE</span> <span class="s1">'txn1'</span><span class="p">;</span>
-
-<span class="c1">-- db2 で XA トランザクションを開始</span>
-<span class="n">XA</span> <span class="k">START</span> <span class="s1">'txn2'</span><span class="p">;</span>
-<span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">db2</span><span class="p">.</span><span class="n">transaction_log</span> <span class="p">(</span><span class="n">account_id</span><span class="p">,</span> <span class="n">amount</span><span class="p">)</span> 
-<span class="k">VALUES</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">100</span><span class="p">.</span><span class="mi">00</span><span class="p">);</span>
-<span class="n">XA</span> <span class="k">END</span> <span class="s1">'txn2'</span><span class="p">;</span>
-<span class="n">XA</span> <span class="k">PREPARE</span> <span class="s1">'txn2'</span><span class="p">;</span>
-
-<span class="c1">-- すべてのトランザクションをコミット</span>
-<span class="n">XA</span> <span class="k">COMMIT</span> <span class="s1">'txn1'</span><span class="p">;</span>
-<span class="n">XA</span> <span class="k">COMMIT</span> <span class="s1">'txn2'</span><span class="p">;</span>
-
-<span class="c1">-- ロールバック例: 失敗があれば以下を実行</span>
-<span class="c1">-- XA ROLLBACK 'txn1';</span>
-<span class="c1">-- XA ROLLBACK 'txn2';</span>
-</code></pre></div></div>
-
-<p>上記を実行すると、すべての操作が正常に終了した場合、<code class="language-plaintext highlighter-rouge">XA COMMIT</code>でトランザクションを確定され、失敗があった場合、<code class="language-plaintext highlighter-rouge">XA ROLLBACK</code>でトランザクションを取り消されます。</p>
-
-<h3 id="まとめ">まとめ</h3>
-<p>上記は非常に単純なSQLのサンプルですが、それでも単一DBのトランザクションと比較して面倒になりました。プログラムで実装するとなると、さらに面倒になりそうです。パフォーマンスも悪いですし、よほどの一貫性が求められるような場面でもなければ、大人しくサーガを使って補填トランザクションで実装したほうが楽だと感じました。</p>]]></content><author><name></name></author><category term="blog" /><category term="MySQL" /><summary type="html"><![CDATA[MySQL + XAトランザクション]]></summary></entry><entry><title type="html">ClientCredential認証</title><link href="https://hoge-code.github.io/md/posts/2025-02-21-client-credential" rel="alternate" type="text/html" title="ClientCredential認証" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/client-credential</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-02-21-client-credential"><![CDATA[<p>OAuth認証のうち、<br /></p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">Resource Owner Password Credentials Grant</code>
-    <ul>
-      <li>モバイルアプリで使われるらしいがよく分からない</li>
-    </ul>
-  </li>
-  <li><code class="language-plaintext highlighter-rouge">Implicit Grant</code>
-    <ul>
-      <li>危険なので非推奨</li>
-    </ul>
-  </li>
-  <li><code class="language-plaintext highlighter-rouge">Authorization Code Grant</code>
-    <ul>
-      <li><code class="language-plaintext highlighter-rouge">amplify + Cognito</code>や<code class="language-plaintext highlighter-rouge">Firebase Authentication</code>を使えばバックエンドで<code class="language-plaintext highlighter-rouge">/callback</code>エンドポイントすら作成せずにフロントエンドのみで完結できてしまう</li>
-    </ul>
-  </li>
-</ul>
-
-<p>というわけで最後の<code class="language-plaintext highlighter-rouge">Client Credentials</code>認証を少しだけ理解できたような気がするのでまとめてみます。</p>
-
-<p><strong>目次</strong></p>
-<ul id="markdown-toc">
-  <li><a href="#client-credentials認証の流れ" id="markdown-toc-client-credentials認証の流れ">Client Credentials認証の流れ</a></li>
-  <li><a href="#まとめ" id="markdown-toc-まとめ">まとめ</a></li>
-</ul>
-
-<h3 id="client-credentials認証の流れ">Client Credentials認証の流れ</h3>
-<p><code class="language-plaintext highlighter-rouge">Keycloak</code>の場合は以下のような手順になります。</p>
-<ul>
-  <li><strong>レルムを作成</strong></li>
-  <li>
-    <p><strong>クライアント登録</strong>
-クライアントを作成し、<code class="language-plaintext highlighter-rouge">Client Credentials</code>フローを有効化。</p>
-  </li>
-  <li>
-    <p><strong>クライアントIDとクライアントシークレットの取得</strong> 
-登録したクライアントの設定から、<code class="language-plaintext highlighter-rouge">Client ID</code>と<code class="language-plaintext highlighter-rouge">Client Secret</code>を取得。</p>
-  </li>
-  <li><strong>アクセストークンのリクエスト</strong><br />
-<code class="language-plaintext highlighter-rouge">Keycloak</code>のトークンエンドポイントにリクエストを送信。
-    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>POST /realms/&lt;realm-name&gt;/protocol/openid-connect/token
-Content-Type: application/x-www-form-urlencoded
-
-<span class="nv">client_id</span><span class="o">=</span>&lt;client-id&gt;&amp;client_secret<span class="o">=</span>&lt;client-secret&gt;&amp;grant_type<span class="o">=</span>client_credentials
-</code></pre></div>    </div>
-  </li>
-  <li><strong>APIリクエストの実行</strong><br />
-アクセストークンを使用して、保護されたリソースやAPIにアクセス。<br />
-例：
-    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET /protected-api
-Authorization: Bearer &lt;access_token&gt;
-</code></pre></div>    </div>
-    <p>プログラムで実装する場合は、トークンが存在しない場合に<code class="language-plaintext highlighter-rouge">keycloak</code>から取得し、そのトークンをヘッダーに設定して他のマイクロサービスに送信するという流れになりそうです。</p>
-    <div class="language-typescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nx">axios</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">axios</span><span class="dl">'</span><span class="p">;</span>
-
-<span class="kd">let</span> <span class="nx">accessToken</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
-
-<span class="k">async</span> <span class="kd">function</span> <span class="nf">getToken</span><span class="p">()</span> <span class="p">{</span>
-<span class="kd">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">axios</span><span class="p">.</span><span class="nf">post</span><span class="p">(</span><span class="dl">'</span><span class="s1">https://&lt;keycloak-server&gt;/realms/&lt;realm-name&gt;/protocol/openid-connect/token</span><span class="dl">'</span><span class="p">,</span> <span class="k">new</span> <span class="nc">URLSearchParams</span><span class="p">({</span>
-  <span class="na">client_id</span><span class="p">:</span> <span class="dl">'</span><span class="s1">&lt;client-id&gt;</span><span class="dl">'</span><span class="p">,</span>
-  <span class="na">client_secret</span><span class="p">:</span> <span class="dl">'</span><span class="s1">&lt;client-secret&gt;</span><span class="dl">'</span><span class="p">,</span>
-  <span class="na">grant_type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">client_credentials</span><span class="dl">'</span>
-<span class="p">}));</span>
-<span class="nx">accessToken</span> <span class="o">=</span> <span class="nx">response</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">access_token</span><span class="p">;</span>
-<span class="k">return</span> <span class="nx">accessToken</span><span class="p">;</span>
-<span class="p">}</span>
-  
-<span class="k">async</span> <span class="kd">function</span> <span class="nf">callMicroservice</span><span class="p">()</span> <span class="p">{</span>
-<span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">accessToken</span><span class="p">)</span> <span class="p">{</span>
-  <span class="k">await</span> <span class="nf">getToken</span><span class="p">();</span>
-<span class="p">}</span>
-
-<span class="kd">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">axios</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">'</span><span class="s1">https://&lt;microservice-url&gt;/api/resource</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span>
-  <span class="na">headers</span><span class="p">:</span> <span class="p">{</span>
-    <span class="na">Authorization</span><span class="p">:</span> <span class="s2">`Bearer </span><span class="p">${</span><span class="nx">accessToken</span><span class="p">}</span><span class="s2">`</span>
-  <span class="p">}</span>
-<span class="p">});</span>
-
-<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">data</span><span class="p">);</span>
-<span class="p">}</span>
-  
-<span class="nf">callMicroservice</span><span class="p">();</span>
-</code></pre></div>    </div>
-  </li>
-  <li><strong>サーバー側での検証</strong>
-サーバー側で<code class="language-plaintext highlighter-rouge">keycloak</code>の公開鍵エンドポイントから公開鍵を取得し、トークンを検証します。<code class="language-plaintext highlighter-rouge">keycloak</code>と<code class="language-plaintext highlighter-rouge">cognito</code>の公開鍵エンドポイントは以下のようになります。
-```</li>
-  <li>
-    <p>Keycloak公開鍵エンドポイント:<br />
-<code class="language-plaintext highlighter-rouge">https://&lt;keycloak-server&gt;/realms/&lt;realm-name&gt;/protocol/openid-connect/certs</code></p>
-  </li>
-  <li>Amazon Cognito公開鍵エンドポイント:<br />
-<code class="language-plaintext highlighter-rouge">https://cognito-idp.&lt;region&gt;.amazonaws.com/&lt;user-pool-id&gt;/.well-known/jwks.json</code>
-```
-<code class="language-plaintext highlighter-rouge">express</code>を使用したサンプルコードは以下のようになります。</li>
-</ul>
-
-<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nx">express</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">express</span><span class="dl">'</span><span class="p">;</span>
-<span class="k">import</span> <span class="nx">axios</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">axios</span><span class="dl">'</span><span class="p">;</span>
-<span class="k">import</span> <span class="nx">jwt</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">jsonwebtoken</span><span class="dl">'</span><span class="p">;</span>
-
-<span class="kd">const</span> <span class="nx">app</span> <span class="o">=</span> <span class="nf">express</span><span class="p">();</span>
-<span class="kd">const</span> <span class="nx">keycloakUrl</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">https://&lt;keycloak-server&gt;/realms/&lt;realm-name&gt;</span><span class="dl">'</span><span class="p">;</span>
-<span class="kd">let</span> <span class="nx">publicKey</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
-
-<span class="c1">// Keycloak公開鍵の取得</span>
-<span class="k">async</span> <span class="kd">function</span> <span class="nf">getPublicKey</span><span class="p">()</span> <span class="p">{</span>
-  <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">publicKey</span><span class="p">)</span> <span class="p">{</span>
-    <span class="kd">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">axios</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="s2">`</span><span class="p">${</span><span class="nx">keycloakUrl</span><span class="p">}</span><span class="s2">/protocol/openid-connect/certs`</span><span class="p">);</span>
-    <span class="kd">const</span> <span class="nx">keys</span> <span class="o">=</span> <span class="nx">response</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">keys</span><span class="p">;</span>
-    <span class="nx">publicKey</span> <span class="o">=</span> <span class="nx">keys</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">x5c</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span> <span class="c1">// 最初の鍵を使用 (通常、複数の鍵がある場合)</span>
-  <span class="p">}</span>
-  <span class="k">return</span> <span class="nx">publicKey</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="c1">// JWTを検証するミドルウェア</span>
-<span class="k">async</span> <span class="kd">function</span> <span class="nf">verifyToken</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">,</span> <span class="nx">next</span><span class="p">)</span> <span class="p">{</span>
-  <span class="k">try</span> <span class="p">{</span>
-    <span class="kd">const</span> <span class="nx">token</span> <span class="o">=</span> <span class="nx">req</span><span class="p">.</span><span class="nx">headers</span><span class="p">[</span><span class="dl">'</span><span class="s1">authorization</span><span class="dl">'</span><span class="p">]?.</span><span class="nf">split</span><span class="p">(</span><span class="dl">'</span><span class="s1"> </span><span class="dl">'</span><span class="p">)[</span><span class="mi">1</span><span class="p">];</span>
-
-    <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">token</span><span class="p">)</span> <span class="p">{</span>
-      <span class="k">return</span> <span class="nx">res</span><span class="p">.</span><span class="nf">status</span><span class="p">(</span><span class="mi">401</span><span class="p">).</span><span class="nf">send</span><span class="p">(</span><span class="dl">'</span><span class="s1">Token is required</span><span class="dl">'</span><span class="p">);</span>
-    <span class="p">}</span>
-
-    <span class="kd">const</span> <span class="nx">publicKey</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">getPublicKey</span><span class="p">();</span>
-    <span class="kd">const</span> <span class="nx">decoded</span> <span class="o">=</span> <span class="nx">jwt</span><span class="p">.</span><span class="nf">verify</span><span class="p">(</span><span class="nx">token</span><span class="p">,</span> <span class="s2">`-----BEGIN CERTIFICATE-----\n</span><span class="p">${</span><span class="nx">publicKey</span><span class="p">}</span><span class="s2">\n-----END CERTIFICATE-----`</span><span class="p">);</span>
-
-    <span class="nx">req</span><span class="p">.</span><span class="nx">user</span> <span class="o">=</span> <span class="nx">decoded</span><span class="p">;</span> <span class="c1">// ユーザー情報をリクエストオブジェクトに追加</span>
-    <span class="nf">next</span><span class="p">();</span>
-  <span class="p">}</span> <span class="k">catch </span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">res</span><span class="p">.</span><span class="nf">status</span><span class="p">(</span><span class="mi">401</span><span class="p">).</span><span class="nf">send</span><span class="p">(</span><span class="dl">'</span><span class="s1">Invalid or expired token</span><span class="dl">'</span><span class="p">);</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="c1">// ミドルウェアを使用</span>
-<span class="nx">app</span><span class="p">.</span><span class="nf">use</span><span class="p">(</span><span class="nx">verifyToken</span><span class="p">);</span>
-</code></pre></div></div>
-
-<h3 id="まとめ">まとめ</h3>
-<p><code class="language-plaintext highlighter-rouge">EKS</code>など<code class="language-plaintext highlighter-rouge">k8s</code>環境のマイクロサービス間認証では、<code class="language-plaintext highlighter-rouge">IAM</code>や<code class="language-plaintext highlighter-rouge">k8s</code>の<code class="language-plaintext highlighter-rouge">ServiceAcount</code>を使用する方法や、<code class="language-plaintext highlighter-rouge">AppMesh</code>などサービスメッシュを使用した<code class="language-plaintext highlighter-rouge">mTLS</code>が主流らしいですが、どちらも環境構築の時点で難しすぎるので、手軽な<code class="language-plaintext highlighter-rouge">Client Credential</code>認証について学習してみました。</p>]]></content><author><name></name></author><category term="blog" /><category term="Nodejs" /><summary type="html"><![CDATA[Node.js]]></summary></entry><entry><title type="html">hyperターミナルを設定してみる</title><link href="https://hoge-code.github.io/md/posts/2025-02-21-hyper" rel="alternate" type="text/html" title="hyperターミナルを設定してみる" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/hyper</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-02-21-hyper"><![CDATA[<p><a href="https://hyper.is/">Hyper</a>はElectronを使ったターミナルで、プラグインを使った拡張や、tmuxのようにマルチタブが使えるらしいです。正直に言うと、AI補完やコマンド履歴を使える<a href="https://www.warp.dev/">WARP</a>を使いたかったのですが、まだWindowsには対応していないのでHyperを使ってみることにしました。忘備録を兼ねて、セットアップ手順を書きます。</p>
-
-<p><strong>目次</strong></p>
-
-<h4 id="hyperをダウンロード">hyperをダウンロード</h4>
-<p>公式サイトにアクセスするか、chocolateyでインストールします。</p>
-
-<h4 id="設定ファイルを開く">設定ファイルを開く</h4>
-<p>デフォルトでは以下のような画面になっています。</p>
-
-<p><img src="/md/assets/images/hyper_default.png" alt="default" />
-文字が小さく、シェルもcmd.exeのデフォルトのままなので、スタイルを整えて、git bashを導入します。設定ファイルは左上のハンバーメニューから開けますが、デフォルトではJSファイルはテキストエディタで開かれてしまうので、vscodeで開かれるように注意する必要があります。hyper.jsは自分の環境では以下のパスにありました。
-<code class="language-plaintext highlighter-rouge">C:\Users\{username}\AppData\Roaming\Hyper\.hyper.js</code></p>
-
-<h4 id="hyperjsを編集する">.hyper.jsを編集する</h4>
-
-<ul>
-  <li>
-    <p><strong>configディレクティブ</strong>
-・fontsizeを12→16に変更
-・fontWeightをnormal→boldに変更</p>
-  </li>
-  <li>
-    <p><strong>shell</strong>
-デフォルトの空文字からgit bashのパスに変更
-この際、基本的なことですが、JSなので\をエスケープすることを忘れないようにします。</p>
-  </li>
-</ul>
-
-<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">shell:</span><span class="w"> </span><span class="err">'C:\\Program</span><span class="w"> </span><span class="err">Files\\Git\\bin\\bash.exe',</span><span class="w">
-</span></code></pre></div></div>
-
-<ul>
-  <li><strong>plugins</strong>
-pluginsは詳しくないが、適当に追加してみます。</li>
-</ul>
-
-<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">    </span><span class="err">plugins:</span><span class="w"> </span><span class="p">[</span><span class="w">
-        </span><span class="err">'hyper-snazzy'</span><span class="p">,</span><span class="w">
-        </span><span class="err">'hyper-statusline'</span><span class="p">,</span><span class="w">
-        </span><span class="err">'hyper-search'</span><span class="w">
-    </span><span class="p">]</span><span class="err">,</span><span class="w">
-</span></code></pre></div></div>
-
-<h4 id="編集後">編集後</h4>
-
-<p>以下のような見た目になりました。
-<img src="/md/assets/images/hyper.png" alt="default" /></p>
-
-<p>画面分割すると以下のようになります。
-<img src="/md/assets/images/hyper_tmux.png" alt="default" /></p>
-
-<h4 id="感想">感想</h4>
-
-<p>設定ファイルを編集することで簡単にスタイル変更やプラグイン追加ができるのは便利だと感じました。その一方で、git bashだけでは補完が利かないのでxonshなど他のシェルを試してみたくなりました。</p>]]></content><author><name></name></author><category term="blog" /><category term="ツール" /><summary type="html"><![CDATA[Hyper]]></summary></entry><entry><title type="html">MySQLで全文検索を試してみる</title><link href="https://hoge-code.github.io/md/posts/2025-02-21-mysql-full-search" rel="alternate" type="text/html" title="MySQLで全文検索を試してみる" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/mysql-full-search</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-02-21-mysql-full-search"><![CDATA[<p>Docker、VSCode(拡張機能はMySQLとDevContainer)、MySQLで全文検索を試してみます。RDBのLIKE検索は前方一致条件でない限りインデックスが利かないし、Elasticsearchを使ってCQRS的に実装するのは小規模なアプリだとオーバーなのでMySQLの全文検索を使った際の忘備録を残しておきます。</p>
-
-<p><strong>目次</strong></p>
-
-<h4 id="dockerコンテナ起動"><strong>Dockerコンテナ起動</strong></h4>
-
-<p>docker runだとコマンド入力が面倒なので、docker-compose.ymlを書きます。本当は.envファイルに環境変数を書くべきだけどベタ書きします。Docker拡張機能を入れているので、上のRun All Servicesボタンをクリックし、mysqlコンテナが起動することを確認します。</p>
-
-<p><img src="/md/assets/images/mysql_docker_compose.png" alt="" /></p>
-
-<h4 id="テーブル作成とfulltextインデックスの設定"><strong>テーブル作成とFULLTEXTインデックスの設定</strong></h4>
-
-<p>全文検索を行うために、テーブル内の対象カラムに<code class="language-plaintext highlighter-rouge">FULLTEXT</code>インデックスを作成してテーブルを作成します。</p>
-
-<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">articles</span> <span class="p">(</span>
-    <span class="n">id</span> <span class="nb">INT</span> <span class="n">AUTO_INCREMENT</span> <span class="k">PRIMARY</span> <span class="k">KEY</span><span class="p">,</span>
-    <span class="n">title</span> <span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">255</span><span class="p">)</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span>
-    <span class="n">body</span> <span class="nb">TEXT</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span>
-    <span class="n">FULLTEXT</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">body</span><span class="p">)</span> <span class="c1">-- FULLTEXTインデックスを作成</span>
-<span class="p">);</span>
-</code></pre></div></div>
-
-<p>適当にデータも挿入します。</p>
-<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">articles</span> <span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">body</span><span class="p">)</span> <span class="k">VALUES</span>
-<span class="p">(</span><span class="s1">'MySQL Full-Text Search'</span><span class="p">,</span> <span class="s1">'This tutorial explains how to use full-text search in MySQL.'</span><span class="p">),</span>
-<span class="p">(</span><span class="s1">'Introduction to Databases'</span><span class="p">,</span> <span class="s1">'Databases store data and provide various query functionalities.'</span><span class="p">),</span>
-<span class="p">(</span><span class="s1">'Full-Text Search Features'</span><span class="p">,</span> <span class="s1">'MySQL full-text search supports natural language queries.'</span><span class="p">);</span>
-</code></pre></div></div>
-
-<h4 id="クエリを試してみる">クエリを試してみる</h4>
-
-<p><code class="language-plaintext highlighter-rouge">MATCH(column_name) AGAINST('検索文字列')</code>を使用します。以下のように、idが1と3のデータのみが表示されます。
-<img src="/md/assets/images/mysql_against.png" alt="" /></p>
-
-<p>次に、クエリのスコアを算出してランキングにしてみます。
-<img src="/md/assets/images/mysql_ranking.png" alt="" /></p>
-
-<h4 id="設定ファイルを編集してみる">設定ファイルを編集してみる</h4>
-<p>MySQLの全文検索では、最小文字数を指定し、その文字数以下の単語は検索対象外にできます。<code class="language-plaintext highlighter-rouge">Dev Containers</code>という拡張機能を使い、<code class="language-plaintext highlighter-rouge">etc/my.cnf</code>にアクセスし、以下のディレクティブを追加してみます。</p>
-
-<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[mysqld]</span>
-<span class="py">ft_min_word_len</span><span class="p">=</span><span class="s">2</span>
-</code></pre></div></div>
-
-<p><img src="/md/assets/images/mysql_ranking.png" alt="" /></p>
-
-<p>その後、インデックスを再構築します。</p>
-<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">REPAIR</span> <span class="k">TABLE</span> <span class="n">articles</span> <span class="n">QUICK</span><span class="p">;</span>
-</code></pre></div></div>
-
-<h4 id="感想">感想</h4>
-
-<p>小規模なアプリで全文検索を試したいと思った時、わざわざ全文検索エンジンを導入する必要がないので便利だと感じました。</p>]]></content><author><name></name></author><category term="blog" /><category term="MySQL" /><summary type="html"><![CDATA[MySQL + 全文検索]]></summary></entry><entry><title type="html">nodejsをプロファイリングしてみる</title><link href="https://hoge-code.github.io/md/posts/2025-02-21-nodejs-profiling" rel="alternate" type="text/html" title="nodejsをプロファイリングしてみる" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/nodejs-profiling</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-02-21-nodejs-profiling"><![CDATA[<p>nodejsのデバッグは<code class="language-plaintext highlighter-rouge">inspect-brk</code>や、それを内部的に使用しているvscodeが有名ですが、プロファイリングに使われる<code class="language-plaintext highlighter-rouge">clinic.js</code>を試してみます。</p>
-
-<p><strong>目次</strong></p>
-<ul id="markdown-toc">
-  <li><a href="#使用してみる" id="markdown-toc-使用してみる">使用してみる</a></li>
-  <li><a href="#他のオプション" id="markdown-toc-他のオプション">他のオプション</a></li>
-</ul>
-
-<h3 id="使用してみる">使用してみる</h3>
-<p>まずはグローバルにインストールします。</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm <span class="nb">install</span> <span class="nt">-g</span> clinic
-</code></pre></div></div>
-<p>その後、以下のコマンドで分析します。</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>clinic docter <span class="nt">--</span> node dist/app.js
-</code></pre></div></div>
-<p>HTMLが表示されるのでブラウザで結果を確認できます。</p>
-
-<h3 id="他のオプション">他のオプション</h3>
-<p><code class="language-plaintext highlighter-rouge">clinic.js</code> には、以下のオプションがあります。</p>
-
-<h4 id="1-clinic-doctor">1. <strong><code class="language-plaintext highlighter-rouge">clinic doctor</code></strong></h4>
-<p>一般的なパフォーマンス診断ツール。アプリケーションを監視して、ボトルネックを特定します。CPU使用率、イベントループの遅延、GCなどを確認できます。各関数の呼び出し回数や遅延を確認できるので、ボトルネックを確認しやすくなります。</p>
-
-<h4 id="2-clinic-flame">2. <strong><code class="language-plaintext highlighter-rouge">clinic flame</code></strong></h4>
-<p>Flamegraph（炎グラフ）を使用して、CPU のプロファイルを視覚化します。コマンドは<code class="language-plaintext highlighter-rouge">docter</code>を<code class="language-plaintext highlighter-rouge">flame</code>に変更するだけです。グラフが表示され、関数ごとのCPU使用率を視覚的に確認できます。</p>
-
-<h4 id="3-clinic-bubbleprof">3. <strong><code class="language-plaintext highlighter-rouge">clinic bubbleprof</code></strong></h4>
-<p>関数間の呼び出し関係を視覚化するツール。円の大きさによって関数の依存関係や、ボトルネックを確認できます。</p>]]></content><author><name></name></author><category term="blog" /><category term="Nodejs" /><summary type="html"><![CDATA[Node.js + Clinic.js]]></summary></entry><entry><title type="html">Pandocでmdからwordファイルを作る</title><link href="https://hoge-code.github.io/md/posts/2025-02-21-pandoc" rel="alternate" type="text/html" title="Pandocでmdからwordファイルを作る" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/pandoc</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-02-21-pandoc"><![CDATA[<p>ドキュメントをワードで提出しなければならない際に、mdで書て変換したいと思ったので、vscodeとpandocを使ったセットアップ手順を書きます。</p>
-
-<p><strong>目次</strong></p>
-
-<h4 id="pandocのインストール">Pandocのインストール</h4>
-
-<p><a href="https://pandoc.org/installing.html">Pandocの公式サイト</a>にアクセスし、windows用のmsiインストーラをダウンロードし、インストールを完了します。</p>
-
-<p>コマンドプロンプトで確認します。</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pandoc <span class="nt">--version</span>
-</code></pre></div></div>
-<p>vscodeでも使えるように、<code class="language-plaintext highlighter-rouge">vscode-pandoc</code>という拡張機能をダウンロードします。</p>
-
-<h4 id="mdファイルの作成">mdファイルの作成</h4>
-
-<p>適当なmdファイルを作成します。この際、YAMLダークマターを使ってメタデータを挿入します。</p>
-
-<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
-<span class="na">title</span><span class="pi">:</span> <span class="s2">"</span><span class="s">My</span><span class="nv"> </span><span class="s">Document"</span>
-<span class="na">author</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Your</span><span class="nv"> </span><span class="s">Name"</span>
-<span class="na">date</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-01-07"</span>
-<span class="nn">---</span>
-
-<span class="gu">## セクション1</span>
-
-内容の説明がここに来ます。
-</code></pre></div></div>
-
-<h4 id="word形式に変換">word形式に変換</h4>
-
-<p>vscodeでコマンドパレットを開き、wordに変換します。ワード以外にも、pdfやhtml形式にも変換できます。上記のmdを変換すると、以下のようなdocxファイルが生成されます。このままではスタイルが不十分ですが、pandocの<code class="language-plaintext highlighter-rouge">--reference-doc=</code>オプションなどを使えば見た目の調整も出来そうです。
-<img src="/md/assets/images/pandoc_word.png" alt="" /></p>
-
-<h4 id="感想">感想</h4>
-
-<p>notionはdocx形式でエキスポートできないし、ワードファイルを簡単に作成したいと思った際に、pandocとvscodeを使えば非常に簡単に作成できると感じました。</p>]]></content><author><name></name></author><category term="blog" /><category term="ツール" /><summary type="html"><![CDATA[Pandoc]]></summary></entry></feed>
+<p>また、AI機能などはまだ試していないので、今後試してみたいと思っています。</p>]]></content><author><name></name></author><category term="blog" /><category term="ツール" /><summary type="html"><![CDATA[Warp]]></summary></entry></feed>

@@ -1,0 +1,192 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/md/assets/css/default.css">
+  <link rel="stylesheet" href="/md/assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <title>ツールの忘備録</title>
+</head>
+<body>
+
+<header>
+  <h1><a href="/md/">ツールの忘備録</a></h1></h1>
+</header>
+
+<div id="content">
+  <!-- メインコンテンツ部分 -->
+  <main>
+        <article>
+      <header>
+        <h1>sqliteの復習</h1>
+        <p class="meta">
+          May 04, 2025 
+          <!--
+          in
+          <a href="/category/blog"
+            >blog</a
+          >
+        -->
+        </p>
+      </header>
+
+      <div class="content"><p>モバイルやPC、<code class="language-plaintext highlighter-rouge">cloudflare workers</code>で用いられるD1データベースなど、本番環境でも広く用いられる<code class="language-plaintext highlighter-rouge">sqlite</code>について整理してみます。</p>
+
+<p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#1-設定ファイルがない" id="markdown-toc-1-設定ファイルがない">1. 設定ファイルがない</a></li>
+  <li><a href="#2-全文検索full-text-search" id="markdown-toc-2-全文検索full-text-search">2. 全文検索（Full-Text Search）</a></li>
+  <li><a href="#3-json-サポート" id="markdown-toc-3-json-サポート">3. <strong>JSON サポート</strong></a></li>
+  <li><a href="#4-ユーザー認証権限管理がない" id="markdown-toc-4-ユーザー認証権限管理がない">4. <strong>ユーザー・認証・権限管理がない</strong></a></li>
+</ul>
+
+<hr />
+
+<p>SQLite は<strong>設定ファイルが存在しないこと</strong>や<strong>ユーザー・権限管理がほとんどない</strong>といった、特有の性質を持っています。</p>
+
+<hr />
+
+<h3 id="1-設定ファイルがない">1. 設定ファイルがない</h3>
+
+<h4 id="特徴">特徴：</h4>
+
+<p>SQLite には <code class="language-plaintext highlighter-rouge">my.cnf</code>や<code class="language-plaintext highlighter-rouge">postgresql.conf</code> のような設定ファイルは存在しないので、<strong>データベース接続時に指定</strong>するか、<strong>SQL コマンドを通じて変更</strong>します。そのために、以下のようにPRAGMAコマンドを通じて設定します。</p>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- 外部キー制約の有効化</span>
+<span class="n">PRAGMA</span> <span class="n">foreign_keys</span> <span class="o">=</span> <span class="k">ON</span><span class="p">;</span>
+
+<span class="c1">-- 自動インデックスの有効化</span>
+<span class="n">PRAGMA</span> <span class="n">automatic_index</span> <span class="o">=</span> <span class="k">ON</span><span class="p">;</span>
+
+<span class="c1">-- キャッシュサイズの変更</span>
+<span class="n">PRAGMA</span> <span class="n">cache_size</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">;</span>
+
+<span class="c1">-- 永続化される設定（WALモードなど）</span>
+<span class="n">PRAGMA</span> <span class="n">journal_mode</span> <span class="o">=</span> <span class="n">WAL</span><span class="p">;</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="2-全文検索full-text-search">2. 全文検索（Full-Text Search）</h3>
+
+<p>SQLite は全文検索にも対応しているので、例えば日記アプリなどでオフラインでも簡単に条件を含むエントリーを検索できます。</p>
+
+<h4 id="利用可能な全文検索モジュール">利用可能な全文検索モジュール：</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">FTS3</code> / <code class="language-plaintext highlighter-rouge">FTS4</code>: シンプルな全文検索</li>
+  <li><code class="language-plaintext highlighter-rouge">FTS5</code>: より高速で柔軟（推奨）</li>
+</ul>
+
+<h4 id="fts5-の使用例">FTS5 の使用例：</h4>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">CREATE</span> <span class="n">VIRTUAL</span> <span class="k">TABLE</span> <span class="n">documents</span> <span class="k">USING</span> <span class="n">fts5</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">content</span><span class="p">);</span>
+
+<span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">documents</span> <span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+<span class="k">VALUES</span> <span class="p">(</span><span class="s1">'Hello'</span><span class="p">,</span> <span class="s1">'This is a test document'</span><span class="p">);</span>
+
+<span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">documents</span> <span class="k">WHERE</span> <span class="n">content</span> <span class="k">MATCH</span> <span class="s1">'test'</span><span class="p">;</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="3-json-サポート">3. <strong>JSON サポート</strong></h3>
+
+<p>SQLite は JSON の保存と操作にも対応しています。</p>
+
+<h4 id="主な-json-関数sqlite-338-推奨">主な JSON 関数（SQLite 3.38+ 推奨）：</h4>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- JSONオブジェクトから値を取得</span>
+<span class="k">SELECT</span> <span class="n">json_extract</span><span class="p">(</span><span class="s1">'{"user": {"id": 1}}'</span><span class="p">,</span> <span class="s1">'$.user.id'</span><span class="p">);</span>  <span class="c1">-- → 1</span>
+
+<span class="c1">-- 値の更新</span>
+<span class="k">SELECT</span> <span class="n">json_set</span><span class="p">(</span><span class="s1">'{"a":1}'</span><span class="p">,</span> <span class="s1">'$.a'</span><span class="p">,</span> <span class="mi">100</span><span class="p">);</span>  <span class="c1">-- → {"a":100}</span>
+
+<span class="c1">-- オブジェクトの整形</span>
+<span class="k">SELECT</span> <span class="n">json_object</span><span class="p">(</span><span class="s1">'name'</span><span class="p">,</span> <span class="s1">'Alice'</span><span class="p">,</span> <span class="s1">'age'</span><span class="p">,</span> <span class="mi">30</span><span class="p">);</span>  <span class="c1">-- → {"name":"Alice","age":30}</span>
+</code></pre></div></div>
+
+<p>一応JSONにも対応していますが、PostgreSQL よりも型が緩いです。</p>
+
+<hr />
+
+<h3 id="4-ユーザー認証権限管理がない">4. <strong>ユーザー・認証・権限管理がない</strong></h3>
+
+<p>SQLiteにはユーザーやロールという概念がないので、sqliteファイル自体にchmod、chownなどで権限をつける場合があります。</p>
+
+<hr />
+
+</div>
+
+      <footer>
+        <p>
+          Tags: 
+          <a href="/md/tag/sqlite">sqlite</a> 
+        </p>
+      </footer>
+    </article>
+
+  </main>
+
+  <!-- サイドバー部分 -->
+  <aside id="sidebar">
+    <h2><a href="/md/about/">About</a></h2>
+
+    <!--
+    <h2><a href="/md/categories/">Categories</a></h2>
+    <ul>
+      
+        <li><a href="/md/category/blog"">blog</a></li>
+      
+    </ul>
+    -->
+    
+    <h2><a href="/md/tags/">Tags</a></h2>
+    <ul>
+      
+        <li><a href="/md/tag/fastapi">FastAPI</a></li>
+      
+        <li><a href="/md/tag/nodejs">Nodejs</a></li>
+      
+        <li><a href="/md/tag/ツール">ツール</a></li>
+      
+        <li><a href="/md/tag/mysql">MySQL</a></li>
+      
+        <li><a href="/md/tag/react">React</a></li>
+      
+        <li><a href="/md/tag/開発">開発</a></li>
+      
+        <li><a href="/md/tag/elasticsearch">elasticsearch</a></li>
+      
+        <li><a href="/md/tag/react">react</a></li>
+      
+        <li><a href="/md/tag/firebase">firebase</a></li>
+      
+        <li><a href="/md/tag/sqlite">sqlite</a></li>
+      
+        <li><a href="/md/tag/github-actions">github-actions</a></li>
+      
+        <li><a href="/md/tag/k8s">k8s</a></li>
+      
+    </ul>
+    <h2><a href="/md/archives/">Archives</a></h2>
+    <ul>
+      
+      
+        <li><a href="/md/2025/05/">2025-05</a></li>
+      
+        <li><a href="/md/2025/03/">2025-03</a></li>
+      
+        <li><a href="/md/2025/02/">2025-02</a></li>
+      
+    </ul>
+  </aside>
+</div>
+
+<footer>
+  <p>&copy; 2025 ツールの忘備録</p>
+</footer>
+
+</body>
+</html>
