@@ -66,6 +66,6 @@ newman run ./api.postman_collection.json -n 10 --reporters cli,html --reporter-h
 
 高度なテストならk6やJMeterなどを使うべきですが、簡易的な負荷テストならPostmanのCollection RunnerやNewmanでCIを使って実行できそうです。
 
-#### 感想
+### 感想
 
 OASを自動生成してくれるフレームワークに頼るだけでなく、OAS関連の様々なツールに慣れていきたいと思いました。

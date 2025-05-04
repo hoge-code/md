@@ -40,13 +40,12 @@
       {% endfor %}
     </ul>
     <h2><a href="{{ site.baseurl }}/archives/">Archives</a></h2>
-<ul>
-  {% assign months = site.posts | group_by_exp:"post" ,"post.date | date: '%Y-%m'" %}
-  {% for month in months %}
-    <li><a href="{{ site.baseurl }}/{{ month.name | replace: '-', '/' }}/">{{ month.name | date: "%Y-%m" }}</a></li>
-  {% endfor %}
-</ul>
-
+    <ul>
+      {% assign months = site.posts | group_by_exp:"post" ,"post.date | date: '%Y-%m'" %}
+      {% for month in months %}
+        <li><a href="{{ site.baseurl }}/{{ month.name | replace: '-', '/' }}/">{{ month.name | date: "%Y-%m" }}</a></li>
+      {% endfor %}
+    </ul>
   </aside>
 </div>
 
