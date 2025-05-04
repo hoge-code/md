@@ -1,0 +1,92 @@
+---
+layout: post
+title: "sqliteの復習"
+date: 2025-05-04 12:00:00 +0900
+categories: [blog]
+tags: [sqlite]
+excerpt: "sqlite"
+---
+
+モバイルやPC、`cloudflare workers`で用いられるD1データベースなど、本番環境でも広く用いられる`sqlite`について整理してみます。
+
+**目次**
+* ToC
+{:toc}
+
+---
+
+SQLite は**設定ファイルが存在しないこと**や**ユーザー・権限管理がほとんどない**といった、特有の性質を持っています。
+
+---
+
+### 1. 設定ファイルがない
+
+#### 特徴：
+
+SQLite には `my.cnf`や`postgresql.conf` のような設定ファイルは存在しないので、**データベース接続時に指定**するか、**SQL コマンドを通じて変更**します。そのために、以下のようにPRAGMAコマンドを通じて設定します。
+
+```sql
+-- 外部キー制約の有効化
+PRAGMA foreign_keys = ON;
+
+-- 自動インデックスの有効化
+PRAGMA automatic_index = ON;
+
+-- キャッシュサイズの変更
+PRAGMA cache_size = 10000;
+
+-- 永続化される設定（WALモードなど）
+PRAGMA journal_mode = WAL;
+```
+
+---
+
+### 2. 全文検索（Full-Text Search）
+
+SQLite は全文検索にも対応しているので、例えば日記アプリなどでオフラインでも簡単に条件を含むエントリーを検索できます。
+
+#### 利用可能な全文検索モジュール：
+
+* `FTS3` / `FTS4`: シンプルな全文検索
+* `FTS5`: より高速で柔軟（推奨）
+
+#### FTS5 の使用例：
+
+```sql
+CREATE VIRTUAL TABLE documents USING fts5(title, content);
+
+INSERT INTO documents (title, content)
+VALUES ('Hello', 'This is a test document');
+
+SELECT * FROM documents WHERE content MATCH 'test';
+```
+
+---
+
+### 3. **JSON サポート**
+
+SQLite は JSON の保存と操作にも対応しています。
+
+#### 主な JSON 関数（SQLite 3.38+ 推奨）：
+
+```sql
+-- JSONオブジェクトから値を取得
+SELECT json_extract('{"user": {"id": 1}}', '$.user.id');  -- → 1
+
+-- 値の更新
+SELECT json_set('{"a":1}', '$.a', 100);  -- → {"a":100}
+
+-- オブジェクトの整形
+SELECT json_object('name', 'Alice', 'age', 30);  -- → {"name":"Alice","age":30}
+```
+
+一応JSONにも対応していますが、PostgreSQL よりも型が緩いです。
+
+---
+
+### 4. **ユーザー・認証・権限管理がない**
+
+SQLiteにはユーザーやロールという概念がないので、sqliteファイル自体にchmod、chownなどで権限をつける場合があります。
+
+---
+

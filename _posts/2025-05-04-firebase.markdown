@@ -1,0 +1,123 @@
+---
+layout: post
+title: "firebase-authの小技"
+date: 2025-05-04 12:00:00 +0900
+categories: [blog]
+tags: [firebase]
+excerpt: "firebase"
+---
+
+自分用の忘備録です。他に何か思いついたら更新します。
+
+**目次**
+* ToC
+{:toc}
+
+---
+
+### OAuthにスコープを追加する方法
+
+以下は Google OAuth プロバイダを例にしたコードです。他のプロバイダでも同様に `.addScope()` メソッドが使えます。
+
+`Firebase`はSDK9以降でAPIが大きく変更されましたが、ネットのサンプルコードの多くがSDK8以前なので注意します。
+
+#### Google プロバイダでスコープ追加
+
+```ts
+import { initializeApp } from "firebase/app";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup
+} from "firebase/auth";
+
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  // ...
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+// Google プロバイダに追加スコープを指定
+const provider = new GoogleAuthProvider();
+provider.addScope("https://www.googleapis.com/auth/calendar.readonly");
+provider.addScope("https://www.googleapis.com/auth/userinfo.profile");
+
+// 認証実行
+signInWithPopup(auth, provider)
+  .then((result) => {
+    const user = result.user;
+    const credential = GoogleAuthProvider.credentialFromResult(result);
+    const accessToken = credential?.accessToken;
+    console.log("AccessToken:", accessToken);
+  })
+  .catch((error) => {
+    console.error("OAuth error:", error.code, error.message);
+  });
+```
+
+`GoogleAPI`のスコープは長くて忘れやすいです。
+
+#### 他のプロバイダ例（GitHub）
+
+その一方で、`GitHub`や`Twitter`のスコープは覚えやすいです。
+```ts
+import { GithubAuthProvider } from "firebase/auth";
+
+const provider = new GithubAuthProvider();
+provider.addScope("repo"); // GitHubのリポジトリアクセス権
+```
+
+---
+
+### Firebase Authが内部で使うエンドポイント
+
+Firebase Authは、Google の Identity Platform 上に構築されており、認証時に以下のようなエンドポイントが内部で使用されます。これらは`Astro`などCSRが推奨されない環境や、`Postman`を使ってOAuth認証をセットアップする場合で使うことがあります。
+
+#### OAuth 認可リクエスト
+
+Firebase SDK は OAuth プロバイダ（Google, GitHub など）へ以下の形式で認可リクエストを送ります：
+
+```
+GET https://accounts.google.com/o/oauth2/v2/auth
+  ?client_id=...
+  &redirect_uri=...
+  &response_type=token
+  &scope=...（addScope で指定）
+  &state=...
+```
+
+Firebase SDK がこれをブラウザ上で動的に構成して送信します。
+
+---
+
+#### Firebase のトークン交換 API
+
+OAuth 認証後、アクセストークンなどを Firebase のサーバーに送り、Firebase 独自のID トークンに変換します。
+
+```
+POST https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=YOUR_API_KEY
+
+{
+  postBody: "access_token=...&providerId=google.com",
+  requestUri: "http://localhost",
+  returnIdpCredential: true,
+  returnSecureToken: true
+}
+```
+
+---
+
+#### Firebase ID トークンの取得（クライアント側）
+
+```ts
+const token = await auth.currentUser?.getIdToken();
+```       
+
+これらのトークンをサーバ側のセッションなどに保存し、トークンを使って`GoogleAPI`などにリクエストを送ることで、`GDrive`を操作するようなアプリを実装できます。
+
+#### 参考
+
+[firebase-auth RESTAPI](https://firebase.google.com/docs/reference/rest/auth?hl=ja#section-sign-in-with-oauth-credential)
