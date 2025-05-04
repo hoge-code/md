@@ -42,7 +42,9 @@
 </ul>
 
 <h3 id="socketioの通信プロトコル">Socket.IOの通信プロトコル</h3>
-<p><code class="language-plaintext highlighter-rouge">Socket.io</code>接続をする場合、HTTPから<code class="language-plaintext highlighter-rouge">ws</code>にアップグレードされますが、(HTTPSの場合は<code class="language-plaintext highlighter-rouge">wss://</code>)、初回のプロトコルアップグレード時のみHTTPリクエストとしてヘッダーやクエリパラメータを送信できます。それ以降はHTTPではなく、<code class="language-plaintext highlighter-rouge">ws</code>での通信となるので、テキストでもバイナリでも、データを送信するにはペイロード内で送る必要があります。</p>
+<p><code class="language-plaintext highlighter-rouge">Socket.io</code>接続をする場合、HTTPから<code class="language-plaintext highlighter-rouge">ws</code>にアップグレードされますが、(HTTPSの場合は<code class="language-plaintext highlighter-rouge">wss://</code>)、初回のプロトコルアップグレード時のみHTTPリクエストとしてヘッダーやクエリパラメータを送信できます。</p>
+
+<p>それ以降はHTTPではなく、<code class="language-plaintext highlighter-rouge">ws</code>での通信となるので、テキストでもバイナリでも、データを送信するにはペイロード内で送る必要があります。</p>
 
 <h3 id="クライアント側での初期設定">クライアント側での初期設定</h3>
 <p>以下のように<code class="language-plaintext highlighter-rouge">extraHeaders</code> を使用してトークンを送信します。(フロントでトークンを保存している場合)この際、再接続処理や、そのバックオフも書いておきます。</p>
@@ -62,8 +64,11 @@
 <p><code class="language-plaintext highlighter-rouge">React</code>などを使う場合は、上記で作成した<code class="language-plaintext highlighter-rouge">socket</code>を<code class="language-plaintext highlighter-rouge">useContext</code>などを使うと様々なコンポーネントで<code class="language-plaintext highlighter-rouge">socket.emit</code>の処理を書けるようになります。</p>
 
 <h3 id="サーバー側での設定">サーバー側での設定</h3>
-<p><code class="language-plaintext highlighter-rouge">Node.js + Express</code>の場合、接続時に <code class="language-plaintext highlighter-rouge">socket.handshake</code> を使って、ヘッダーを確認することができます。<code class="language-plaintext highlighter-rouge">python-socketio</code>の場合は<code class="language-plaintext highlighter-rouge">environ</code>でヘッダーを確認できます。
-以下のサンプルコードの<code class="language-plaintext highlighter-rouge">isValidToken</code>関数では、<code class="language-plaintext highlighter-rouge">jsonwebtoken</code>ライブラリなどを使い、JWTペイロードからクレームを検証するような処理を実装します。認証サービスを利用している場合は、<code class="language-plaintext highlighter-rouge">cognito</code>や<code class="language-plaintext highlighter-rouge">keycloak</code>の公開鍵エンドポイントを使って公開鍵を取得して検証します。</p>
+<p><code class="language-plaintext highlighter-rouge">Node.js + Express</code>の場合、接続時に <code class="language-plaintext highlighter-rouge">socket.handshake</code> を使って、ヘッダーを確認することができます。<code class="language-plaintext highlighter-rouge">python-socketio</code>の場合は<code class="language-plaintext highlighter-rouge">environ</code>でヘッダーを確認できます。</p>
+
+<p>以下のサンプルコードの<code class="language-plaintext highlighter-rouge">isValidToken</code>関数では、<code class="language-plaintext highlighter-rouge">jsonwebtoken</code>ライブラリなどを使い、JWTペイロードからクレームを検証するような処理を実装します。</p>
+
+<p>認証サービスを利用している場合は、<code class="language-plaintext highlighter-rouge">cognito</code>や<code class="language-plaintext highlighter-rouge">keycloak</code>の公開鍵エンドポイントを使って公開鍵を取得して検証します。</p>
 <div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// サーバー側での認証処理例</span>
 <span class="kd">const</span> <span class="nx">io</span> <span class="o">=</span> <span class="nf">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">socket.io</span><span class="dl">'</span><span class="p">)(</span><span class="nx">server</span><span class="p">);</span>
 
@@ -124,15 +129,14 @@
       
     </ul>
     <h2><a href="/md/archives/">Archives</a></h2>
-<ul>
-  
-  
-    <li><a href="/md/2025/03/">2025-03</a></li>
-  
-    <li><a href="/md/2025/02/">2025-02</a></li>
-  
-</ul>
-
+    <ul>
+      
+      
+        <li><a href="/md/2025/03/">2025-03</a></li>
+      
+        <li><a href="/md/2025/02/">2025-02</a></li>
+      
+    </ul>
   </aside>
 </div>
 

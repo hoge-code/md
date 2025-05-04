@@ -80,6 +80,11 @@ ul li {
   list-style-image: none !important;
 }
 
+article{
+  margin-bottom: 15px !important;
+  border-bottom-color: gray !important ;
+}
+
 code:not(pre code) {
   background-color: rgba(31, 37, 46, 0.126) !important;
   color: black !important;
