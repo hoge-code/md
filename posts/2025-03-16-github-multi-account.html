@@ -33,6 +33,17 @@
 
       <div class="content"><p>GitHubで複数アカウントを登録する際にいくつかの問題に直面したため、忘備録として残しておきます。基本的な内容ですが、登録したのがかなり前で、忘れており、忘れやすいない内容のため、記事に残しておきます。</p>
 
+<p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#githubの認証方式" id="markdown-toc-githubの認証方式">GitHubの認証方式</a></li>
+  <li><a href="#1-httpでのトークン認証" id="markdown-toc-1-httpでのトークン認証">1. HTTPでのトークン認証</a></li>
+  <li><a href="#2-ssh接続" id="markdown-toc-2-ssh接続">2. SSH接続</a></li>
+  <li><a href="#3-ssh接続の確認" id="markdown-toc-3-ssh接続の確認">3. SSH接続の確認</a></li>
+  <li><a href="#4-sshキーの登録確認" id="markdown-toc-4-sshキーの登録確認">4. SSHキーの登録確認</a></li>
+  <li><a href="#5-ブランチ名の確認" id="markdown-toc-5-ブランチ名の確認">5. ブランチ名の確認</a></li>
+  <li><a href="#結論" id="markdown-toc-結論">結論</a></li>
+</ul>
+
 <h3 id="githubの認証方式">GitHubの認証方式</h3>
 
 <p>GitHubの認証方式には、主に2つの方法があります。</p>
@@ -83,7 +94,7 @@ Host github.com-Account2
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git remote set-url origin git@github.com-Account1:username/repository.git
 </code></pre></div></div>
 
-<h3 id="ssh接続の確認">SSH接続の確認</h3>
+<h3 id="3-ssh接続の確認">3. SSH接続の確認</h3>
 
 <p>SSHキーが正しく設定されているか確認するためには、以下のコマンドで接続のテストができます。</p>
 
@@ -97,7 +108,7 @@ Host github.com-Account2
 
 <p>もしこのメッセージが表示されない場合、設定に問題がある可能性があります。</p>
 
-<h3 id="sshキーの登録確認">SSHキーの登録確認</h3>
+<h3 id="4-sshキーの登録確認">4. SSHキーの登録確認</h3>
 
 <p><code class="language-plaintext highlighter-rouge">ssh-agent</code> を使用してSSHキーが正しく登録されているか確認します。</p>
 
@@ -129,7 +140,7 @@ Host github.com-Account2
   </li>
 </ol>
 
-<h3 id="4-ブランチ名の確認">4. ブランチ名の確認</h3>
+<h3 id="5-ブランチ名の確認">5. ブランチ名の確認</h3>
 
 <p>初期状態で、<code class="language-plaintext highlighter-rouge">git push --set-upstream origin master</code> を実行した場合にエラーが発生することがあります。特にファイルを一切作成せずにウェブ上でリポジトリを作成した場合は、認証前にリモートブランチを手動で作成し、同じ名前のローカルブランチを作成し、pushします。</p>
 

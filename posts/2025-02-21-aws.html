@@ -33,6 +33,13 @@
 
       <div class="content"><p>マイクロサービス間で整合性を保つには、CAP定理でいうC(整合性)の一部を妥協して、最終整合性を維持できるサーガパターンを<code class="language-plaintext highlighter-rouge">AWS StepFunctions</code>などを使用して実装するのが一般的らしいですが、せっかくなので分散トランザクションについても簡単に試してみます。</p>
 
+<p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#サンプルの流れ" id="markdown-toc-サンプルの流れ">サンプルの流れ</a></li>
+  <li><a href="#テーブルの用意" id="markdown-toc-テーブルの用意">テーブルの用意</a></li>
+  <li><a href="#まとめ" id="markdown-toc-まとめ">まとめ</a></li>
+</ul>
+
 <h3 id="サンプルの流れ">サンプルの流れ</h3>
 <p>複数のmySQLデータベースを用意し、XAトランザクションを使用します。両方のデータベースで操作が成功すればコミットし、どちらかが失敗すればロールバックします。また、<code class="language-plaintext highlighter-rouge">my.cnf</code>ファイルで使用されているMySQLのエンジンが<code class="language-plaintext highlighter-rouge">InnoDB</code>であることを確認します。</p>
 

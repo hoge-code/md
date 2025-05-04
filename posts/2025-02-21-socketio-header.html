@@ -33,6 +33,14 @@
 
       <div class="content"><p><code class="language-plaintext highlighter-rouge">socket-io</code>を使って認証機能を実装する際につまづいたので記事に残しておきます。</p>
 
+<p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#socketioの通信プロトコル" id="markdown-toc-socketioの通信プロトコル">Socket.IOの通信プロトコル</a></li>
+  <li><a href="#クライアント側での初期設定" id="markdown-toc-クライアント側での初期設定">クライアント側での初期設定</a></li>
+  <li><a href="#サーバー側での設定" id="markdown-toc-サーバー側での設定">サーバー側での設定</a></li>
+  <li><a href="#テスト" id="markdown-toc-テスト">テスト</a></li>
+</ul>
+
 <h3 id="socketioの通信プロトコル">Socket.IOの通信プロトコル</h3>
 <p><code class="language-plaintext highlighter-rouge">Socket.io</code>接続をする場合、HTTPから<code class="language-plaintext highlighter-rouge">ws</code>にアップグレードされますが、(HTTPSの場合は<code class="language-plaintext highlighter-rouge">wss://</code>)、初回のプロトコルアップグレード時のみHTTPリクエストとしてヘッダーやクエリパラメータを送信できます。それ以降はHTTPではなく、<code class="language-plaintext highlighter-rouge">ws</code>での通信となるので、テキストでもバイナリでも、データを送信するにはペイロード内で送る必要があります。</p>
 

@@ -33,6 +33,13 @@
 
       <div class="content"><p>APIレスポンスの形式を統一する方法を考えてみます。</p>
 
+<p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#fastapiの場合" id="markdown-toc-fastapiの場合">FastAPIの場合</a></li>
+  <li><a href="#expressの場合" id="markdown-toc-expressの場合">Expressの場合</a></li>
+  <li><a href="#まとめ" id="markdown-toc-まとめ">まとめ</a></li>
+</ul>
+
 <h3 id="fastapiの場合">FastAPIの場合</h3>
 
 <p>FastAPIはエンドポイントの<code class="language-plaintext highlighter-rouge">response_model</code>のDTOクラスの構造をもとにOASドキュメントを生成しますが、ミドルウェアを使って、レスポンス後に返却するJSONの構造を変更すると上手く表示されないのでDTOを使って実装してみます。</p>
@@ -40,86 +47,86 @@
 <h4 id="dtoの生成">DTOの生成</h4>
 <p>適当な<code class="language-plaintext highlighter-rouge">Item</code>と汎用的な<code class="language-plaintext highlighter-rouge">ResponseDTO</code>を作成します。<code class="language-plaintext highlighter-rouge">ResponseDTO</code>も本来ならステータスコードや、エラーならエラーメッセージを詳細に含めるべきですが、簡略化します。</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from typing import TypeVar, Generic, List
-from fastapi import FastAPI
-from pydantic import BaseModel
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">typing</span> <span class="kn">import</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="n">fastapi</span> <span class="kn">import</span> <span class="n">FastAPI</span>
+<span class="kn">from</span> <span class="n">pydantic</span> <span class="kn">import</span> <span class="n">BaseModel</span>
 
-# 総称型の定義
-T = TypeVar('T')  # Tは任意の型
+<span class="c1"># 総称型の定義
+</span><span class="n">T</span> <span class="o">=</span> <span class="nc">TypeVar</span><span class="p">(</span><span class="sh">'</span><span class="s">T</span><span class="sh">'</span><span class="p">)</span>  <span class="c1"># Tは任意の型
+</span>
+<span class="k">class</span> <span class="nc">ResponseDTO</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">success</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">T</span>
+    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
 
-class ResponseDTO(Generic[T], BaseModel):
-    success: bool
-    data: T
-    message: str
-
-# レスポンス用のDTOクラス
-class Item(BaseModel):
-    id: int
-    name: str
+<span class="c1"># レスポンス用のDTOクラス
+</span><span class="k">class</span> <span class="nc">Item</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
 </code></pre></div></div>
 
 <h4 id="エンドポイントの作成">エンドポイントの作成</h4>
 <p>こちらも本来ならクエリパラメータなどを使ってページネーションを実装し、それらのメタデータもレスポンスに含めるべきですが簡略化します。</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>app = FastAPI()
+<div class="language-typescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">app</span> <span class="o">=</span> <span class="nc">FastAPI</span><span class="p">()</span>
 
-@app.get("/items", response_model=ResponseDTO[List[Item]])
-async def get_items():
-    items = [
-        Item(id=1, name="Item 1"),
-        Item(id=2, name="Item 2")
-    ]
-    return ResponseDTO(success=True, data=items, message="Items fetched successfully")
+<span class="p">@</span><span class="nd">app</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">"</span><span class="s2">/items</span><span class="dl">"</span><span class="p">,</span> <span class="nx">response_model</span><span class="o">=</span><span class="nx">ResponseDTO</span><span class="p">[</span><span class="nx">List</span><span class="p">[</span><span class="nx">Item</span><span class="p">]])</span>
+<span class="k">async</span> <span class="nx">def</span> <span class="nf">get_items</span><span class="p">():</span>
+    <span class="nx">items</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="nc">Item</span><span class="p">(</span><span class="nx">id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nx">name</span><span class="o">=</span><span class="dl">"</span><span class="s2">Item 1</span><span class="dl">"</span><span class="p">),</span>
+        <span class="nc">Item</span><span class="p">(</span><span class="nx">id</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="nx">name</span><span class="o">=</span><span class="dl">"</span><span class="s2">Item 2</span><span class="dl">"</span><span class="p">)</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="nc">ResponseDTO</span><span class="p">(</span><span class="nx">success</span><span class="o">=</span><span class="nx">True</span><span class="p">,</span> <span class="nx">data</span><span class="o">=</span><span class="nx">items</span><span class="p">,</span> <span class="nx">message</span><span class="o">=</span><span class="dl">"</span><span class="s2">Items fetched successfully</span><span class="dl">"</span><span class="p">)</span>
 </code></pre></div></div>
 
 <h3 id="expressの場合">Expressの場合</h3>
 <p>Expressでも一応<code class="language-plaintext highlighter-rouge">Response</code>の型定義にDTOを使うこともできますが、OASを使わないし、ミドルウェアで作成してみます。この際、<code class="language-plaintext highlighter-rouge">X-Forwarded-For</code>ヘッダーを消し、エラーレスポンスは標準の<code class="language-plaintext highlighter-rouge">RFC7807</code>形式で返却するように実装してみます。以下がサンプルコードです。</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import { Request, Response, NextFunction } from 'express';
+<div class="language-typescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">Request</span><span class="p">,</span> <span class="nx">Response</span><span class="p">,</span> <span class="nx">NextFunction</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">express</span><span class="dl">'</span><span class="p">;</span>
 
-// 成功時のレスポンス形式
-interface SuccessResponse {
-  status: string;
-  data: any;
-}
+<span class="c1">// 成功時のレスポンス形式</span>
+<span class="kr">interface</span> <span class="nx">SuccessResponse</span> <span class="p">{</span>
+  <span class="nl">status</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+  <span class="nl">data</span><span class="p">:</span> <span class="kr">any</span><span class="p">;</span>
+<span class="p">}</span>
 
-// エラーレスポンスのRFC7807形式
-interface ErrorResponse {
-  type: string;
-  title: string;
-  status: number;
-  detail: string;
-}
+<span class="c1">// エラーレスポンスのRFC7807形式</span>
+<span class="kr">interface</span> <span class="nx">ErrorResponse</span> <span class="p">{</span>
+  <span class="nl">type</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+  <span class="nl">title</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+  <span class="nl">status</span><span class="p">:</span> <span class="kr">number</span><span class="p">;</span>
+  <span class="nl">detail</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+<span class="p">}</span>
 
-const responseMiddleware = (req: Request, res: Response, next: NextFunction) =&gt; {
-  const originalJson = res.json;
+<span class="kd">const</span> <span class="nx">responseMiddleware</span> <span class="o">=</span> <span class="p">(</span><span class="nx">req</span><span class="p">:</span> <span class="nx">Request</span><span class="p">,</span> <span class="nx">res</span><span class="p">:</span> <span class="nx">Response</span><span class="p">,</span> <span class="nx">next</span><span class="p">:</span> <span class="nx">NextFunction</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">originalJson</span> <span class="o">=</span> <span class="nx">res</span><span class="p">.</span><span class="nx">json</span><span class="p">;</span>
 
-  res.json = (body: any) =&gt; {
-    // X-Forwarded-Forを消す
-    res.removeHeader('X-Forwarded-For');
+  <span class="nx">res</span><span class="p">.</span><span class="nx">json</span> <span class="o">=</span> <span class="p">(</span><span class="na">body</span><span class="p">:</span> <span class="kr">any</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="c1">// X-Forwarded-Forを消す</span>
+    <span class="nx">res</span><span class="p">.</span><span class="nf">removeHeader</span><span class="p">(</span><span class="dl">'</span><span class="s1">X-Forwarded-For</span><span class="dl">'</span><span class="p">);</span>
 
-    if (res.statusCode &gt;= 200 &amp;&amp; res.statusCode &lt; 300) {
-      // 成功時のレスポンス形式
-      const successResponse: SuccessResponse = {
-        status: 'success',
-        data: body,
-      };
-      return originalJson.call(res, successResponse);
-    } else {
-      // 失敗時のRFC7807形式
-      const errorResponse: ErrorResponse = {
-        type: 'about:blank',
-        title: 'Error',
-        status: res.statusCode,
-        detail: body.message || 'Unknown error',
-      };
-      return originalJson.call(res, errorResponse);
-    }
-  };
+    <span class="k">if </span><span class="p">(</span><span class="nx">res</span><span class="p">.</span><span class="nx">statusCode</span> <span class="o">&gt;=</span> <span class="mi">200</span> <span class="o">&amp;&amp;</span> <span class="nx">res</span><span class="p">.</span><span class="nx">statusCode</span> <span class="o">&lt;</span> <span class="mi">300</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// 成功時のレスポンス形式</span>
+      <span class="kd">const</span> <span class="na">successResponse</span><span class="p">:</span> <span class="nx">SuccessResponse</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="na">status</span><span class="p">:</span> <span class="dl">'</span><span class="s1">success</span><span class="dl">'</span><span class="p">,</span>
+        <span class="na">data</span><span class="p">:</span> <span class="nx">body</span><span class="p">,</span>
+      <span class="p">};</span>
+      <span class="k">return</span> <span class="nx">originalJson</span><span class="p">.</span><span class="nf">call</span><span class="p">(</span><span class="nx">res</span><span class="p">,</span> <span class="nx">successResponse</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="c1">// 失敗時のRFC7807形式</span>
+      <span class="kd">const</span> <span class="na">errorResponse</span><span class="p">:</span> <span class="nx">ErrorResponse</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">about:blank</span><span class="dl">'</span><span class="p">,</span>
+        <span class="na">title</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Error</span><span class="dl">'</span><span class="p">,</span>
+        <span class="na">status</span><span class="p">:</span> <span class="nx">res</span><span class="p">.</span><span class="nx">statusCode</span><span class="p">,</span>
+        <span class="na">detail</span><span class="p">:</span> <span class="nx">body</span><span class="p">.</span><span class="nx">message</span> <span class="o">||</span> <span class="dl">'</span><span class="s1">Unknown error</span><span class="dl">'</span><span class="p">,</span>
+      <span class="p">};</span>
+      <span class="k">return</span> <span class="nx">originalJson</span><span class="p">.</span><span class="nf">call</span><span class="p">(</span><span class="nx">res</span><span class="p">,</span> <span class="nx">errorResponse</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">};</span>
 
-  next();
-};
+  <span class="nf">next</span><span class="p">();</span>
+<span class="p">};</span>
 
-export default responseMiddleware;
+<span class="k">export</span> <span class="k">default</span> <span class="nx">responseMiddleware</span><span class="p">;</span>
 </code></pre></div></div>
 
 <h3 id="まとめ">まとめ</h3>

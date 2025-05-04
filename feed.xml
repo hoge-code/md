@@ -1,4 +1,15 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://hoge-code.github.io/md/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hoge-code.github.io/md/" rel="alternate" type="text/html" /><updated>2025-03-20T10:42:53+00:00</updated><id>https://hoge-code.github.io/md/feed.xml</id><title type="html">ツールの忘備録</title><subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle><entry><title type="html">GitHubでの複数アカウント登録</title><link href="https://hoge-code.github.io/md/posts/2025-03-16-github-multi-account" rel="alternate" type="text/html" title="GitHubでの複数アカウント登録" /><published>2025-03-16T03:00:00+00:00</published><updated>2025-03-16T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/github-multi-account</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-03-16-github-multi-account"><![CDATA[<p>GitHubで複数アカウントを登録する際にいくつかの問題に直面したため、忘備録として残しておきます。基本的な内容ですが、登録したのがかなり前で、忘れており、忘れやすいない内容のため、記事に残しておきます。</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://hoge-code.github.io/md/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hoge-code.github.io/md/" rel="alternate" type="text/html" /><updated>2025-05-04T04:30:32+00:00</updated><id>https://hoge-code.github.io/md/feed.xml</id><title type="html">ツールの忘備録</title><subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle><entry><title type="html">GitHubでの複数アカウント登録</title><link href="https://hoge-code.github.io/md/posts/2025-03-16-github-multi-account" rel="alternate" type="text/html" title="GitHubでの複数アカウント登録" /><published>2025-03-16T03:00:00+00:00</published><updated>2025-03-16T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/github-multi-account</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-03-16-github-multi-account"><![CDATA[<p>GitHubで複数アカウントを登録する際にいくつかの問題に直面したため、忘備録として残しておきます。基本的な内容ですが、登録したのがかなり前で、忘れており、忘れやすいない内容のため、記事に残しておきます。</p>
+
+<p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#githubの認証方式" id="markdown-toc-githubの認証方式">GitHubの認証方式</a></li>
+  <li><a href="#1-httpでのトークン認証" id="markdown-toc-1-httpでのトークン認証">1. HTTPでのトークン認証</a></li>
+  <li><a href="#2-ssh接続" id="markdown-toc-2-ssh接続">2. SSH接続</a></li>
+  <li><a href="#3-ssh接続の確認" id="markdown-toc-3-ssh接続の確認">3. SSH接続の確認</a></li>
+  <li><a href="#4-sshキーの登録確認" id="markdown-toc-4-sshキーの登録確認">4. SSHキーの登録確認</a></li>
+  <li><a href="#5-ブランチ名の確認" id="markdown-toc-5-ブランチ名の確認">5. ブランチ名の確認</a></li>
+  <li><a href="#結論" id="markdown-toc-結論">結論</a></li>
+</ul>
 
 <h3 id="githubの認証方式">GitHubの認証方式</h3>
 
@@ -50,7 +61,7 @@ Host github.com-Account2
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git remote set-url origin git@github.com-Account1:username/repository.git
 </code></pre></div></div>
 
-<h3 id="ssh接続の確認">SSH接続の確認</h3>
+<h3 id="3-ssh接続の確認">3. SSH接続の確認</h3>
 
 <p>SSHキーが正しく設定されているか確認するためには、以下のコマンドで接続のテストができます。</p>
 
@@ -64,7 +75,7 @@ Host github.com-Account2
 
 <p>もしこのメッセージが表示されない場合、設定に問題がある可能性があります。</p>
 
-<h3 id="sshキーの登録確認">SSHキーの登録確認</h3>
+<h3 id="4-sshキーの登録確認">4. SSHキーの登録確認</h3>
 
 <p><code class="language-plaintext highlighter-rouge">ssh-agent</code> を使用してSSHキーが正しく登録されているか確認します。</p>
 
@@ -96,7 +107,7 @@ Host github.com-Account2
   </li>
 </ol>
 
-<h3 id="4-ブランチ名の確認">4. ブランチ名の確認</h3>
+<h3 id="5-ブランチ名の確認">5. ブランチ名の確認</h3>
 
 <p>初期状態で、<code class="language-plaintext highlighter-rouge">git push --set-upstream origin master</code> を実行した場合にエラーが発生することがあります。特にファイルを一切作成せずにウェブ上でリポジトリを作成した場合は、認証前にリモートブランチを手動で作成し、同じ名前のローカルブランチを作成し、pushします。</p>
 
@@ -107,6 +118,18 @@ Host github.com-Account2
   <li>SSH接続時には、<code class="language-plaintext highlighter-rouge">ssh-agent</code> の設定が重要です。SSHキーが正しく登録されているか確認します。</li>
   <li>初期のブランチ名の設定に注意します。</li>
 </ul>]]></content><author><name></name></author><category term="blog" /><category term="ツール" /><summary type="html"><![CDATA[GitHub]]></summary></entry><entry><title type="html">Warpターミナルを試してみる</title><link href="https://hoge-code.github.io/md/posts/2025-03-16-warp" rel="alternate" type="text/html" title="Warpターミナルを試してみる" /><published>2025-03-16T03:00:00+00:00</published><updated>2025-03-16T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/warp</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-03-16-warp"><![CDATA[<p>最近Windowsにも対応した<strong>Warpターミナル</strong>を試してみました。</p>
+
+<p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#1-workflows" id="markdown-toc-1-workflows">1. <strong>Workflows</strong></a></li>
+  <li><a href="#2-notebooks" id="markdown-toc-2-notebooks">2. <strong>Notebooks</strong></a></li>
+  <li><a href="#3-environment-variables" id="markdown-toc-3-environment-variables">3. <strong>Environment Variables</strong></a></li>
+  <li><a href="#4-warp-drive" id="markdown-toc-4-warp-drive">4. <strong>Warp Drive</strong></a></li>
+  <li><a href="#5-actions" id="markdown-toc-5-actions">5. <strong>Actions</strong></a></li>
+  <li><a href="#6-sessions" id="markdown-toc-6-sessions">6. <strong>Sessions</strong></a></li>
+  <li><a href="#7-launch-configurations" id="markdown-toc-7-launch-configurations">7. <strong>Launch Configurations</strong></a></li>
+  <li><a href="#感想" id="markdown-toc-感想">感想</a></li>
+</ul>
 
 <p>まず、Warpを起動した際に、<code class="language-plaintext highlighter-rouge">Ctrl + Shift + P</code>を押すと以下のようなパレットが表示されます。さまざまなコマンドや機能に簡単にアクセスできます。</p>
 
@@ -149,6 +172,13 @@ Host github.com-Account2
 <p>特に<strong>Notebooks</strong>機能が便利だと感じました。よく忘れてしまうGitやSSHのコマンドを、ChatGPTに質問してその回答をコピペするだけで簡単に呼び出すことができました。</p>
 
 <p>また、AI機能などはまだ試していないので、今後試してみたいと思っています。</p>]]></content><author><name></name></author><category term="blog" /><category term="ツール" /><summary type="html"><![CDATA[Warp]]></summary></entry><entry><title type="html">はてなブログからJekyllに移行してみる</title><link href="https://hoge-code.github.io/md/posts/2025-03-13-jekyll-blog-copy" rel="alternate" type="text/html" title="はてなブログからJekyllに移行してみる" /><published>2025-03-13T03:00:00+00:00</published><updated>2025-03-13T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/jekyll-blog%20copy</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-03-13-jekyll-blog-copy"><![CDATA[<p>はてなブログからJekyllに移行する際、いくつかの点で躓きました。<code class="language-plaintext highlighter-rouge">ruby</code>やSSGにあまり慣れていなかったため、セットアップに多少時間がかかってしまいました。移行を決めたきっかけとして、はてなブログでは何故か記事を物理的に削除できなかったり、mdの編集がしづらかったりといった問題があり、<code class="language-plaintext highlighter-rouge">git</code>リポジトリでmdを管理できる環境にしたいと考えたからです。</p>
+
+<p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#jekyllのメリット" id="markdown-toc-jekyllのメリット">Jekyllのメリット</a></li>
+  <li><a href="#苦労した点" id="markdown-toc-苦労した点">苦労した点</a></li>
+  <li><a href="#結論" id="markdown-toc-結論">結論</a></li>
+</ul>
 
 <h3 id="jekyllのメリット">Jekyllのメリット</h3>
 
@@ -204,6 +234,13 @@ Host github.com-Account2
 
 <p>色々と面倒な点がありましたが、特にローカル環境でmdを編集できる点が大きな利点だと感じました。デメリットとしては、無料枠だとパブリックリポジトリにする必要があることくらいかと思います。</p>]]></content><author><name></name></author><category term="blog" /><category term="開発" /><summary type="html"><![CDATA[Jekyll + GitHubPages]]></summary></entry><entry><title type="html">APIのレスポンス形式を統一する</title><link href="https://hoge-code.github.io/md/posts/2025-02-21-api-response" rel="alternate" type="text/html" title="APIのレスポンス形式を統一する" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/api-response</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-02-21-api-response"><![CDATA[<p>APIレスポンスの形式を統一する方法を考えてみます。</p>
 
+<p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#fastapiの場合" id="markdown-toc-fastapiの場合">FastAPIの場合</a></li>
+  <li><a href="#expressの場合" id="markdown-toc-expressの場合">Expressの場合</a></li>
+  <li><a href="#まとめ" id="markdown-toc-まとめ">まとめ</a></li>
+</ul>
+
 <h3 id="fastapiの場合">FastAPIの場合</h3>
 
 <p>FastAPIはエンドポイントの<code class="language-plaintext highlighter-rouge">response_model</code>のDTOクラスの構造をもとにOASドキュメントを生成しますが、ミドルウェアを使って、レスポンス後に返却するJSONの構造を変更すると上手く表示されないのでDTOを使って実装してみます。</p>
@@ -211,90 +248,97 @@ Host github.com-Account2
 <h4 id="dtoの生成">DTOの生成</h4>
 <p>適当な<code class="language-plaintext highlighter-rouge">Item</code>と汎用的な<code class="language-plaintext highlighter-rouge">ResponseDTO</code>を作成します。<code class="language-plaintext highlighter-rouge">ResponseDTO</code>も本来ならステータスコードや、エラーならエラーメッセージを詳細に含めるべきですが、簡略化します。</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from typing import TypeVar, Generic, List
-from fastapi import FastAPI
-from pydantic import BaseModel
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">typing</span> <span class="kn">import</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="n">fastapi</span> <span class="kn">import</span> <span class="n">FastAPI</span>
+<span class="kn">from</span> <span class="n">pydantic</span> <span class="kn">import</span> <span class="n">BaseModel</span>
 
-# 総称型の定義
-T = TypeVar('T')  # Tは任意の型
+<span class="c1"># 総称型の定義
+</span><span class="n">T</span> <span class="o">=</span> <span class="nc">TypeVar</span><span class="p">(</span><span class="sh">'</span><span class="s">T</span><span class="sh">'</span><span class="p">)</span>  <span class="c1"># Tは任意の型
+</span>
+<span class="k">class</span> <span class="nc">ResponseDTO</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">success</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">T</span>
+    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
 
-class ResponseDTO(Generic[T], BaseModel):
-    success: bool
-    data: T
-    message: str
-
-# レスポンス用のDTOクラス
-class Item(BaseModel):
-    id: int
-    name: str
+<span class="c1"># レスポンス用のDTOクラス
+</span><span class="k">class</span> <span class="nc">Item</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
 </code></pre></div></div>
 
 <h4 id="エンドポイントの作成">エンドポイントの作成</h4>
 <p>こちらも本来ならクエリパラメータなどを使ってページネーションを実装し、それらのメタデータもレスポンスに含めるべきですが簡略化します。</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>app = FastAPI()
+<div class="language-typescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">app</span> <span class="o">=</span> <span class="nc">FastAPI</span><span class="p">()</span>
 
-@app.get("/items", response_model=ResponseDTO[List[Item]])
-async def get_items():
-    items = [
-        Item(id=1, name="Item 1"),
-        Item(id=2, name="Item 2")
-    ]
-    return ResponseDTO(success=True, data=items, message="Items fetched successfully")
+<span class="p">@</span><span class="nd">app</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">"</span><span class="s2">/items</span><span class="dl">"</span><span class="p">,</span> <span class="nx">response_model</span><span class="o">=</span><span class="nx">ResponseDTO</span><span class="p">[</span><span class="nx">List</span><span class="p">[</span><span class="nx">Item</span><span class="p">]])</span>
+<span class="k">async</span> <span class="nx">def</span> <span class="nf">get_items</span><span class="p">():</span>
+    <span class="nx">items</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="nc">Item</span><span class="p">(</span><span class="nx">id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nx">name</span><span class="o">=</span><span class="dl">"</span><span class="s2">Item 1</span><span class="dl">"</span><span class="p">),</span>
+        <span class="nc">Item</span><span class="p">(</span><span class="nx">id</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="nx">name</span><span class="o">=</span><span class="dl">"</span><span class="s2">Item 2</span><span class="dl">"</span><span class="p">)</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="nc">ResponseDTO</span><span class="p">(</span><span class="nx">success</span><span class="o">=</span><span class="nx">True</span><span class="p">,</span> <span class="nx">data</span><span class="o">=</span><span class="nx">items</span><span class="p">,</span> <span class="nx">message</span><span class="o">=</span><span class="dl">"</span><span class="s2">Items fetched successfully</span><span class="dl">"</span><span class="p">)</span>
 </code></pre></div></div>
 
 <h3 id="expressの場合">Expressの場合</h3>
 <p>Expressでも一応<code class="language-plaintext highlighter-rouge">Response</code>の型定義にDTOを使うこともできますが、OASを使わないし、ミドルウェアで作成してみます。この際、<code class="language-plaintext highlighter-rouge">X-Forwarded-For</code>ヘッダーを消し、エラーレスポンスは標準の<code class="language-plaintext highlighter-rouge">RFC7807</code>形式で返却するように実装してみます。以下がサンプルコードです。</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import { Request, Response, NextFunction } from 'express';
+<div class="language-typescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">Request</span><span class="p">,</span> <span class="nx">Response</span><span class="p">,</span> <span class="nx">NextFunction</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">express</span><span class="dl">'</span><span class="p">;</span>
 
-// 成功時のレスポンス形式
-interface SuccessResponse {
-  status: string;
-  data: any;
-}
+<span class="c1">// 成功時のレスポンス形式</span>
+<span class="kr">interface</span> <span class="nx">SuccessResponse</span> <span class="p">{</span>
+  <span class="nl">status</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+  <span class="nl">data</span><span class="p">:</span> <span class="kr">any</span><span class="p">;</span>
+<span class="p">}</span>
 
-// エラーレスポンスのRFC7807形式
-interface ErrorResponse {
-  type: string;
-  title: string;
-  status: number;
-  detail: string;
-}
+<span class="c1">// エラーレスポンスのRFC7807形式</span>
+<span class="kr">interface</span> <span class="nx">ErrorResponse</span> <span class="p">{</span>
+  <span class="nl">type</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+  <span class="nl">title</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+  <span class="nl">status</span><span class="p">:</span> <span class="kr">number</span><span class="p">;</span>
+  <span class="nl">detail</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+<span class="p">}</span>
 
-const responseMiddleware = (req: Request, res: Response, next: NextFunction) =&gt; {
-  const originalJson = res.json;
+<span class="kd">const</span> <span class="nx">responseMiddleware</span> <span class="o">=</span> <span class="p">(</span><span class="nx">req</span><span class="p">:</span> <span class="nx">Request</span><span class="p">,</span> <span class="nx">res</span><span class="p">:</span> <span class="nx">Response</span><span class="p">,</span> <span class="nx">next</span><span class="p">:</span> <span class="nx">NextFunction</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">originalJson</span> <span class="o">=</span> <span class="nx">res</span><span class="p">.</span><span class="nx">json</span><span class="p">;</span>
 
-  res.json = (body: any) =&gt; {
-    // X-Forwarded-Forを消す
-    res.removeHeader('X-Forwarded-For');
+  <span class="nx">res</span><span class="p">.</span><span class="nx">json</span> <span class="o">=</span> <span class="p">(</span><span class="na">body</span><span class="p">:</span> <span class="kr">any</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="c1">// X-Forwarded-Forを消す</span>
+    <span class="nx">res</span><span class="p">.</span><span class="nf">removeHeader</span><span class="p">(</span><span class="dl">'</span><span class="s1">X-Forwarded-For</span><span class="dl">'</span><span class="p">);</span>
 
-    if (res.statusCode &gt;= 200 &amp;&amp; res.statusCode &lt; 300) {
-      // 成功時のレスポンス形式
-      const successResponse: SuccessResponse = {
-        status: 'success',
-        data: body,
-      };
-      return originalJson.call(res, successResponse);
-    } else {
-      // 失敗時のRFC7807形式
-      const errorResponse: ErrorResponse = {
-        type: 'about:blank',
-        title: 'Error',
-        status: res.statusCode,
-        detail: body.message || 'Unknown error',
-      };
-      return originalJson.call(res, errorResponse);
-    }
-  };
+    <span class="k">if </span><span class="p">(</span><span class="nx">res</span><span class="p">.</span><span class="nx">statusCode</span> <span class="o">&gt;=</span> <span class="mi">200</span> <span class="o">&amp;&amp;</span> <span class="nx">res</span><span class="p">.</span><span class="nx">statusCode</span> <span class="o">&lt;</span> <span class="mi">300</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// 成功時のレスポンス形式</span>
+      <span class="kd">const</span> <span class="na">successResponse</span><span class="p">:</span> <span class="nx">SuccessResponse</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="na">status</span><span class="p">:</span> <span class="dl">'</span><span class="s1">success</span><span class="dl">'</span><span class="p">,</span>
+        <span class="na">data</span><span class="p">:</span> <span class="nx">body</span><span class="p">,</span>
+      <span class="p">};</span>
+      <span class="k">return</span> <span class="nx">originalJson</span><span class="p">.</span><span class="nf">call</span><span class="p">(</span><span class="nx">res</span><span class="p">,</span> <span class="nx">successResponse</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="c1">// 失敗時のRFC7807形式</span>
+      <span class="kd">const</span> <span class="na">errorResponse</span><span class="p">:</span> <span class="nx">ErrorResponse</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">about:blank</span><span class="dl">'</span><span class="p">,</span>
+        <span class="na">title</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Error</span><span class="dl">'</span><span class="p">,</span>
+        <span class="na">status</span><span class="p">:</span> <span class="nx">res</span><span class="p">.</span><span class="nx">statusCode</span><span class="p">,</span>
+        <span class="na">detail</span><span class="p">:</span> <span class="nx">body</span><span class="p">.</span><span class="nx">message</span> <span class="o">||</span> <span class="dl">'</span><span class="s1">Unknown error</span><span class="dl">'</span><span class="p">,</span>
+      <span class="p">};</span>
+      <span class="k">return</span> <span class="nx">originalJson</span><span class="p">.</span><span class="nf">call</span><span class="p">(</span><span class="nx">res</span><span class="p">,</span> <span class="nx">errorResponse</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">};</span>
 
-  next();
-};
+  <span class="nf">next</span><span class="p">();</span>
+<span class="p">};</span>
 
-export default responseMiddleware;
+<span class="k">export</span> <span class="k">default</span> <span class="nx">responseMiddleware</span><span class="p">;</span>
 </code></pre></div></div>
 
 <h3 id="まとめ">まとめ</h3>
 <p>上記は単純な例ですが、一度レスポンス形式を統一する処理を書いておけば繰り返し使えそうです。</p>]]></content><author><name></name></author><category term="blog" /><category term="FastAPI" /><category term="Nodejs" /><summary type="html"><![CDATA[FastAPIやNode.jsでレスポンス形式を統一する]]></summary></entry><entry><title type="html">XAトランザクション</title><link href="https://hoge-code.github.io/md/posts/2025-02-21-aws" rel="alternate" type="text/html" title="XAトランザクション" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/aws</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-02-21-aws"><![CDATA[<p>マイクロサービス間で整合性を保つには、CAP定理でいうC(整合性)の一部を妥協して、最終整合性を維持できるサーガパターンを<code class="language-plaintext highlighter-rouge">AWS StepFunctions</code>などを使用して実装するのが一般的らしいですが、せっかくなので分散トランザクションについても簡単に試してみます。</p>
+
+<p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#サンプルの流れ" id="markdown-toc-サンプルの流れ">サンプルの流れ</a></li>
+  <li><a href="#テーブルの用意" id="markdown-toc-テーブルの用意">テーブルの用意</a></li>
+  <li><a href="#まとめ" id="markdown-toc-まとめ">まとめ</a></li>
+</ul>
 
 <h3 id="サンプルの流れ">サンプルの流れ</h3>
 <p>複数のmySQLデータベースを用意し、XAトランザクションを使用します。両方のデータベースで操作が成功すればコミットし、どちらかが失敗すればロールバックします。また、<code class="language-plaintext highlighter-rouge">my.cnf</code>ファイルで使用されているMySQLのエンジンが<code class="language-plaintext highlighter-rouge">InnoDB</code>であることを確認します。</p>
@@ -377,6 +421,12 @@ export default responseMiddleware;
 </ul>
 
 <p>というわけで最後の<code class="language-plaintext highlighter-rouge">Client Credentials</code>認証を少しだけ理解できたような気がするのでまとめてみます。</p>
+
+<p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#client-credentials認証の流れ" id="markdown-toc-client-credentials認証の流れ">Client Credentials認証の流れ</a></li>
+  <li><a href="#まとめ" id="markdown-toc-まとめ">まとめ</a></li>
+</ul>
 
 <h3 id="client-credentials認証の流れ">Client Credentials認証の流れ</h3>
 <p><code class="language-plaintext highlighter-rouge">Keycloak</code>の場合は以下のような手順になります。</p>
@@ -493,6 +543,8 @@ Authorization: Bearer &lt;access_token&gt;
 <h3 id="まとめ">まとめ</h3>
 <p><code class="language-plaintext highlighter-rouge">EKS</code>など<code class="language-plaintext highlighter-rouge">k8s</code>環境のマイクロサービス間認証では、<code class="language-plaintext highlighter-rouge">IAM</code>や<code class="language-plaintext highlighter-rouge">k8s</code>の<code class="language-plaintext highlighter-rouge">ServiceAcount</code>を使用する方法や、<code class="language-plaintext highlighter-rouge">AppMesh</code>などサービスメッシュを使用した<code class="language-plaintext highlighter-rouge">mTLS</code>が主流らしいですが、どちらも環境構築の時点で難しすぎるので、手軽な<code class="language-plaintext highlighter-rouge">Client Credential</code>認証について学習してみました。</p>]]></content><author><name></name></author><category term="blog" /><category term="Nodejs" /><summary type="html"><![CDATA[Node.js]]></summary></entry><entry><title type="html">hyperターミナルを設定してみる</title><link href="https://hoge-code.github.io/md/posts/2025-02-21-hyper" rel="alternate" type="text/html" title="hyperターミナルを設定してみる" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/hyper</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-02-21-hyper"><![CDATA[<p><a href="https://hyper.is/">Hyper</a>はElectronを使ったターミナルで、プラグインを使った拡張や、tmuxのようにマルチタブが使えるらしいです。正直に言うと、AI補完やコマンド履歴を使える<a href="https://www.warp.dev/">WARP</a>を使いたかったのですが、まだWindowsには対応していないのでHyperを使ってみることにしました。忘備録を兼ねて、セットアップ手順を書きます。</p>
 
+<p><strong>目次</strong></p>
+
 <h4 id="hyperをダウンロード">hyperをダウンロード</h4>
 <p>公式サイトにアクセスするか、chocolateyでインストールします。</p>
 
@@ -545,6 +597,8 @@ pluginsは詳しくないが、適当に追加してみます。</li>
 
 <p>設定ファイルを編集することで簡単にスタイル変更やプラグイン追加ができるのは便利だと感じました。その一方で、git bashだけでは補完が利かないのでxonshなど他のシェルを試してみたくなりました。</p>]]></content><author><name></name></author><category term="blog" /><category term="ツール" /><summary type="html"><![CDATA[Hyper]]></summary></entry><entry><title type="html">MySQLで全文検索を試してみる</title><link href="https://hoge-code.github.io/md/posts/2025-02-21-mysql-full-search" rel="alternate" type="text/html" title="MySQLで全文検索を試してみる" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/mysql-full-search</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-02-21-mysql-full-search"><![CDATA[<p>Docker、VSCode(拡張機能はMySQLとDevContainer)、MySQLで全文検索を試してみます。RDBのLIKE検索は前方一致条件でない限りインデックスが利かないし、Elasticsearchを使ってCQRS的に実装するのは小規模なアプリだとオーバーなのでMySQLの全文検索を使った際の忘備録を残しておきます。</p>
 
+<p><strong>目次</strong></p>
+
 <h4 id="dockerコンテナ起動"><strong>Dockerコンテナ起動</strong></h4>
 
 <p>docker runだとコマンド入力が面倒なので、docker-compose.ymlを書きます。本当は.envファイルに環境変数を書くべきだけどベタ書きします。Docker拡張機能を入れているので、上のRun All Servicesボタンをクリックし、mysqlコンテナが起動することを確認します。</p>
@@ -595,6 +649,12 @@ pluginsは詳しくないが、適当に追加してみます。</li>
 
 <p>小規模なアプリで全文検索を試したいと思った時、わざわざ全文検索エンジンを導入する必要がないので便利だと感じました。</p>]]></content><author><name></name></author><category term="blog" /><category term="MySQL" /><summary type="html"><![CDATA[MySQL + 全文検索]]></summary></entry><entry><title type="html">nodejsをプロファイリングしてみる</title><link href="https://hoge-code.github.io/md/posts/2025-02-21-nodejs-profiling" rel="alternate" type="text/html" title="nodejsをプロファイリングしてみる" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/nodejs-profiling</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-02-21-nodejs-profiling"><![CDATA[<p>nodejsのデバッグは<code class="language-plaintext highlighter-rouge">inspect-brk</code>や、それを内部的に使用しているvscodeが有名ですが、プロファイリングに使われる<code class="language-plaintext highlighter-rouge">clinic.js</code>を試してみます。</p>
 
+<p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#使用してみる" id="markdown-toc-使用してみる">使用してみる</a></li>
+  <li><a href="#他のオプション" id="markdown-toc-他のオプション">他のオプション</a></li>
+</ul>
+
 <h3 id="使用してみる">使用してみる</h3>
 <p>まずはグローバルにインストールします。</p>
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm <span class="nb">install</span> <span class="nt">-g</span> clinic
@@ -615,6 +675,8 @@ pluginsは詳しくないが、適当に追加してみます。</li>
 
 <h4 id="3-clinic-bubbleprof">3. <strong><code class="language-plaintext highlighter-rouge">clinic bubbleprof</code></strong></h4>
 <p>関数間の呼び出し関係を視覚化するツール。円の大きさによって関数の依存関係や、ボトルネックを確認できます。</p>]]></content><author><name></name></author><category term="blog" /><category term="Nodejs" /><summary type="html"><![CDATA[Node.js + Clinic.js]]></summary></entry><entry><title type="html">Pandocでmdからwordファイルを作る</title><link href="https://hoge-code.github.io/md/posts/2025-02-21-pandoc" rel="alternate" type="text/html" title="Pandocでmdからwordファイルを作る" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/pandoc</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-02-21-pandoc"><![CDATA[<p>ドキュメントをワードで提出しなければならない際に、mdで書て変換したいと思ったので、vscodeとpandocを使ったセットアップ手順を書きます。</p>
+
+<p><strong>目次</strong></p>
 
 <h4 id="pandocのインストール">Pandocのインストール</h4>
 
