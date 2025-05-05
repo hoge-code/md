@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://hoge-code.github.io/md/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hoge-code.github.io/md/" rel="alternate" type="text/html" /><updated>2025-05-04T17:29:32+00:00</updated><id>https://hoge-code.github.io/md/feed.xml</id><title type="html">ツールの忘備録</title><subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle><entry><title type="html">自動補完のローカルと全文検索の比較</title><link href="https://hoge-code.github.io/md/posts/2025-05-04-auto-complete" rel="alternate" type="text/html" title="自動補完のローカルと全文検索の比較" /><published>2025-05-04T03:00:00+00:00</published><updated>2025-05-04T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/auto-complete</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-04-auto-complete"><![CDATA[<p>検索機能などで使われるオートコンプリートをクライアント側のJSONファイルと、リモートの全文検索を実装する方法を比較して考えてみます。</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://hoge-code.github.io/md/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hoge-code.github.io/md/" rel="alternate" type="text/html" /><updated>2025-05-05T12:10:25+00:00</updated><id>https://hoge-code.github.io/md/feed.xml</id><title type="html">ツールの忘備録</title><subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle><entry><title type="html">自動補完のローカルと全文検索の比較</title><link href="https://hoge-code.github.io/md/posts/2025-05-04-auto-complete" rel="alternate" type="text/html" title="自動補完のローカルと全文検索の比較" /><published>2025-05-04T03:00:00+00:00</published><updated>2025-05-04T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/auto-complete</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-04-auto-complete"><![CDATA[<p>検索機能などで使われるオートコンプリートをクライアント側のJSONファイルと、リモートの全文検索を実装する方法を比較して考えてみます。</p>
 
 <p><strong>目次</strong></p>
 <ul id="markdown-toc">
@@ -502,262 +502,7 @@
 
 <h3 id="感想">感想</h3>
 
-<p>デブオペについて体系的に学習してこなかったため、プログラムと同様にCICDファイルも分割するという発想がありませんでしたが、ファイル分割することでより柔軟にCICDを構築できると感じました。</p>]]></content><author><name></name></author><category term="blog" /><category term="ツール" /><summary type="html"><![CDATA[github-actions]]></summary></entry><entry><title type="html">github小技</title><link href="https://hoge-code.github.io/md/posts/2025-05-04-github" rel="alternate" type="text/html" title="github小技" /><published>2025-05-04T03:00:00+00:00</published><updated>2025-05-04T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/github</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-04-github"><![CDATA[<p>忘れがちやネットに情報が少ないGitHub関連の操作について忘備録を兼ねてまとめてみます。</p>
-
-<p><strong>目次</strong></p>
-<ul id="markdown-toc">
-  <li><a href="#1-github-の-pull-requestとissue-テンプレート" id="markdown-toc-1-github-の-pull-requestとissue-テンプレート">1. GitHub の Pull RequestとIssue テンプレート</a></li>
-  <li><a href="#2-issue-からブランチを作成" id="markdown-toc-2-issue-からブランチを作成">2. Issue からブランチを作成</a></li>
-  <li><a href="#3-conventional-commit--自動リリースノート生成" id="markdown-toc-3-conventional-commit--自動リリースノート生成">3. Conventional Commit &amp; 自動リリースノート生成</a></li>
-  <li><a href="#4-前回のコミットに少しだけ変更を追加" id="markdown-toc-4-前回のコミットに少しだけ変更を追加">4. 前回のコミットに少しだけ変更を追加</a></li>
-</ul>
-
-<hr />
-
-<h3 id="1-github-の-pull-requestとissue-テンプレート">1. GitHub の Pull RequestとIssue テンプレート</h3>
-
-<h4 id="テンプレートの設置方法">テンプレートの設置方法</h4>
-
-<p><code class="language-plaintext highlighter-rouge">.github/</code> ディレクトリ以下に以下のように配置すると、自動でテンプレートとして認識されます。</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>.github/
-├── PULL_REQUEST_TEMPLATE.md
-├── ISSUE_TEMPLATE/
-│   ├── bug_report.md
-│   ├── feature_request.md
-│   └── config.yml
-</code></pre></div></div>
-
-<h4 id="pull-request-テンプレート例">Pull Request テンプレート例</h4>
-
-<div class="language-md highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gu">## 概要</span>
-
-<span class="gu">## 変更内容</span>
-
-<span class="gu">## 関連Issue</span>
-
-Fixes #123
-
-<span class="gu">## 動作確認手順</span>
-</code></pre></div></div>
-
-<hr />
-
-<h4 id="issue-テンプレート例-bug_reportmd">Issue テンプレート（例: <code class="language-plaintext highlighter-rouge">bug_report.md</code>）</h4>
-
-<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">name</span><span class="pi">:</span> <span class="s">Bug Report</span>
-<span class="na">description</span><span class="pi">:</span> <span class="s">バグの報告</span>
-<span class="na">title</span><span class="pi">:</span> <span class="s2">"</span><span class="s">[BUG]</span><span class="nv"> </span><span class="s">"</span>
-<span class="na">labels</span><span class="pi">:</span> <span class="pi">[</span><span class="nv">bug</span><span class="pi">]</span>
-<span class="na">body</span><span class="pi">:</span>
-  <span class="pi">-</span> <span class="na">type</span><span class="pi">:</span> <span class="s">textarea</span>
-    <span class="na">attributes</span><span class="pi">:</span>
-      <span class="na">label</span><span class="pi">:</span> <span class="s">概要</span>
-  <span class="pi">-</span> <span class="na">type</span><span class="pi">:</span> <span class="s">textarea</span>
-    <span class="na">attributes</span><span class="pi">:</span>
-      <span class="na">label</span><span class="pi">:</span> <span class="s">再現手順</span>
-</code></pre></div></div>
-
-<hr />
-
-<h3 id="2-issue-からブランチを作成">2. Issue からブランチを作成</h3>
-
-<p>VSCodeなら<code class="language-plaintext highlighter-rouge">GitHub PullRequest + Issue</code>という拡張機能を利用して、Issueからブランチを作成できます。ブランチにはIssue番号を含めることがありますが、コミット名にIssue番号を書かない限り、Issueが自動でクローズされることがないことに注意します。</p>
-
-<h4 id="例">例：</h4>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git checkout <span class="nt">-b</span> feature/123-add-login
-</code></pre></div></div>
-
-<h4 id="issue-をクローズするコミットメッセージの書き方">Issue をクローズするコミットメッセージの書き方</h4>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">Fixes #123</code></li>
-  <li><code class="language-plaintext highlighter-rouge">Closes #123</code></li>
-  <li><code class="language-plaintext highlighter-rouge">Resolves #123</code></li>
-</ul>
-
-<p>GitHub 上でこのコミットが PR にマージされると、該当 issue が自動でクローズされます。</p>
-
-<hr />
-
-<h3 id="3-conventional-commit--自動リリースノート生成">3. Conventional Commit &amp; 自動リリースノート生成</h3>
-
-<p>取り敢えず<code class="language-plaintext highlighter-rouge">Conventional Commit</code>に従っておけば、<code class="language-plaintext highlighter-rouge">GitHub Copilot</code>での補完、リリースノートの自動生成などのメリットが得られます。コミットメッセージが<code class="language-plaintext highlighter-rouge">Conventional Commit</code>に従っているか確認するためにフックを使用することもできます。</p>
-
-<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;type&gt;(&lt;scope&gt;): &lt;subject&gt;
-</code></pre></div></div>
-
-<h4 id="例-1">例：</h4>
-
-<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>feat(auth): ログイン機能を追加
-fix(api): 500エラーの原因を修正
-docs(readme): セットアップ手順を追加
-</code></pre></div></div>
-
-<hr />
-
-<h4 id="自動リリースノート生成">自動リリースノート生成</h4>
-
-<p><code class="language-plaintext highlighter-rouge">semantic-release</code>など`を使うと、PRやコミットから changelog や GitHub Release を自動生成することができます。</p>
-
-<ol>
-  <li><code class="language-plaintext highlighter-rouge">semantic-release</code> をインストール</li>
-  <li><code class="language-plaintext highlighter-rouge">release.config.js</code> でルールを定義</li>
-  <li>GitHub Actions に <code class="language-plaintext highlighter-rouge">semantic-release</code> ワークフローを追加</li>
-</ol>
-
-<h3 id="4-前回のコミットに少しだけ変更を追加">4. 前回のコミットに少しだけ変更を追加</h3>
-
-<p>コミットメッセージの変更で紹介される<code class="language-plaintext highlighter-rouge">amend</code>コマンドですが、直前のコミットに変更を付け足す場面で使用することのほうが多い気がします。プッシュした後だと、<code class="language-plaintext highlighter-rouge">git push --force</code>する必要があります。</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git commit <span class="nt">--amend</span> <span class="nt">--no-edit</span>
-</code></pre></div></div>
-
-<h4 id="参考">参考</h4>
-
-<p><a href="https://roadmap.sh/git-github">roadmap.sh</a></p>]]></content><author><name></name></author><category term="blog" /><category term="ツール" /><summary type="html"><![CDATA[github]]></summary></entry><entry><title type="html">github小技2</title><link href="https://hoge-code.github.io/md/posts/2025-05-04-github2" rel="alternate" type="text/html" title="github小技2" /><published>2025-05-04T03:00:00+00:00</published><updated>2025-05-04T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/github2</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-04-github2"><![CDATA[<p>忘れがちやネットに情報が少ないGitHub関連の操作について忘備録を兼ねてまとめてみます。</p>
-
-<p><strong>目次</strong></p>
-<ul id="markdown-toc">
-  <li><a href="#1-gfmの引用" id="markdown-toc-1-gfmの引用">1. GFMの引用</a></li>
-  <li><a href="#2slack-チャンネルで-github-を連携登録するコマンド" id="markdown-toc-2slack-チャンネルで-github-を連携登録するコマンド">2.Slack チャンネルで GitHub を連携登録するコマンド</a></li>
-  <li><a href="#3-git-filter-repo" id="markdown-toc-3-git-filter-repo">3. <code class="language-plaintext highlighter-rouge">git-filter-repo</code></a></li>
-  <li><a href="#4-git-でワークツリーに別リポジトリを含める方法" id="markdown-toc-4-git-でワークツリーに別リポジトリを含める方法">4. Git でワークツリーに別リポジトリを含める方法</a></li>
-  <li><a href="#5-git-lfslarge-file-storage" id="markdown-toc-5-git-lfslarge-file-storage">5. Git LFS（Large File Storage）</a></li>
-</ul>
-
-<hr />
-
-<h3 id="1-gfmの引用">1. GFMの引用</h3>
-
-<p>引用が色分けされて便利ですが、何故かネットで検索しても情報が少ないです。</p>
-
-<div class="language-md highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gt">&gt; [!NOTE]  </span>
-<span class="gt">&gt; note</span>
-<span class="gt">
-&gt; [!TIP]</span>
-<span class="gt">&gt; tip</span>
-<span class="gt">
-&gt; [!IMPORTANT]  </span>
-<span class="gt">&gt; important</span>
-<span class="gt">
-&gt; [!WARNING]  </span>
-<span class="gt">&gt; warning</span>
-<span class="gt">
-&gt; [!CAUTION]</span>
-<span class="gt">&gt; caution</span>
-</code></pre></div></div>
-
-<hr />
-
-<h3 id="2slack-チャンネルで-github-を連携登録するコマンド">2.Slack チャンネルで GitHub を連携登録するコマンド</h3>
-
-<h4 id="前提">前提：</h4>
-
-<ul>
-  <li>Slack に GitHub アプリをインストール済み</li>
-  <li>GitHub に Slack 通知を送るための連携設定済み（OAuth連携）</li>
-</ul>
-
-<h4 id="チャンネルに連携リポジトリを登録するコマンド">チャンネルに連携リポジトリを登録するコマンド：</h4>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/github subscribe owner/repo issues pulls commits
-</code></pre></div></div>
-
-<h4 id="解除">解除：</h4>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/github unsubscribe owner/repo
-</code></pre></div></div>
-
-<hr />
-
-<h3 id="3-git-filter-repo">3. <code class="language-plaintext highlighter-rouge">git-filter-repo</code></h3>
-
-<p><code class="language-plaintext highlighter-rouge">git-filter-repo</code> は [<code class="language-plaintext highlighter-rouge">git filter-branch</code>] や [<code class="language-plaintext highlighter-rouge">BFG Repo-Cleaner</code>] の高速・安全な後継ツールです。</p>
-
-<p>特定ディレクトリだけを抽出して新リポジトリ化したい場合、コミット履歴から機密ファイルを完全に除去したい場合、メールアドレス・名前の一括変換（匿名化）したい場合などに使用します。</p>
-
-<h4 id="特定のディレクトリを抽出">特定のディレクトリを抽出</h4>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone <span class="nt">--no-local</span> <span class="nt">--mirror</span> https://github.com/owner/repo.git
-<span class="nb">cd </span>repo.git
-
-git filter-repo <span class="nt">--subdirectory-filter</span> src
-</code></pre></div></div>
-
-<h4 id="ファイル除去">ファイル除去</h4>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git filter-repo <span class="nt">--path</span> secrets.env <span class="nt">--invert-paths</span>
-</code></pre></div></div>
-
-<p>バックアップを取ることを忘れないようにします。</p>
-
-<hr />
-
-<h3 id="4-git-でワークツリーに別リポジトリを含める方法">4. Git でワークツリーに別リポジトリを含める方法</h3>
-
-<h4 id="サブモジュール公式一般的">サブモジュール（公式・一般的）</h4>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git submodule add https://github.com/owner/other-repo.git external/other-repo
-</code></pre></div></div>
-
-<ul>
-  <li>外部リポジトリを自分のリポジトリの下に「リンク」する</li>
-  <li>バージョン固定（コミット単位）できる</li>
-  <li><code class="language-plaintext highlighter-rouge">git clone --recurse-submodules</code> が必要</li>
-</ul>
-
-<h4 id="ワークツリー外部管理高度">ワークツリー＋外部管理（高度）</h4>
-
-<p><code class="language-plaintext highlighter-rouge">git worktree</code>は同じリポジトリの別ブランチを別のフォルダに展開する機能です。</p>
-
-<p>例：</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git worktree add ../build-dir build-branch
-</code></pre></div></div>
-
-<p>同一リポジトリの別ブランチを別ディレクトリに展開する仕組みです。</p>
-
-<hr />
-
-<h3 id="5-git-lfslarge-file-storage">5. Git LFS（Large File Storage）</h3>
-
-<p>Git で扱いにくい大容量ファイル（画像、動画、バイナリなど）を効率的に管理する仕組みです。</p>
-
-<h4 id="セットアップ手順">セットアップ手順：</h4>
-
-<ol>
-  <li>LFS をインストール</li>
-</ol>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git lfs <span class="nb">install</span>
-</code></pre></div></div>
-
-<ol>
-  <li>追跡するファイルタイプを指定</li>
-</ol>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git lfs track <span class="s2">"*.psd"</span>
-<span class="nb">echo</span> <span class="s2">"*.psd"</span> <span class="o">&gt;&gt;</span> .gitattributes
-</code></pre></div></div>
-
-<ol>
-  <li>通常通りコミット・Push</li>
-</ol>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git add file.psd
-git commit <span class="nt">-m</span> <span class="s2">"Add large PSD"</span>
-git push origin main
-</code></pre></div></div>
-
-<p><code class="language-plaintext highlighter-rouge">.gitattributes</code> に LFS の追跡対象が記録され、push 時に実体は Git LFS サーバーへ送信されるようになります。大容量のファイルを効率的に扱うことができるようになりますが、ストレージに制限があるので注意が必要です。GitHub, GitLab, Bitbucket などで対応しています。</p>
-
-<hr />
-
-<h4 id="参考">参考</h4>
-
-<p><a href="https://roadmap.sh/git-github">roadmap.sh</a></p>]]></content><author><name></name></author><category term="blog" /><category term="ツール" /><summary type="html"><![CDATA[github]]></summary></entry><entry><title type="html">kubectl contextの設定と確認</title><link href="https://hoge-code.github.io/md/posts/2025-05-04-kubectl-context" rel="alternate" type="text/html" title="kubectl contextの設定と確認" /><published>2025-05-04T03:00:00+00:00</published><updated>2025-05-04T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/kubectl-context</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-04-kubectl-context"><![CDATA[<p>k8sでコンテキストを切り替える動作に躓いてしまったので、<code class="language-plaintext highlighter-rouge">kubectl context</code>関連の設定と確認コマンドをまとめてみます。</p>
+<p>デブオペについて体系的に学習してこなかったため、プログラムと同様にCICDファイルも分割するという発想がありませんでしたが、ファイル分割することでより柔軟にCICDを構築できると感じました。</p>]]></content><author><name></name></author><category term="blog" /><category term="ツール" /><summary type="html"><![CDATA[github-actions]]></summary></entry><entry><title type="html">kubectl contextの設定と確認</title><link href="https://hoge-code.github.io/md/posts/2025-05-04-kubectl-context" rel="alternate" type="text/html" title="kubectl contextの設定と確認" /><published>2025-05-04T03:00:00+00:00</published><updated>2025-05-04T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/kubectl-context</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-04-kubectl-context"><![CDATA[<p>k8sでコンテキストを切り替える動作に躓いてしまったので、<code class="language-plaintext highlighter-rouge">kubectl context</code>関連の設定と確認コマンドをまとめてみます。</p>
 
 <p><strong>目次</strong></p>
 <ul id="markdown-toc">
@@ -1104,4 +849,166 @@ Host github.com-Account2
 
 <p>特に<strong>Notebooks</strong>機能が便利だと感じました。よく忘れてしまうGitやSSHのコマンドを、ChatGPTに質問してその回答をコピペするだけで簡単に呼び出すことができました。</p>
 
-<p>また、AI機能などはまだ試していないので、今後試してみたいと思っています。</p>]]></content><author><name></name></author><category term="blog" /><category term="ツール" /><summary type="html"><![CDATA[Warp]]></summary></entry></feed>
+<p>また、AI機能などはまだ試していないので、今後試してみたいと思っています。</p>]]></content><author><name></name></author><category term="blog" /><category term="ツール" /><summary type="html"><![CDATA[Warp]]></summary></entry><entry><title type="html">はてなブログからJekyllに移行してみる</title><link href="https://hoge-code.github.io/md/posts/2025-03-13-jekyll-blog-copy" rel="alternate" type="text/html" title="はてなブログからJekyllに移行してみる" /><published>2025-03-13T03:00:00+00:00</published><updated>2025-03-13T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/jekyll-blog%20copy</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-03-13-jekyll-blog-copy"><![CDATA[<p>はてなブログからJekyllに移行する際、いくつかの点で躓きました。<code class="language-plaintext highlighter-rouge">ruby</code>やSSGにあまり慣れていなかったため、セットアップに多少時間がかかってしまいました。</p>
+
+<p>移行を決めたきっかけとして、はてなブログでは何故か記事を物理的に削除できなかったり、mdの編集がしづらかったりといった問題があり、<code class="language-plaintext highlighter-rouge">git</code>リポジトリでmdを管理できる環境にしたいと考えたからです。</p>
+
+<p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#jekyllのメリット" id="markdown-toc-jekyllのメリット">Jekyllのメリット</a></li>
+  <li><a href="#苦労した点" id="markdown-toc-苦労した点">苦労した点</a></li>
+  <li><a href="#結論" id="markdown-toc-結論">結論</a></li>
+</ul>
+
+<h3 id="jekyllのメリット">Jekyllのメリット</h3>
+
+<ul>
+  <li>プラグインでUIのカスタマイズが可能</li>
+  <li>ローカル環境でサイトを確認できる (<code class="language-plaintext highlighter-rouge">bundle exec jekyll serve</code> で確認)</li>
+  <li>ウェブ上でmdを編集する必要がなく、CI/CDで簡単に更新できる</li>
+</ul>
+
+<p>これらのメリットがあり、Jekyllを使うことに決めました。</p>
+
+<h3 id="苦労した点">苦労した点</h3>
+
+<h4 id="1-そもそもrubyが分からない">1. そもそも<code class="language-plaintext highlighter-rouge">ruby</code>が分からない</h4>
+
+<p><code class="language-plaintext highlighter-rouge">bundle exec jekyll serve</code>や<code class="language-plaintext highlighter-rouge">gem install</code>などのコマンドすら知りませんでした。しかし、最近Windows用にもAIが搭載されたターミナル<code class="language-plaintext highlighter-rouge">warp</code>が登場したことで、VSCodeのコードスニペットのように一度登録すれば簡単にコマンドを呼び出せるようになり、少し楽になりました。</p>
+
+<h4 id="2-htmlテンプレートエンジン--ssgに慣れていない">2. HTMLテンプレートエンジン + SSGに慣れていない</h4>
+
+<p>フロントエンドで<code class="language-plaintext highlighter-rouge">React</code>のコンポーネントベースに慣れすぎていたため、昔ながらのテンプレートエンジンの構文を思い出すのにも時間がかかりました。</p>
+
+<h4 id="3-jekyllのプラグイン設定">3. <code class="language-plaintext highlighter-rouge">jekyll</code>のプラグイン設定</h4>
+
+<p>SSGサイトを構築する際に、以下のプラグインを使用しました。</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">jekyll-paginate</code></li>
+  <li><code class="language-plaintext highlighter-rouge">jekyll-theme-cayman</code></li>
+  <li><code class="language-plaintext highlighter-rouge">jekyll-archives</code></li>
+</ul>
+
+<p>これらのプラグインの設定に少し手間がかかりました。</p>
+
+<h5 id="jekyll-theme-cayman">jekyll-theme-cayman</h5>
+
+<p>このプラグインはSCSSを使用しているため、以下の手順で設定を行う必要がありました。</p>
+
+<ol>
+  <li><code class="language-plaintext highlighter-rouge">/assets/css/style.scss</code>ファイルで<code class="language-plaintext highlighter-rouge">@import "jekyll-theme-cayman"</code>をインポート</li>
+  <li><code class="language-plaintext highlighter-rouge">index.html</code>でビルドされたCSSファイルをインポート</li>
+  <li><code class="language-plaintext highlighter-rouge">_config.yml</code>ファイルでSCSSのビルド情報を設定</li>
+</ol>
+
+<p>これらを正しく設定しないと、テーマがうまく反映されませんでした。</p>
+
+<h5 id="jekyll-archives">jekyll-archives</h5>
+
+<p>タグや日付ごとの表示が可能なプラグインですが、どうやら<code class="language-plaintext highlighter-rouge">github-pages</code>では動作しないようです。Jekyllは本来、<code class="language-plaintext highlighter-rouge">github-actions</code>を自動的に使うことができるのが特徴ですが、<code class="language-plaintext highlighter-rouge">github-pages</code>に対応させるためには手動でCI/CDを設定しなければならず、結果的に自分でCI/CDを構築する羽目になりました。</p>
+
+<p>また、<code class="language-plaintext highlighter-rouge">github-pages</code>自体の設定を久々に行ったため、公開先のブランチを変更する必要があることすら忘れており、少し手間取りました。</p>
+
+<h3 id="結論">結論</h3>
+
+<p>色々と面倒な点がありましたが、特にローカル環境でmdを編集できる点が大きな利点だと感じました。デメリットとしては、無料枠だとパブリックリポジトリにする必要があることくらいかと思います。</p>]]></content><author><name></name></author><category term="blog" /><category term="開発" /><summary type="html"><![CDATA[Jekyll + GitHubPages]]></summary></entry><entry><title type="html">APIのレスポンス形式を統一する</title><link href="https://hoge-code.github.io/md/posts/2025-02-21-api-response" rel="alternate" type="text/html" title="APIのレスポンス形式を統一する" /><published>2025-02-21T03:00:00+00:00</published><updated>2025-02-21T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/api-response</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-02-21-api-response"><![CDATA[<p>APIレスポンスの形式を統一する方法を考えてみます。</p>
+
+<p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#fastapiの場合" id="markdown-toc-fastapiの場合">FastAPIの場合</a></li>
+  <li><a href="#expressの場合" id="markdown-toc-expressの場合">Expressの場合</a></li>
+  <li><a href="#まとめ" id="markdown-toc-まとめ">まとめ</a></li>
+</ul>
+
+<h3 id="fastapiの場合">FastAPIの場合</h3>
+
+<p>FastAPIはエンドポイントの<code class="language-plaintext highlighter-rouge">response_model</code>のDTOクラスの構造をもとにOASドキュメントを生成しますが、ミドルウェアを使って、レスポンス後に返却するJSONの構造を変更すると上手く表示されないのでDTOを使って実装してみます。</p>
+
+<h4 id="dtoの生成">DTOの生成</h4>
+<p>適当な<code class="language-plaintext highlighter-rouge">Item</code>と汎用的な<code class="language-plaintext highlighter-rouge">ResponseDTO</code>を作成します。<code class="language-plaintext highlighter-rouge">ResponseDTO</code>も本来ならステータスコードや、エラーならエラーメッセージを詳細に含めるべきですが、簡略化します。</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">typing</span> <span class="kn">import</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="n">fastapi</span> <span class="kn">import</span> <span class="n">FastAPI</span>
+<span class="kn">from</span> <span class="n">pydantic</span> <span class="kn">import</span> <span class="n">BaseModel</span>
+
+<span class="c1"># 総称型の定義
+</span><span class="n">T</span> <span class="o">=</span> <span class="nc">TypeVar</span><span class="p">(</span><span class="sh">'</span><span class="s">T</span><span class="sh">'</span><span class="p">)</span>  <span class="c1"># Tは任意の型
+</span>
+<span class="k">class</span> <span class="nc">ResponseDTO</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">success</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">T</span>
+    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
+
+<span class="c1"># レスポンス用のDTOクラス
+</span><span class="k">class</span> <span class="nc">Item</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+</code></pre></div></div>
+
+<h4 id="エンドポイントの作成">エンドポイントの作成</h4>
+<p>こちらも本来ならクエリパラメータなどを使ってページネーションを実装し、それらのメタデータもレスポンスに含めるべきですが簡略化します。</p>
+<div class="language-typescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">app</span> <span class="o">=</span> <span class="nc">FastAPI</span><span class="p">()</span>
+
+<span class="p">@</span><span class="nd">app</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">"</span><span class="s2">/items</span><span class="dl">"</span><span class="p">,</span> <span class="nx">response_model</span><span class="o">=</span><span class="nx">ResponseDTO</span><span class="p">[</span><span class="nx">List</span><span class="p">[</span><span class="nx">Item</span><span class="p">]])</span>
+<span class="k">async</span> <span class="nx">def</span> <span class="nf">get_items</span><span class="p">():</span>
+    <span class="nx">items</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="nc">Item</span><span class="p">(</span><span class="nx">id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nx">name</span><span class="o">=</span><span class="dl">"</span><span class="s2">Item 1</span><span class="dl">"</span><span class="p">),</span>
+        <span class="nc">Item</span><span class="p">(</span><span class="nx">id</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="nx">name</span><span class="o">=</span><span class="dl">"</span><span class="s2">Item 2</span><span class="dl">"</span><span class="p">)</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="nc">ResponseDTO</span><span class="p">(</span><span class="nx">success</span><span class="o">=</span><span class="nx">True</span><span class="p">,</span> <span class="nx">data</span><span class="o">=</span><span class="nx">items</span><span class="p">,</span> <span class="nx">message</span><span class="o">=</span><span class="dl">"</span><span class="s2">Items fetched successfully</span><span class="dl">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="expressの場合">Expressの場合</h3>
+<p>Expressでも一応<code class="language-plaintext highlighter-rouge">Response</code>の型定義にDTOを使うこともできますが、OASを使わないし、ミドルウェアで作成してみます。この際、<code class="language-plaintext highlighter-rouge">X-Forwarded-For</code>ヘッダーを消し、エラーレスポンスは標準の<code class="language-plaintext highlighter-rouge">RFC7807</code>形式で返却するように実装してみます。以下がサンプルコードです。</p>
+
+<div class="language-typescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">Request</span><span class="p">,</span> <span class="nx">Response</span><span class="p">,</span> <span class="nx">NextFunction</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">express</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="c1">// 成功時のレスポンス形式</span>
+<span class="kr">interface</span> <span class="nx">SuccessResponse</span> <span class="p">{</span>
+  <span class="nl">status</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+  <span class="nl">data</span><span class="p">:</span> <span class="kr">any</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// エラーレスポンスのRFC7807形式</span>
+<span class="kr">interface</span> <span class="nx">ErrorResponse</span> <span class="p">{</span>
+  <span class="nl">type</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+  <span class="nl">title</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+  <span class="nl">status</span><span class="p">:</span> <span class="kr">number</span><span class="p">;</span>
+  <span class="nl">detail</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">const</span> <span class="nx">responseMiddleware</span> <span class="o">=</span> <span class="p">(</span><span class="nx">req</span><span class="p">:</span> <span class="nx">Request</span><span class="p">,</span> <span class="nx">res</span><span class="p">:</span> <span class="nx">Response</span><span class="p">,</span> <span class="nx">next</span><span class="p">:</span> <span class="nx">NextFunction</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">originalJson</span> <span class="o">=</span> <span class="nx">res</span><span class="p">.</span><span class="nx">json</span><span class="p">;</span>
+
+  <span class="nx">res</span><span class="p">.</span><span class="nx">json</span> <span class="o">=</span> <span class="p">(</span><span class="na">body</span><span class="p">:</span> <span class="kr">any</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="c1">// X-Forwarded-Forを消す</span>
+    <span class="nx">res</span><span class="p">.</span><span class="nf">removeHeader</span><span class="p">(</span><span class="dl">'</span><span class="s1">X-Forwarded-For</span><span class="dl">'</span><span class="p">);</span>
+
+    <span class="k">if </span><span class="p">(</span><span class="nx">res</span><span class="p">.</span><span class="nx">statusCode</span> <span class="o">&gt;=</span> <span class="mi">200</span> <span class="o">&amp;&amp;</span> <span class="nx">res</span><span class="p">.</span><span class="nx">statusCode</span> <span class="o">&lt;</span> <span class="mi">300</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// 成功時のレスポンス形式</span>
+      <span class="kd">const</span> <span class="na">successResponse</span><span class="p">:</span> <span class="nx">SuccessResponse</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="na">status</span><span class="p">:</span> <span class="dl">'</span><span class="s1">success</span><span class="dl">'</span><span class="p">,</span>
+        <span class="na">data</span><span class="p">:</span> <span class="nx">body</span><span class="p">,</span>
+      <span class="p">};</span>
+      <span class="k">return</span> <span class="nx">originalJson</span><span class="p">.</span><span class="nf">call</span><span class="p">(</span><span class="nx">res</span><span class="p">,</span> <span class="nx">successResponse</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="c1">// 失敗時のRFC7807形式</span>
+      <span class="kd">const</span> <span class="na">errorResponse</span><span class="p">:</span> <span class="nx">ErrorResponse</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">about:blank</span><span class="dl">'</span><span class="p">,</span>
+        <span class="na">title</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Error</span><span class="dl">'</span><span class="p">,</span>
+        <span class="na">status</span><span class="p">:</span> <span class="nx">res</span><span class="p">.</span><span class="nx">statusCode</span><span class="p">,</span>
+        <span class="na">detail</span><span class="p">:</span> <span class="nx">body</span><span class="p">.</span><span class="nx">message</span> <span class="o">||</span> <span class="dl">'</span><span class="s1">Unknown error</span><span class="dl">'</span><span class="p">,</span>
+      <span class="p">};</span>
+      <span class="k">return</span> <span class="nx">originalJson</span><span class="p">.</span><span class="nf">call</span><span class="p">(</span><span class="nx">res</span><span class="p">,</span> <span class="nx">errorResponse</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">};</span>
+
+  <span class="nf">next</span><span class="p">();</span>
+<span class="p">};</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="nx">responseMiddleware</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h3 id="まとめ">まとめ</h3>
+<p>上記は単純な例ですが、一度レスポンス形式を統一する処理を書いておけば繰り返し使えそうです。</p>]]></content><author><name></name></author><category term="blog" /><category term="FastAPI" /><category term="Nodejs" /><summary type="html"><![CDATA[FastAPIやNode.jsでレスポンス形式を統一する]]></summary></entry></feed>
