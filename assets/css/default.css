@@ -2,6 +2,34 @@
 
 /* 汎用CSS*/
 /* メインコンテンツとサイドバーを横並びにする */
+header h1 a {
+  font-weight: 600 !important;
+  margin-left: 40px !important;
+}
+
+@media (min-width: 800px) {
+  header h1:not(a) {
+    margin-left: 40px !important;
+  }
+}
+
+
+h1 a,
+h2 a,
+h3 a {
+  font-family: Consolas !important;
+}
+
+ul li{padding-bottom:3px !important;}
+
+header h1::before {
+  display: none !important;
+}
+
+body {
+  padding: 20px !important;
+}
+
 #content {
   display: flex;
   justify-content: space-between;
@@ -15,13 +43,18 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+div.pagination a {
+  font-size: 1.2rem !important;
+  margin-right: 10px !important;
+}
+
 /* メインコンテンツのスタイル */
-*{
+* {
   font-family: ui-sans-serif !important;
   /*background-color: rgb(243, 243, 230) !important;*/
 }
 
-a{
+a {
   text-shadow: none !important;
 }
 
@@ -36,7 +69,7 @@ header {
 }
 
 article {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .pagination {
@@ -44,10 +77,9 @@ article {
 }
 
 img {
-   max-width: 100% !important;
-   display:block !important;
+  max-width: 100% !important;
+  display: block !important;
 }
-
 
 @media (min-width: 700px) {
   img {
@@ -58,21 +90,26 @@ img {
 /* プラグインのデフォルトSCSSを上書き*/
 body {
   background: white !important;
-  color:black !important;
-  font-family: 'Roboto', sans-serif !important; 
+  color: black !important;
+  font-family: "Roboto", sans-serif !important;
   transform: scale(0.8);
   transform-origin: top left; /* スケーリングの基準点を左上に設定 */
   width: 125%; /* スケーリングにより余分に広がるため、幅を調整 */
 }
 
-h1,h2,h3,h4,h5,h6{
-  font-family: sans-serif !important; 
-  color:black !important;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: sans-serif !important;
+  color: black !important;
   font-weight: bold !important;
 }
 
 a {
-  color:blue !important;
+  color: blue !important;
   font-weight: normal !important;
 }
 
@@ -80,12 +117,12 @@ ul li {
   list-style-image: none !important;
 }
 
-code .err{
+code .err {
   background-color: inherit !important;
-  color:inherit !important;
+  color: inherit !important;
 }
 
-article{
+article {
   margin-bottom: 15px !important;
   border-bottom-color: gray !important ;
 }
@@ -93,20 +130,29 @@ article{
 code:not(pre code) {
   background-color: rgba(31, 37, 46, 0.126) !important;
   color: black !important;
-  font-family: 'Roboto', sans-serif !important;  
-  font-size: 1rem !important;
+  font-family: ui-sans-serif, Consolas, sans-serif !important;
+  font-size: 18px !important;
   font-weight: normal !important;
 }
 
 pre {
   background-color: rgba(31, 37, 46, 0.126) !important;
-  filter: invert(1);  /* 背景と文字を反転 */
+  filter: invert(1); /* 背景と文字を反転 */
   font-size: 0.9rem !important;
 }
 
-#markdown-toc a{
+pre code span{
+  font-family: Consolas !important;
+}
+
+#markdown-toc a {
   font-weight: normal !important;
   color: rgb(15, 113, 200) !important;
+}
+
+code {
+  font-family: Consolus !important;
+  font-size:18px !important;
 }
 
 /*
@@ -124,6 +170,3 @@ pre code {
   font-weight: normal !important;
 }
 */
-
-
-
