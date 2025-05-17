@@ -24,14 +24,15 @@ OAuth認証のうち、<br>
 
 ### Client Credentials認証の流れ
 `Keycloak`の場合は以下のような手順になります。
-- **レルムを作成**
-- **クライアント登録**
+- #### レルムを作成
+
+- #### クライアント登録
   クライアントを作成し、`Client Credentials`フローを有効化。
 
-- **クライアントIDとクライアントシークレットの取得** 
+- #### クライアントIDとクライアントシークレットの取得
   登録したクライアントの設定から、`Client ID`と`Client Secret`を取得。
 
-- **アクセストークンのリクエスト**  
+- #### アクセストークンのリクエスト  
   `Keycloak`のトークンエンドポイントにリクエストを送信。 
 ```bash
   POST /realms/<realm-name>/protocol/openid-connect/token
@@ -40,7 +41,7 @@ OAuth認証のうち、<br>
   client_id=<client-id>&client_secret=<client-secret>&grant_type=client_credentials
 ```
 
-- **APIリクエストの実行**  
+- #### APIリクエストの実行
   アクセストークンを使用して、保護されたリソースやAPIにアクセス。  
   例：  
 ```bash
@@ -80,17 +81,18 @@ OAuth認証のうち、<br>
   callMicroservice();
 ```
 
-- **サーバー側での検証**
+- #### サーバー側での検証
 サーバー側で`keycloak`の公開鍵エンドポイントから公開鍵を取得し、トークンを検証します。`keycloak`と`cognito`の公開鍵エンドポイントは以下のようになります。
-```
+
+```plaintext
 - Keycloak公開鍵エンドポイント:  
   `https://<keycloak-server>/realms/<realm-name>/protocol/openid-connect/certs`
 
 - Amazon Cognito公開鍵エンドポイント:  
   `https://cognito-idp.<region>.amazonaws.com/<user-pool-id>/.well-known/jwks.json`
 ```
-`express`を使用したサンプルコードは以下のようになります。
 
+`express`を使用したサンプルコードは以下のようになります。
 ```javascript
 import express from 'express';
 import axios from 'axios';
