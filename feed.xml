@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://hoge-code.github.io/md/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hoge-code.github.io/md/" rel="alternate" type="text/html" /><updated>2025-05-15T16:05:35+00:00</updated><id>https://hoge-code.github.io/md/feed.xml</id><title type="html">ツールの忘備録</title><subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle><entry><title type="html">自動補完のローカルと全文検索の比較</title><link href="https://hoge-code.github.io/md/posts/2025-05-04-auto-complete" rel="alternate" type="text/html" title="自動補完のローカルと全文検索の比較" /><published>2025-05-04T03:00:00+00:00</published><updated>2025-05-04T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/auto-complete</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-04-auto-complete"><![CDATA[<p>検索機能などで使われるオートコンプリートをクライアント側のJSONファイルと、リモートの全文検索を実装する方法を比較して考えてみます。</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://hoge-code.github.io/md/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hoge-code.github.io/md/" rel="alternate" type="text/html" /><updated>2025-05-17T16:17:51+00:00</updated><id>https://hoge-code.github.io/md/feed.xml</id><title type="html">ツールの忘備録</title><subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle><entry><title type="html">自動補完のローカルと全文検索の比較</title><link href="https://hoge-code.github.io/md/posts/2025-05-04-auto-complete" rel="alternate" type="text/html" title="自動補完のローカルと全文検索の比較" /><published>2025-05-04T03:00:00+00:00</published><updated>2025-05-04T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/auto-complete</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-04-auto-complete"><![CDATA[<p>検索機能などで使われるオートコンプリートをクライアント側のJSONファイルと、リモートの全文検索を実装する方法を比較して考えてみます。</p>
 
 <p><strong>目次</strong></p>
 <ul id="markdown-toc">
@@ -442,8 +442,8 @@
 
 <p>また、SQLiteはファイルベースの小規模なDBですが、基本的な全文検索やハイライトが出来たりと、PCやモバイルでローカルに使うには十分な機能があるように感じます。</p>]]></content><author><name></name></author><category term="blog" /><category term="elasticsearch" /><category term="MySQL" /><category term="sqlite" /><summary type="html"><![CDATA[elasticsearch, MySQL, sqlite]]></summary></entry><entry><title type="html">github actionsのファイル分割</title><link href="https://hoge-code.github.io/md/posts/2025-05-04-github-actions-uses" rel="alternate" type="text/html" title="github actionsのファイル分割" /><published>2025-05-04T03:00:00+00:00</published><updated>2025-05-04T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/github-actions-uses</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-04-github-actions-uses"><![CDATA[<p><strong>目次</strong></p>
 <ul id="markdown-toc">
-  <li><a href="#1-再利用可能なワークフロー" id="markdown-toc-1-再利用可能なワークフロー">1. 再利用可能なワークフロー</a></li>
-  <li><a href="#2-アクションを作成する方法" id="markdown-toc-2-アクションを作成する方法">2. アクションを作成する方法</a></li>
+  <li><a href="#再利用可能なワークフロー" id="markdown-toc-再利用可能なワークフロー">再利用可能なワークフロー</a></li>
+  <li><a href="#アクションを作成する方法" id="markdown-toc-アクションを作成する方法">アクションを作成する方法</a></li>
   <li><a href="#感想" id="markdown-toc-感想">感想</a></li>
 </ul>
 
@@ -451,7 +451,7 @@
 
 <p>最近は<code class="language-plaintext highlighter-rouge">GitLabCI</code>について学習していて、<code class="language-plaintext highlighter-rouge">GitHubActions</code>でも<code class="language-plaintext highlighter-rouge">GitLabCI</code>のように柔軟に他のyamlファイルをインポートできないか気になったので調べてみました。</p>
 
-<h3 id="1-再利用可能なワークフロー">1. 再利用可能なワークフロー</h3>
+<h3 id="再利用可能なワークフロー">再利用可能なワークフロー</h3>
 
 <h4 id="workflow-を-extends-と-uses-で再利用する">workflow を extends と uses で再利用する</h4>
 
@@ -494,7 +494,7 @@
 
 <hr />
 
-<h3 id="2-アクションを作成する方法">2. アクションを作成する方法</h3>
+<h3 id="アクションを作成する方法">アクションを作成する方法</h3>
 
 <p>TSを使ってサードパーティーアクションも作成できますが、リポジトリを分ける必要があるので面倒です。</p>
 
