@@ -1,0 +1,540 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/md/assets/css/default.css">
+  <link rel="stylesheet" href="/md/assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <title>ツールの忘備録</title>
+</head>
+<body>
+
+<header>
+  <h1><a href="/md/">ツールの忘備録</a></h1></h1>
+</header>
+
+<div id="content">
+  <!-- メインコンテンツ部分 -->
+  <main>
+        <article>
+      <header>
+        <h1>「Scalable Application Development with NestJS」を読む</h1>
+        <p class="meta">
+          May 22, 2025 
+          <!--
+          in
+          <a href="/category/blog"
+            >blog</a
+          >
+        -->
+        </p>
+      </header>
+
+      <div class="content"><p>Packt社の<code class="language-plaintext highlighter-rouge">Scalable Application Development with NestJS</code>という書籍を一部読んだので、気になったことを中心に簡単な感想や要約を書きます。(網羅性はありません)</p>
+
+<p>この書籍は<code class="language-plaintext highlighter-rouge">NestJS</code>について書かれている数少ない書籍です。自分の知っている範囲内では日本語にそのような書籍はなく、洋書でも殆どありません。(公式ドキュメントは読みやすいです。)また、<code class="language-plaintext highlighter-rouge">NestJS</code>はDTO、DI、モジュール指向、GraphQLやマイクロサービスとの統合など、多くのことを学べるフレームワークだと思います。この本は<code class="language-plaintext highlighter-rouge">NestJS</code>について体系的に説明し、実際の開発の流れまで書かれています。</p>
+
+<p>全体にはまだ目を通せていませんが、ケーススタディのパートが面白かったのでまとめてみます。</p>
+
+<p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#第12章-電子商取引アプリケーション" id="markdown-toc-第12章-電子商取引アプリケーション">第12章 電子商取引アプリケーション</a></li>
+  <li><a href="#第13章-snsプラットフォーム" id="markdown-toc-第13章-snsプラットフォーム">第13章 SNSプラットフォーム</a></li>
+  <li><a href="#ミューテーション型" id="markdown-toc-ミューテーション型">ミューテーション型</a></li>
+  <li><a href="#サブスクリプション型" id="markdown-toc-サブスクリプション型">サブスクリプション型</a></li>
+  <li><a href="#入力型新しいpostを作成するための入力データ" id="markdown-toc-入力型新しいpostを作成するための入力データ">入力型（新しいPostを作成するための入力データ）</a>    <ul>
+      <li><a href="#第14章-erpシステム" id="markdown-toc-第14章-erpシステム">第14章 ERPシステム</a></li>
+    </ul>
+  </li>
+</ul>
+
+<hr />
+
+<p><strong>サイト</strong></p>
+
+<ul>
+  <li><a href="https://www.oreilly.com/library/view/scalable-application-development/9781835468609/">オライリー</a></li>
+</ul>
+
+<hr />
+
+<p>NestJSはTSのフレームワークで、<code class="language-plaintext highlighter-rouge">Angular</code>や<code class="language-plaintext highlighter-rouge">SpringBoot</code>を意識して作られています。以下のような特徴があります。</p>
+<ul>
+  <li>OASの自動生成</li>
+  <li><code class="language-plaintext highlighter-rouge">Angular</code>のようにcliコマンドでモジュールを作成</li>
+  <li>デコレータを使ったDI</li>
+  <li><code class="language-plaintext highlighter-rouge">Express</code>と違い、<code class="language-plaintext highlighter-rouge">GraphQL</code>、<code class="language-plaintext highlighter-rouge">WebSocket</code>、<code class="language-plaintext highlighter-rouge">GRPC</code>もデコレーターで書ける</li>
+</ul>
+
+<h3 id="第12章-電子商取引アプリケーション">第12章 電子商取引アプリケーション</h3>
+
+<p>この章ではECサイトを構築していきます。</p>
+
+<h4 id="電子商取引アプリケーションの要件を理解する">電子商取引アプリケーションの要件を理解する</h4>
+
+<p><strong>製品情報サービス</strong></p>
+<ul>
+  <li>APIではデータ検証が必要</li>
+  <li>しかし、文字列の長さなどの簡易的な検証では不十分</li>
+  <li>例えば、曖昧な商品説明はユーザーにとって良くない
+    <ul>
+      <li>AIツールと組み合わせることで解決できる</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>顧客サービス</strong></p>
+<ul>
+  <li>顧客が簡単にサポートに連絡でき、回答を得ることが重要</li>
+</ul>
+
+<h4 id="アプリケーションアーキテクチャとデータモデリングの設計">アプリケーションアーキテクチャとデータモデリングの設計</h4>
+
+<p><strong>RESTAPIでも実装の前にドキュメント作成が重要</strong></p>
+<ul>
+  <li>これはGRPCと同じような開発の進め方</li>
+  <li>HTTPメソッド定義前に、エンドポイントをリスト
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># products
+  /products
+  /products/{id}
+  /products/{id}/orders
+  /products/{id}/orders/{orderId}
+  /products/{id}/reviews
+  /products/search
+# users
+  ...
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<p><strong>APIではレスポンスの統一が重要</strong></p>
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">Class</span> <span class="nx">APIResponse</span> <span class="p">{</span>
+    <span class="nl">success</span><span class="p">:</span> <span class="nx">boolean</span><span class="p">,</span>
+    <span class="nx">message</span><span class="p">:</span> <span class="kr">string</span><span class="p">,</span>
+    <span class="nx">error</span><span class="p">?:</span> <span class="nx">HttpExcetion</span><span class="p">,</span>
+    <span class="nx">data</span><span class="p">:</span> <span class="kr">any</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<ul>
+  <li>NestJSでは例外クラスは<code class="language-plaintext highlighter-rouge">HttpException</code>クラスを継承している</li>
+</ul>
+
+<p><strong>実際にHTTPメソッドを定義</strong></p>
+<ul>
+  <li>この段階ではクエリパラメータも使って書く
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">GET /products/search?page=1&amp;limit=100&amp;keyword=sample&amp;minPrice=100&amp;maxPrice=500</code></li>
+    </ul>
+  </li>
+  <li>論理削除をPOSTで定義する方法を紹介している
+    <ul>
+      <li>個人的には<code class="language-plaintext highlighter-rouge">DELETE /soft</code>などのほうが分かりやすいと思う</li>
+    </ul>
+  </li>
+  <li>支払情報を変更するAPIは作成しない</li>
+  <li>商品レビューはユーザーだけでなく、システム管理者も変更できるようにする必要</li>
+</ul>
+
+<p>API開発の最初の段階では、メソッドは定義せず、リソースだけ考えるという手法はAPIGatewayと同じ方法で、勉強になりました。</p>
+
+<h4 id="製品と注文用のrest-apiの実装">製品と注文用のREST APIの実装</h4>
+
+<ul>
+  <li>下の例では、製品エンティティを定義している
+    <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">@</span><span class="nd">Entity</span><span class="p">(</span><span class="dl">'</span><span class="s1">products</span><span class="dl">'</span><span class="p">)</span>
+<span class="k">export</span> <span class="kd">class</span> <span class="nc">Product</span> <span class="p">{</span>
+  <span class="p">@</span><span class="nd">PrimaryGeneratedColumn</span><span class="p">(</span><span class="dl">'</span><span class="s1">uuid</span><span class="dl">'</span><span class="p">)</span>
+  <span class="nx">id</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+  <span class="p">...</span>
+  <span class="p">@</span><span class="nd">Column</span><span class="p">(</span><span class="dl">'</span><span class="s1">simple-json</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span>
+      <span class="na">default</span><span class="p">:</span> <span class="p">{},</span>
+      <span class="na">comment</span><span class="p">:</span> <span class="dl">"</span><span class="s2">product's specs</span><span class="dl">"</span><span class="p">,</span>
+  <span class="p">})</span>
+  <span class="nx">specs</span><span class="p">:</span> <span class="nb">Record</span><span class="o">&lt;</span><span class="kr">string</span><span class="p">,</span> <span class="kr">string</span><span class="o">&gt;</span><span class="p">;</span>
+  <span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+  <li>上記で興味深い点
+    <ul>
+      <li>自動採番を使わずにUUIDを使用している</li>
+      <li>RDBだが、JSONでメタデータを保存している</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>DTOクラスの作成</strong></p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">src/products/dto/create-product.dto.ts</code>などでDTOクラスを作成
+    <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">class</span> <span class="nc">CreateProductDto</span> <span class="p">{</span>
+  <span class="p">@</span><span class="nd">IsString</span><span class="p">({</span>
+      <span class="na">message</span><span class="p">:</span> <span class="dl">'</span><span class="s1">name must be a string</span><span class="dl">'</span><span class="p">,</span>
+  <span class="p">})</span>
+  <span class="p">@</span><span class="nd">Length</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="p">{</span>
+      <span class="na">message</span><span class="p">:</span> <span class="dl">'</span><span class="s1">name must be between 5 and 25 characters</span><span class="dl">'</span><span class="p">,</span>
+  <span class="p">})</span>
+  <span class="nx">name</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+
+  <span class="p">@</span><span class="nd">IsString</span><span class="p">({</span>
+  <span class="na">message</span><span class="p">:</span> <span class="dl">'</span><span class="s1">description must be a string</span><span class="dl">'</span><span class="p">,</span>
+  <span class="p">})</span>
+  <span class="p">@</span><span class="nd">Length</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="p">{</span>
+      <span class="na">message</span><span class="p">:</span> <span class="dl">'</span><span class="s1">description must be between 25 and 255
+characters</span><span class="dl">'</span><span class="p">,</span>
+  <span class="p">})</span>
+  <span class="p">@</span><span class="nd">Validate</span><span class="p">(</span><span class="nx">ProductDescription</span><span class="p">)</span>
+  <span class="nx">description</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+  <span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+  <li>上記で興味深い点
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">class-validator</code>ライブラリは便利</li>
+      <li>名前は5文字以上、25字以下など制約が厳しい
+        <ul>
+          <li>モバイルなどは画面が小さく、長いと読みにくいため</li>
+        </ul>
+      </li>
+      <li><code class="language-plaintext highlighter-rouge">ProductDescription</code>などカスタムバリデーションを作成している
+        <ul>
+          <li><code class="language-plaintext highlighter-rouge">ProductDescription</code>では、<code class="language-plaintext highlighter-rouge">GeminiAI</code>に説明が有効かAPIに尋ねる処理を書いている
+            <ul>
+              <li>批判的な説明だけでなく、虚偽の説明をDBに入れない目的もある</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>URLは正規表現チェックだけでなく、有効であるかまで確認</li>
+    </ul>
+  </li>
+</ul>
+
+<p>個人的にはDTOにここまで検証ロジックを書くのは、ドメインの流出につながってしまうためよくないと思います。</p>
+
+<p>また、<code class="language-plaintext highlighter-rouge">Zod</code>などフロントエンドで使用されるライブラリに非同期カスタムバリデーションを実装する方法は知っていましたが、<code class="language-plaintext highlighter-rouge">class-validator</code>のようなバックエンドでも実装できることは知りませんでした。</p>
+
+<p><strong><code class="language-plaintext highlighter-rouge">TypeORM</code>の設定</strong></p>
+<ul>
+  <li>正規表現を使うと、エンティティを監視しやすくなる
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">entities: ['/**/*.entity{.ts,.js}']</code></li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>ページネーションの設定</strong></p>
+<ul>
+  <li>現在のページ、制限などの情報も提供する必要</li>
+  <li><code class="language-plaintext highlighter-rouge">PagniationService</code>クラスなどを作成すると便利
+    <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">@</span><span class="nd">Injectable</span><span class="p">()</span>
+<span class="k">export</span> <span class="kd">class</span> <span class="nc">PaginationService</span> <span class="p">{</span>
+  <span class="nf">getPaginationMeta</span><span class="p">(</span>
+      <span class="nx">page</span><span class="p">:</span> <span class="kr">number</span><span class="p">,</span>
+      <span class="nx">limit</span><span class="p">:</span> <span class="kr">number</span><span class="p">,</span>
+      <span class="nx">totalItems</span><span class="p">:</span> <span class="kr">number</span>
+  <span class="p">)</span>
+  <span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<p>ページネーションAPIは一見簡単そうですが、含めるべきフィールドが多かったりと、見た目以上に面倒に感じます。</p>
+
+<h4 id="電子商取引におけるユーザー認証と承認">電子商取引におけるユーザー認証と承認</h4>
+
+<p>JWTトークンを使う一般的な認証ガードについて書かれています。</p>
+
+<h3 id="第13章-snsプラットフォーム">第13章 SNSプラットフォーム</h3>
+
+<ul>
+  <li>この章では、GraphQLとMongoDBを使用する</li>
+  <li>RESTはオーバーフェッチだけでなく、アンダーフェッチも問題</li>
+  <li>SNSでは読み取り、書き込みが多いので、NoSQLが有効</li>
+</ul>
+
+<h4 id="ソーシャルネットワーキングのアプリケーション構造の設計">ソーシャルネットワーキングのアプリケーション構造の設計</h4>
+
+<p><strong>MongoDBコレクション</strong></p>
+<ul>
+  <li>インデックスがRDBと同様に重要</li>
+  <li>コレクションの関係は、RDBと同様の参照型の他に埋め込み型もある</li>
+  <li>Usersコレクション
+    <ul>
+      <li>環境設定をのサブドキュメントを埋め込む</li>
+      <li>emailインデックス</li>
+    </ul>
+  </li>
+  <li>Postsコレクション
+    <ul>
+      <li>コメントやリアクションのサブドキュメント</li>
+      <li>author, createdAtのインデックス</li>
+    </ul>
+  </li>
+  <li>Commentsコレクション
+    <ul>
+      <li>親投稿、投稿者の2つの参照</li>
+      <li>post, author, createdAtのインデックス</li>
+    </ul>
+  </li>
+</ul>
+
+<p>MongoDBはインデックスの種類が多く、昇順、降順なども考える必要があるのでインデックス設計が難しく感じます。</p>
+
+<p>また、<code class="language-plaintext highlighter-rouge">Firestore</code>などのドキュメントDBに共通していることですが、ユースケースに応じて、トレードオフを意識しながら参照型と埋め込み型を使い分ける必要がありそうです。</p>
+
+<p><strong>API設計</strong></p>
+<ul>
+  <li>クエリは、<code class="language-plaintext highlighter-rouge">getUser</code>,<code class="language-plaintext highlighter-rouge">getPost</code>など</li>
+  <li>ミューテーションも同様に列挙</li>
+</ul>
+
+<p>RPCのように<code class="language-plaintext highlighter-rouge">GraphQL</code>APIを関数のように考えるようにしてから<code class="language-plaintext highlighter-rouge">GraphQL</code>設計に対する苦手意識が減ったように感じます。</p>
+
+<p>例えば、RESTではページネーションはクエリパラメータを利用しますが、<code class="language-plaintext highlighter-rouge">GraphQL</code>では以下のように引数として実装する方法が考えられます。</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// メタデータを含むページネーション用の結果型</span>
+<span class="kr">interface</span> <span class="nx">PaginationMeta</span> <span class="p">{</span>
+  <span class="nl">totalCount</span><span class="p">:</span> <span class="kr">number</span><span class="p">;</span>      
+  <span class="nl">currentPage</span><span class="p">:</span> <span class="kr">number</span><span class="p">;</span>     
+  <span class="nl">totalPages</span><span class="p">:</span> <span class="kr">number</span><span class="p">;</span>     
+  <span class="nl">hasNextPage</span><span class="p">:</span> <span class="nx">boolean</span><span class="p">;</span>   
+  <span class="nl">hasPreviousPage</span><span class="p">:</span> <span class="nx">boolean</span><span class="p">;</span> 
+<span class="p">}</span>
+
+<span class="kr">interface</span> <span class="nx">PaginatedResult</span><span class="o">&lt;</span><span class="nx">T</span><span class="o">&gt;</span> <span class="p">{</span>
+  <span class="na">data</span><span class="p">:</span> <span class="nx">T</span><span class="p">[];</span>             
+  <span class="nl">meta</span><span class="p">:</span> <span class="nx">PaginationMeta</span><span class="p">;</span> 
+<span class="p">}</span>
+
+<span class="c1">// GraphQLのページネーション関数の引数</span>
+<span class="kr">interface</span> <span class="nx">PaginationArgs</span> <span class="p">{</span>
+  <span class="nl">page</span><span class="p">:</span> <span class="kr">number</span><span class="p">;</span>      
+  <span class="nl">limit</span><span class="p">:</span> <span class="kr">number</span><span class="p">;</span>         
+  <span class="nl">cursor</span><span class="p">?:</span> <span class="kr">string</span><span class="p">;</span>   
+<span class="p">}</span>
+
+<span class="c1">// ページネーションされたデータを取得するGraphQLの関数</span>
+<span class="k">async</span> <span class="kd">function</span> <span class="nf">getUsers</span><span class="p">(</span>
+  <span class="nx">args</span><span class="p">:</span> <span class="nx">PaginationArgs</span>
+<span class="p">):</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">PaginatedResult</span><span class="o">&lt;</span><span class="nx">User</span><span class="o">&gt;&gt;</span> <span class="p">{</span>
+  <span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="ユーザー投稿インタラクションのためのgraphql-apiの実装">ユーザー、投稿、インタラクションのためのGraphQL APIの実装</h4>
+
+<p><strong><code class="language-plaintext highlighter-rouge">MongoDBエンティティ</code></strong></p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">NestJS</code>ではGraphQLのスキーマは自動生成される</li>
+</ul>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">@</span><span class="nd">Schema</span><span class="p">()</span>
+<span class="k">export</span> <span class="kd">class</span> <span class="nc">User</span> <span class="kd">extends</span> <span class="nc">Document</span> <span class="p">{</span>
+    <span class="p">@</span><span class="nd">Prop</span><span class="p">({</span> <span class="na">required</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span> <span class="na">unique</span><span class="p">:</span> <span class="kc">true</span> <span class="p">})</span>
+    <span class="nx">username</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+    <span class="p">@</span><span class="nd">Prop</span><span class="p">({</span> <span class="na">required</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span> <span class="na">unique</span><span class="p">:</span> <span class="kc">true</span> <span class="p">})</span>
+    <span class="nx">email</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+    <span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">Mongoose</code>で、デコレータを使って詳細にフィールドを定義できる</li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">MongoDB</code>はスキーマレスですが、一貫性を保つためにアプリ側でスキーマを定義するのがよさそうです。また、<code class="language-plaintext highlighter-rouge">Mongoose</code>では、RDBのORMのように柔軟にフィールドを定義できることは知りませんでした。</p>
+
+<p><strong><code class="language-plaintext highlighter-rouge">GraphQL</code>のDTO</strong></p>
+<ul>
+  <li>GraphQLでもDTOを作成します
+    <ul>
+      <li>これを元に、<code class="language-plaintext highlighter-rouge">NestJS</code>がスキーマファイルを生成します</li>
+      <li><code class="language-plaintext highlighter-rouge">src/users/dto/create-user.dto.ts</code>
+        <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">@</span><span class="nd">InputType</span><span class="p">()</span>
+<span class="k">export</span> <span class="kd">class</span> <span class="nc">CreateUserDto</span> <span class="p">{</span>
+  <span class="p">@</span><span class="nd">Field</span><span class="p">()</span>
+  <span class="nx">username</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+  <span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div>        </div>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>リゾルバーファイルの生成</strong></p>
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">@</span><span class="nd">Resolver</span><span class="p">(</span><span class="k">of</span> <span class="o">=&gt;</span> <span class="nx">User</span><span class="p">)</span>
+<span class="k">export</span> <span class="kd">class</span> <span class="nc">UsersResolver</span> <span class="p">{</span>
+  <span class="nf">constructor</span><span class="p">(</span>
+    <span class="k">private</span> <span class="k">readonly</span> <span class="nx">usersService</span><span class="p">:</span> <span class="nx">UsersService</span>
+  <span class="p">)</span> <span class="p">{}</span>
+
+  <span class="c1">// ユーザー一覧を取得するクエリ</span>
+  <span class="p">@</span><span class="nd">Query</span><span class="p">(</span><span class="nx">returns</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="nx">User</span><span class="p">])</span>
+  <span class="k">async</span> <span class="nf">users</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">usersService</span><span class="p">.</span><span class="nf">findAll</span><span class="p">();</span>
+  <span class="p">}</span>
+  <span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="ユーザー関係とソーシャル機能">ユーザー関係とソーシャル機能</h4>
+
+<h4 id="ソーシャルネットワーキングのコンテキストでリアルタイムの更新と通知を投稿する">ソーシャルネットワーキングのコンテキストでリアルタイムの更新と通知を投稿する</h4>
+
+<ul>
+  <li>GraphQLのサブスクリプションを使用すれば、リアルタイムに反映できる
+    <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">pubSub</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">PubSub</span><span class="p">();</span>
+<span class="p">@</span><span class="nd">Resolver</span><span class="p">(</span><span class="k">of</span> <span class="o">=&gt;</span> <span class="nx">Post</span><span class="p">)</span>
+<span class="k">export</span> <span class="kd">class</span> <span class="nc">PostsResolver</span> <span class="p">{</span>
+<span class="nf">constructor</span><span class="p">(</span>
+  <span class="k">private</span> <span class="k">readonly</span> <span class="nx">postsService</span><span class="p">:</span> <span class="nx">PostsService</span>
+<span class="p">)</span> <span class="p">{}</span>
+
+<span class="p">@</span><span class="nd">Mutation</span><span class="p">(</span><span class="nx">returns</span> <span class="o">=&gt;</span> <span class="nx">Post</span><span class="p">)</span>
+<span class="k">async</span> <span class="nf">createPost</span><span class="p">(</span>
+  <span class="p">@</span><span class="nd">Args</span><span class="p">(</span><span class="dl">'</span><span class="s1">createPostDto</span><span class="dl">'</span><span class="p">)</span> <span class="nx">createPostDto</span><span class="p">:</span> <span class="nx">CreatePostDto</span>
+<span class="p">)</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">newPost</span> <span class="o">=</span> <span class="k">await</span> <span class="k">this</span><span class="p">.</span><span class="nx">postsService</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span><span class="nx">createPostDto</span><span class="p">);</span>
+  <span class="nx">pubSub</span><span class="p">.</span><span class="nf">publish</span><span class="p">(</span><span class="dl">'</span><span class="s1">postAdded</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span> <span class="na">postAdded</span><span class="p">:</span> <span class="nx">newPost</span> <span class="p">});</span>
+  <span class="k">return</span> <span class="nx">newPost</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="p">@</span><span class="nd">Subscription</span><span class="p">(</span><span class="nx">returns</span> <span class="o">=&gt;</span> <span class="nx">Post</span><span class="p">)</span>
+<span class="nf">postAdded</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="nx">pubSub</span><span class="p">.</span><span class="nf">asyncIterator</span><span class="p">(</span><span class="dl">'</span><span class="s1">postAdded</span><span class="dl">'</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+  <li>上記ではサブスクリプションリゾルバを追加している</li>
+  <li>
+    <p>また、ポストが追加された際に、そのサブスクリプションを呼び出す処理を書いている</p>
+  </li>
+  <li>上記に対応するスキーマファイルはこういう形になる
+```plaintext
+    <h1 id="ミューテーション型">ミューテーション型</h1>
+    <p>type Mutation {
+createPost(createPostDto: CreatePostInput!): Post!
+}</p>
+  </li>
+</ul>
+
+<h1 id="サブスクリプション型">サブスクリプション型</h1>
+<p>type Subscription {
+  postAdded: Post!
+}</p>
+
+<h1 id="入力型新しいpostを作成するための入力データ">入力型（新しいPostを作成するための入力データ）</h1>
+<p>input CreatePostInput {
+  title: String!
+  content: String!
+}
+```</p>
+
+<ul>
+  <li>これを<code class="language-plaintext highlighter-rouge">Apollo client</code>などで呼び出せば、リアルタイム処理を簡単に実装できる</li>
+</ul>
+
+<p>リアルタイムUI反映(タイムラインや通知)を実装する際、色々な方法があると思います。</p>
+<ul>
+  <li>WebSocket</li>
+  <li>GraphQLのサブスクリプション</li>
+  <li>FireStore</li>
+</ul>
+
+<p>このうち、<code class="language-plaintext highlighter-rouge">GraphQL</code>のサブスクリプションは非常に簡潔に書け、<code class="language-plaintext highlighter-rouge">Firestore</code>のようにベンダーロックされないので非常に便利に感じました。</p>
+
+<p>ただ、内部的には<code class="language-plaintext highlighter-rouge">WebSocket</code>を使用しているので、<code class="language-plaintext highlighter-rouge">AppSync</code>などのマネージドサービスを使わないと、非機能要件を満たすのは難しそうです。</p>
+
+<h3 id="第14章-erpシステム">第14章 ERPシステム</h3>
+<!--
+#### 技術要件
+
+#### ERPシステムの要件を理解する
+
+#### ERPシステムのシステムアーキテクチャの設計
+
+#### スケーラビリティとモジュール性を実現するマイクロサービスの実装
+
+#### ERPコンテキストにおけるデータの同期と一貫性
+
+#### 複雑なビジネスプロセスとワークフローの処理
+-->
+</div>
+
+      <footer>
+        <p>
+          Tags: 
+          <a href="/md/tag/書籍">書籍</a> 
+        </p>
+      </footer>
+    </article>
+
+  </main>
+
+  <!-- サイドバー部分 -->
+  <aside id="sidebar">
+    <h2><a href="/md/about/">About</a></h2>
+
+    <!--
+    <h2><a href="/md/categories/">Categories</a></h2>
+    <ul>
+      
+        <li><a href="/md/category/blog"">blog</a></li>
+      
+    </ul>
+    -->
+    
+    <h2><a href="/md/tags/">Tags</a></h2>
+    <ul>
+      
+        <li><a href="/md/tag/fastapi">FastAPI</a></li>
+      
+        <li><a href="/md/tag/nodejs">Nodejs</a></li>
+      
+        <li><a href="/md/tag/ツール">ツール</a></li>
+      
+        <li><a href="/md/tag/mysql">MySQL</a></li>
+      
+        <li><a href="/md/tag/react">React</a></li>
+      
+        <li><a href="/md/tag/開発">開発</a></li>
+      
+        <li><a href="/md/tag/elasticsearch">elasticsearch</a></li>
+      
+        <li><a href="/md/tag/firebase">firebase</a></li>
+      
+        <li><a href="/md/tag/sqlite">sqlite</a></li>
+      
+        <li><a href="/md/tag/k8s">k8s</a></li>
+      
+        <li><a href="/md/tag/書籍">書籍</a></li>
+      
+        <li><a href="/md/tag/aws">AWS</a></li>
+      
+        <li><a href="/md/tag/cdk">CDK</a></li>
+      
+    </ul>
+    <h2><a href="/md/archives/">Archives</a></h2>
+    <ul>
+      
+      
+        <li><a href="/md/2025/05/">2025-05</a></li>
+      
+        <li><a href="/md/2025/03/">2025-03</a></li>
+      
+        <li><a href="/md/2025/02/">2025-02</a></li>
+      
+    </ul>
+  </aside>
+</div>
+
+<footer>
+  <p>&copy; 2025 ツールの忘備録</p>
+</footer>
+
+</body>
+</html>

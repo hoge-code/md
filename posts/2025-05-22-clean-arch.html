@@ -1,0 +1,947 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/md/assets/css/default.css">
+  <link rel="stylesheet" href="/md/assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <title>ツールの忘備録</title>
+</head>
+<body>
+
+<header>
+  <h1><a href="/md/">ツールの忘備録</a></h1></h1>
+</header>
+
+<div id="content">
+  <!-- メインコンテンツ部分 -->
+  <main>
+        <article>
+      <header>
+        <h1>「Get Your Hands Dirty on Clean Architecture」を読む</h1>
+        <p class="meta">
+          May 22, 2025 
+          <!--
+          in
+          <a href="/category/blog"
+            >blog</a
+          >
+        -->
+        </p>
+      </header>
+
+      <div class="content"><p>Packt社の<code class="language-plaintext highlighter-rouge">Get Your Hands Dirty on Clean Architecture</code>という書籍を読んだので、気になったことを中心に簡単な感想や要約を書きます。日本語にも翻訳されていて、こちらは「手を動かしてわかるクリーンアーキテクチャ」というタイトルになっています。</p>
+
+<p>また、この書籍はJavaで書かれていますが、ソースコードが全て画像(文字ではない)になっていて、コピーできないのでGoに変換して書いてみます。</p>
+
+<p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#第1章-保守性" id="markdown-toc-第1章-保守性">第1章 保守性</a></li>
+  <li><a href="#第2章-レイヤーの何が問題なのか" id="markdown-toc-第2章-レイヤーの何が問題なのか">第2章: レイヤーの何が問題なのか?</a></li>
+  <li><a href="#第3章-依存関係の反転" id="markdown-toc-第3章-依存関係の反転">第3章 依存関係の反転</a></li>
+  <li><a href="#第4章-コードの整理" id="markdown-toc-第4章-コードの整理">第4章 コードの整理</a></li>
+  <li><a href="#第5章-ユースケースの実装" id="markdown-toc-第5章-ユースケースの実装">第5章: ユースケースの実装</a></li>
+  <li><a href="#第6章-webアダプタの実装" id="markdown-toc-第6章-webアダプタの実装">第6章: Webアダプタの実装</a></li>
+  <li><a href="#第7章-永続化アダプタの実装" id="markdown-toc-第7章-永続化アダプタの実装">第7章: 永続化アダプタの実装</a></li>
+  <li><a href="#第8章-アーキテクチャ要素のテスト" id="markdown-toc-第8章-アーキテクチャ要素のテスト">第8章: アーキテクチャ要素のテスト</a></li>
+  <li><a href="#第9章-境界間のマッピング" id="markdown-toc-第9章-境界間のマッピング">第9章 境界間のマッピング</a></li>
+  <li><a href="#第10章-アプリケーションの組み立て" id="markdown-toc-第10章-アプリケーションの組み立て">第10章: アプリケーションの組み立て</a></li>
+  <li><a href="#第11章意識的に近道をする" id="markdown-toc-第11章意識的に近道をする">第11章：意識的に近道をする</a></li>
+  <li><a href="#第12章-アーキテクチャ境界の強制" id="markdown-toc-第12章-アーキテクチャ境界の強制">第12章 アーキテクチャ境界の強制</a></li>
+  <li><a href="#第13章-複数の境界付きコンテキストの管理" id="markdown-toc-第13章-複数の境界付きコンテキストの管理">第13章: 複数の境界付きコンテキストの管理</a></li>
+  <li><a href="#第14章-ソフトウェアアーキテクチャへのコンポーネントベースのアプローチ" id="markdown-toc-第14章-ソフトウェアアーキテクチャへのコンポーネントベースのアプローチ">第14章: ソフトウェアアーキテクチャへのコンポーネントベースのアプローチ</a></li>
+  <li><a href="#第15章-アーキテクチャスタイルの決定" id="markdown-toc-第15章-アーキテクチャスタイルの決定">第15章 アーキテクチャスタイルの決定</a></li>
+</ul>
+
+<hr />
+
+<p><strong>サイト</strong></p>
+
+<ul>
+  <li><a href="https://www.oreilly.com/library/view/get-your-hands/9781805128373/">オライリー</a></li>
+</ul>
+
+<hr />
+
+<h3 id="第1章-保守性">第1章 保守性</h3>
+<!--
+#### 保守性とは一体何を意味するのでしょうか?
+
+#### 保守性により機能性が向上
+
+#### 保守性は開発者の喜びを生み出す
+
+#### 保守性は意思決定をサポートする
+
+#### 保守性の維持
+-->
+
+<h3 id="第2章-レイヤーの何が問題なのか">第2章: レイヤーの何が問題なのか?</h3>
+<!--
+#### 彼らはデータベース駆動型設計を推進している
+
+#### 彼らは近道をする傾向がある
+
+#### テストが難しくなる
+
+#### ユースケースを隠している
+
+#### 並行作業を困難にする
+
+#### これは保守可能なソフトウェアの構築にどのように役立ちますか?
+-->
+
+<h3 id="第3章-依存関係の反転">第3章 依存関係の反転</h3>
+<!--
+#### 単一責任原則
+
+#### 副作用についての物語
+
+#### 依存性逆転の原則
+
+#### クリーンアーキテクチャ
+
+#### 六角形の建築
+
+#### これは保守可能なソフトウェアの構築にどのように役立ちますか?
+-->
+
+<h3 id="第4章-コードの整理">第4章 コードの整理</h3>
+
+<ul>
+  <li>パッケージ構造を整理しても、ファサードになりがち
+    <ul>
+      <li>インポートすべきでない他のパッケージからインポートしていること</li>
+    </ul>
+  </li>
+  <li>この章は、SendMoneyユースケースについて考える</li>
+</ul>
+
+<h4 id="レイヤー別に整理する">レイヤー別に整理する</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>domain
+    - Account
+    - ...
+    - AccountService
+persistence
+    - XXXRepositoryImpl
+web
+    - XXXController
+</code></pre></div></div>
+
+<ul>
+  <li>上記の問題点
+    <ul>
+      <li>ドメインの機能の間にパッケージ境界がない</li>
+      <li>構造化しないと、クラスの混乱を引き起こす</li>
+    </ul>
+  </li>
+</ul>
+
+<p>こうしたフォルダ構造は、一般的なウェブフレームワークのデフォルトで設定されていることが多いです。</p>
+
+<h4 id="機能別に整理">機能別に整理</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>account
+    - Account
+    - XXXController
+    - XXXRepositoryImpl
+    - ...
+    - SendMoneyService
+</code></pre></div></div>
+
+<ul>
+  <li>外部アクセス制限のために<code class="language-plaintext highlighter-rouge">package-private</code>可視性を利用
+    <ul>
+      <li>これにより、パッケージ境界を強制できる</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">AccountService</code>の名前を<code class="language-plaintext highlighter-rouge">SendMoneyService</code>に変更
+    <ul>
+      <li>サービス層のクラス名を具体的にするのは特に重要</li>
+    </ul>
+  </li>
+  <li>ただし、アダプター、ポート層が分かりづらい</li>
+</ul>
+
+<p>こうした機能別のフォルダ構造は、<code class="language-plaintext highlighter-rouge">NestJS</code>や<code class="language-plaintext highlighter-rouge">Angular</code>などで見られます。</p>
+
+<h4 id="アーキテクチャに表現力豊かなパッケージ構造">アーキテクチャに表現力豊かなパッケージ構造</h4>
+
+<ul>
+  <li>一般的なヘキサゴナルアーキテクチャのフォルダ構造</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>adapter
+    - in
+        - web
+            - SendMoneyController
+    - out
+        - persistence
+            - AccountPersistenceAdapter
+            - SpringDataAccountRepository
+-application
+    - domain
+        - model
+            -　Account
+        - service
+            - SendMoneyService
+    - port
+        - in
+            - SendMoneyUseCase
+        - out
+            - UpdateAccountStatePort
+- common
+</code></pre></div></div>
+<p><strong>フォルダ構造の解説</strong></p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">adapter</code>パッケージ
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">web</code>と<code class="language-plaintext highlighter-rouge">persistence</code>アダプター</li>
+      <li>これらは受信、送信ポートの実体</li>
+    </ul>
+  </li>
+  <li>ポートは<code class="language-plaintext highlighter-rouge">application</code>パッケージ内に配置する</li>
+  <li>このフォルダ構造なら、サードパーティAPIの変更なども容易
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">adapter/out/xxx</code>パッケージの変更で済む</li>
+    </ul>
+  </li>
+  <li>複数のドメインを管理する場合は、<code class="language-plaintext highlighter-rouge">domain</code>内にサブパッケージを配置</li>
+</ul>
+
+<p><strong>可視性</strong></p>
+<ul>
+  <li>ただし、フォルダ構造が多いので可視性について考える必要
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">adapter</code>は呼び出されないので、パッケージプライベートでいい</li>
+      <li>ただし、ポート、ドメインモデルはパブリックにする必要</li>
+      <li>ドメインサービスはプライベートでいい</li>
+    </ul>
+  </li>
+</ul>
+
+<p>こうしたフォルダ構造はクリーンアーキテクチャでは一般的ですが、パッケージ可視性や、長期に渡って維持するための規律など、考えることが多そうだと感じました。</p>
+
+<h4 id="依存性注入の役割">依存性注入の役割</h4>
+
+<ul>
+  <li>ここでは便宜のために、<code class="language-plaintext highlighter-rouge">interface</code>には<code class="language-plaintext highlighter-rouge">I...</code>とつけています</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SendMoneyController→ISendMoneyUseCase
+　　　　　　　　　　　　　　↑
+                    SendMoneyService
+                    　　　↓
+                    IUpdateAccountStatePort←AccountPersistenceAdapter
+</code></pre></div></div>
+
+<ul>
+  <li>コントローラは、受信ポート(サービスが実装)を呼び出す</li>
+  <li>サービスは、送信ポート(アダプタが実装)を呼び出す</li>
+</ul>
+
+<p>Javaでは<code class="language-plaintext highlighter-rouge">SpringBoot</code>がDIでインターフェースを実装した具象クラスを自動で呼び出します。</p>
+
+<p>Goでは自分で<code class="language-plaintext highlighter-rouge">main.go</code>などで依存関係を書くか、<code class="language-plaintext highlighter-rouge">wire</code>などのライブラリを使います。JSでは<code class="language-plaintext highlighter-rouge">InversifyJS</code>などが有名です。</p>
+
+<h4 id="これは保守可能なソフトウェアの構築にどのように役立ちますか">これは保守可能なソフトウェアの構築にどのように役立ちますか?</h4>
+
+<p>この章では、クリーンアーキテクチャの一般的なフォルダ構造や、呼び出しの流れが説明されていました。</p>
+
+<h3 id="第5章-ユースケースの実装">第5章: ユースケースの実装</h3>
+
+<ul>
+  <li>この章では、DDD的にドメインエンティティから始めて、ユースケースを組み立てる</li>
+</ul>
+
+<h4 id="ドメインモデルの実装">ドメインモデルの実装</h4>
+
+<ul>
+  <li>別の口座に送信するユースケースを考える</li>
+  <li>まずは、<code class="language-plaintext highlighter-rouge">Account</code>エンティティを作成
+    <ul>
+      <li>お金を引き出し、送信できる機能を持つ</li>
+    </ul>
+  </li>
+  <li>以下はGoのサンプルコード
+    <ul>
+      <li>Javaでは<code class="language-plaintext highlighter-rouge">@AllArgsConstructor</code>の他に、<code class="language-plaintext highlighter-rouge">withoutId</code>関数で初期化できる</li>
+      <li>また、<code class="language-plaintext highlighter-rouge">AccountId</code>はクラス内クラスになっている</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">AccountId</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">Value</span> <span class="kt">int64</span>
+<span class="p">}</span>
+
+<span class="c">// Account は残高と最近のアクティビティを持つ銀行口座</span>
+<span class="k">type</span> <span class="n">Account</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">id</span>              <span class="o">*</span><span class="n">AccountId</span>
+	<span class="n">BaselineBalance</span> <span class="n">Money</span>
+	<span class="n">ActivityWindow</span>  <span class="n">ActivityWindow</span>
+<span class="p">}</span>
+
+<span class="c">// IDなしで新しいアカウントを作成（新規作成用）</span>
+<span class="k">func</span> <span class="n">NewAccountWithoutId</span><span class="p">(</span><span class="n">baselineBalance</span> <span class="n">Money</span><span class="p">,</span> <span class="n">activityWindow</span> <span class="n">ActivityWindow</span><span class="p">)</span> <span class="o">*</span><span class="n">Account</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="o">&amp;</span><span class="n">Account</span><span class="p">{</span>
+		<span class="n">id</span><span class="o">:</span>              <span class="no">nil</span><span class="p">,</span>
+		<span class="n">BaselineBalance</span><span class="o">:</span> <span class="n">baselineBalance</span><span class="p">,</span>
+		<span class="n">ActivityWindow</span><span class="o">:</span>  <span class="n">activityWindow</span><span class="p">,</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c">// ID付きでアカウントを作成（既存エンティティの復元用）</span>
+<span class="k">func</span> <span class="n">NewAccountWithId</span><span class="p">(</span><span class="n">id</span> <span class="o">*</span><span class="n">AccountId</span><span class="p">,</span> <span class="n">baselineBalance</span> <span class="n">Money</span><span class="p">,</span> <span class="n">activityWindow</span> <span class="n">ActivityWindow</span><span class="p">)</span> <span class="o">*</span><span class="n">Account</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="o">&amp;</span><span class="n">Account</span><span class="p">{</span>
+		<span class="n">id</span><span class="o">:</span>              <span class="n">id</span><span class="p">,</span>
+		<span class="n">BaselineBalance</span><span class="o">:</span> <span class="n">baselineBalance</span><span class="p">,</span>
+		<span class="n">ActivityWindow</span><span class="o">:</span>  <span class="n">activityWindow</span><span class="p">,</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c">// アカウントIDを返します（存在しない場合はnil）</span>
+<span class="k">func</span> <span class="p">(</span><span class="n">a</span> <span class="o">*</span><span class="n">Account</span><span class="p">)</span> <span class="n">GetId</span><span class="p">()</span> <span class="o">*</span><span class="n">AccountId</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="n">a</span><span class="o">.</span><span class="n">id</span>
+<span class="p">}</span>
+
+<span class="c">// アカウントの現在の合計残高を計算</span>
+<span class="k">func</span> <span class="p">(</span><span class="n">a</span> <span class="o">*</span><span class="n">Account</span><span class="p">)</span> <span class="n">CalculateBalance</span><span class="p">()</span> <span class="n">Money</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="n">a</span><span class="o">.</span><span class="n">BaselineBalance</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">ActivityWindow</span><span class="o">.</span><span class="n">CalculateBalance</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
+<span class="p">}</span>
+
+<span class="c">// 指定された金額を引き出し</span>
+<span class="c">// 残高が足りていればアクティビティを追加し、trueを返す</span>
+<span class="k">func</span> <span class="p">(</span><span class="n">a</span> <span class="o">*</span><span class="n">Account</span><span class="p">)</span> <span class="n">Withdraw</span><span class="p">(</span><span class="n">money</span> <span class="n">Money</span><span class="p">,</span> <span class="n">targetAccountId</span> <span class="o">*</span><span class="n">AccountId</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="o">!</span><span class="n">a</span><span class="o">.</span><span class="n">mayWithdraw</span><span class="p">(</span><span class="n">money</span><span class="p">)</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="no">false</span>
+	<span class="p">}</span>
+
+	<span class="n">withdrawal</span> <span class="o">:=</span> <span class="n">Activity</span><span class="p">{</span>
+		<span class="n">OwnerAccountId</span><span class="o">:</span>  <span class="n">a</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+		<span class="n">SourceAccountId</span><span class="o">:</span> <span class="n">a</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+		<span class="n">TargetAccountId</span><span class="o">:</span> <span class="n">targetAccountId</span><span class="p">,</span>
+		<span class="n">Timestamp</span><span class="o">:</span>       <span class="n">time</span><span class="o">.</span><span class="n">Now</span><span class="p">(),</span>
+		<span class="n">Money</span><span class="o">:</span>           <span class="n">money</span><span class="p">,</span>
+	<span class="p">}</span>
+
+	<span class="n">a</span><span class="o">.</span><span class="n">ActivityWindow</span><span class="o">.</span><span class="n">AddActivity</span><span class="p">(</span><span class="n">withdrawal</span><span class="p">)</span>
+	<span class="k">return</span> <span class="no">true</span>
+<span class="p">}</span>
+
+<span class="c">// 指定された金額を引き出すことが可能か判定</span>
+<span class="k">func</span> <span class="p">(</span><span class="n">a</span> <span class="o">*</span><span class="n">Account</span><span class="p">)</span> <span class="n">mayWithdraw</span><span class="p">(</span><span class="n">money</span> <span class="n">Money</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="n">a</span><span class="o">.</span><span class="n">CalculateBalance</span><span class="p">()</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">money</span><span class="o">.</span><span class="n">Negate</span><span class="p">())</span><span class="o">.</span><span class="n">IsPositiveOrZero</span><span class="p">()</span>
+<span class="p">}</span>
+
+<span class="c">// 指定された金額を入金</span>
+<span class="c">// アクティビティを追加し、常にtrueを返します</span>
+<span class="k">func</span> <span class="p">(</span><span class="n">a</span> <span class="o">*</span><span class="n">Account</span><span class="p">)</span> <span class="n">Deposit</span><span class="p">(</span><span class="n">money</span> <span class="n">Money</span><span class="p">,</span> <span class="n">sourceAccountId</span> <span class="o">*</span><span class="n">AccountId</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+	<span class="n">deposit</span> <span class="o">:=</span> <span class="n">Activity</span><span class="p">{</span>
+		<span class="n">OwnerAccountId</span><span class="o">:</span>  <span class="n">a</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+		<span class="n">SourceAccountId</span><span class="o">:</span> <span class="n">sourceAccountId</span><span class="p">,</span>
+		<span class="n">TargetAccountId</span><span class="o">:</span> <span class="n">a</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+		<span class="n">Timestamp</span><span class="o">:</span>       <span class="n">time</span><span class="o">.</span><span class="n">Now</span><span class="p">(),</span>
+		<span class="n">Money</span><span class="o">:</span>           <span class="n">money</span><span class="p">,</span>
+	<span class="p">}</span>
+
+	<span class="n">a</span><span class="o">.</span><span class="n">ActivityWindow</span><span class="o">.</span><span class="n">AddActivity</span><span class="p">(</span><span class="n">deposit</span><span class="p">)</span>
+	<span class="k">return</span> <span class="no">true</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">Account</code>エンティティ
+    <ul>
+      <li>現在の口座アカウントのスナップショットを提供</li>
+      <li><code class="language-plaintext highlighter-rouge">ActivityWindows</code>値オブジェクトは最新の一部のウィンドウのみ所持
+        <ul>
+          <li>全てを読み込むのはメモリ効率が悪いため</li>
+        </ul>
+      </li>
+      <li><code class="language-plaintext highlighter-rouge">baselineBalance</code>属性
+        <ul>
+          <li>アクティビティの直前に口座が持っていた残高</li>
+        </ul>
+      </li>
+      <li><code class="language-plaintext highlighter-rouge">withdraw()</code>と<code class="language-plaintext highlighter-rouge">deposit()</code>を使って引き出しと入金を行う</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">Activity</code>エンティティ
+    <ul>
+      <li>全ての引き出しと入金をキャプチャ</li>
+    </ul>
+  </li>
+</ul>
+
+<p>上記により、お金の引き出しと入金ができる<code class="language-plaintext highlighter-rouge">Account</code>エンティティを作成できたので、これを中心にユースケースを構築していきます。</p>
+
+<h4 id="ユースケースの要約">ユースケースの要約</h4>
+
+<ul>
+  <li>入力アダプターから入力を受け取る
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">input validation</code>と<code class="language-plaintext highlighter-rouge">business rule validation</code>の違いを意識</li>
+      <li>DTOの検証に書きすぎないということ</li>
+    </ul>
+  </li>
+  <li>以下はGoのサンプルコード
+    <ul>
+      <li>Javaでは<code class="language-plaintext highlighter-rouge">@Transactional</code>でトランザクションを実装している</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span> <span class="n">service</span>
+
+<span class="k">import</span> <span class="p">(</span>
+	<span class="o">...</span>
+<span class="p">)</span>
+
+<span class="c">// SendMoneyService は送金ユースケースの実装</span>
+<span class="k">type</span> <span class="n">SendMoneyService</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">LoadAccountPort</span>         <span class="n">outbound</span><span class="o">.</span><span class="n">LoadAccountPort</span>
+	<span class="n">AccountLock</span>             <span class="n">outbound</span><span class="o">.</span><span class="n">AccountLock</span>
+	<span class="n">UpdateAccountStatePort</span>  <span class="n">outbound</span><span class="o">.</span><span class="n">UpdateAccountStatePort</span>
+	<span class="n">MoneyTransferProperties</span> <span class="n">MoneyTransferProperties</span>
+<span class="p">}</span>
+
+<span class="c">// NewSendMoneyService はSendMoneyServiceのコンストラクタ</span>
+<span class="k">func</span> <span class="n">NewSendMoneyService</span><span class="p">(</span>
+	<span class="n">loadAccountPort</span> <span class="n">outbound</span><span class="o">.</span><span class="n">LoadAccountPort</span><span class="p">,</span>
+	<span class="n">accountLock</span> <span class="n">outbound</span><span class="o">.</span><span class="n">AccountLock</span><span class="p">,</span>
+	<span class="n">updateAccountStatePort</span> <span class="n">outbound</span><span class="o">.</span><span class="n">UpdateAccountStatePort</span><span class="p">,</span>
+	<span class="n">properties</span> <span class="n">MoneyTransferProperties</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">*</span><span class="n">SendMoneyService</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="o">&amp;</span><span class="n">SendMoneyService</span><span class="p">{</span>
+		<span class="n">LoadAccountPort</span><span class="o">:</span>         <span class="n">loadAccountPort</span><span class="p">,</span>
+		<span class="n">AccountLock</span><span class="o">:</span>             <span class="n">accountLock</span><span class="p">,</span>
+		<span class="n">UpdateAccountStatePort</span><span class="o">:</span>  <span class="n">updateAccountStatePort</span><span class="p">,</span>
+		<span class="n">MoneyTransferProperties</span><span class="o">:</span> <span class="n">properties</span><span class="p">,</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c">// SendMoney は送金処理を行う</span>
+<span class="k">func</span> <span class="p">(</span><span class="n">s</span> <span class="o">*</span><span class="n">SendMoneyService</span><span class="p">)</span> <span class="n">SendMoney</span><span class="p">(</span><span class="n">command</span> <span class="n">inbound</span><span class="o">.</span><span class="n">SendMoneyCommand</span><span class="p">)</span> <span class="p">(</span><span class="kt">bool</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c">// TODO: ビジネスルールの検証</span>
+    <span class="c">// TODO: モデルの状態の変更</span>
+    <span class="c">// TODO: 戻り値を返す</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>上記は<code class="language-plaintext highlighter-rouge">SendMoneyUseCase</code>受信ポートの実装</li>
+  <li><code class="language-plaintext highlighter-rouge">LoadAccountPort</code>送信ポートを呼び出してアカウントを読み込む</li>
+  <li><code class="language-plaintext highlighter-rouge">UpdateAccountState</code>ポートを呼び出して、アカウントをDBに書き込む</li>
+</ul>
+
+<h4 id="入力の検証">入力の検証</h4>
+
+<ul>
+  <li>
+    <p>入力の検証をDTOで行うか、ユースケースで行うかは意見が分かれる</p>
+  </li>
+  <li>
+    <p>以下はGoのサンプルコード</p>
+    <ul>
+      <li>Javaでは<code class="language-plaintext highlighter-rouge">record</code>を使用して<code class="language-plaintext highlighter-rouge">immutable</code>にしている</li>
+      <li>受信ポートパッケージ内にある</li>
+      <li>DTOなので、0以上やnullでないなど、簡単な検証のみ行う</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span> <span class="n">inbound</span>
+
+<span class="k">import</span> <span class="p">(</span>
+    <span class="o">...</span>
+<span class="p">)</span>
+
+<span class="c">// SendMoneyCommand は送金のコマンド</span>
+<span class="k">type</span> <span class="n">SendMoneyCommand</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">SourceAccountId</span> <span class="n">model</span><span class="o">.</span><span class="n">AccountId</span>
+	<span class="n">TargetAccountId</span> <span class="n">model</span><span class="o">.</span><span class="n">AccountId</span>
+	<span class="n">Money</span>           <span class="n">model</span><span class="o">.</span><span class="n">Money</span>
+<span class="p">}</span>
+
+<span class="c">// NewSendMoneyCommand は送金コマンドを作成</span>
+<span class="c">// バリデーションが失敗した場合はエラーを返します</span>
+<span class="k">func</span> <span class="n">NewSendMoneyCommand</span><span class="p">(</span><span class="n">sourceAccountId</span> <span class="n">model</span><span class="o">.</span><span class="n">AccountId</span><span class="p">,</span> <span class="n">targetAccountId</span> <span class="n">model</span><span class="o">.</span><span class="n">AccountId</span><span class="p">,</span> <span class="n">money</span> <span class="n">model</span><span class="o">.</span><span class="n">Money</span><span class="p">)</span> <span class="p">(</span><span class="o">*</span><span class="n">SendMoneyCommand</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+	<span class="n">command</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="n">SendMoneyCommand</span><span class="p">{</span>
+		<span class="n">SourceAccountId</span><span class="o">:</span> <span class="n">sourceAccountId</span><span class="p">,</span>
+		<span class="n">TargetAccountId</span><span class="o">:</span> <span class="n">targetAccountId</span><span class="p">,</span>
+		<span class="n">Money</span><span class="o">:</span>           <span class="n">money</span><span class="p">,</span>
+	<span class="p">}</span>
+
+	<span class="c">// バリデーション</span>
+	<span class="k">if</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">validateSendMoneyCommand</span><span class="p">(</span><span class="n">command</span><span class="p">);</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="no">nil</span><span class="p">,</span> <span class="n">err</span>
+	<span class="p">}</span>
+
+	<span class="k">return</span> <span class="n">command</span><span class="p">,</span> <span class="no">nil</span>
+<span class="p">}</span>
+
+<span class="c">// validateSendMoneyCommand は送金コマンドのバリデーション</span>
+<span class="k">func</span> <span class="n">validateSendMoneyCommand</span><span class="p">(</span><span class="n">command</span> <span class="o">*</span><span class="n">SendMoneyCommand</span><span class="p">)</span> <span class="kt">error</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="n">command</span><span class="o">.</span><span class="n">SourceAccountId</span> <span class="o">==</span> <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">AccountId</span><span class="p">{})</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="n">errors</span><span class="o">.</span><span class="n">New</span><span class="p">(</span><span class="s">"送金元アカウントIDが必須です"</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="k">if</span> <span class="n">command</span><span class="o">.</span><span class="n">TargetAccountId</span> <span class="o">==</span> <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">AccountId</span><span class="p">{})</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="n">errors</span><span class="o">.</span><span class="n">New</span><span class="p">(</span><span class="s">"送金先アカウントIDが必須です"</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="k">if</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">validation</span><span class="o">.</span><span class="n">ValidatePositiveMoney</span><span class="p">(</span><span class="n">command</span><span class="o">.</span><span class="n">Money</span><span class="p">);</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="n">err</span>
+	<span class="p">}</span>
+
+	<span class="k">return</span> <span class="no">nil</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>これは腐敗防止層
+    <ul>
+      <li>簡易的に不適切な入力を跳ね返す役割を持つ</li>
+    </ul>
+  </li>
+  <li>CommandはGoFのコマンドパターンではないことに注意
+    <ul>
+      <li>GoFの場合は<code class="language-plaintext highlighter-rouge">execute()</code>を持つ</li>
+    </ul>
+  </li>
+  <li>筆者は<code class="language-plaintext highlighter-rouge">SendMoneyDTO</code>よりコマンドという用語をお勧めしている
+    <ul>
+      <li>モデルの状態変更を分かりやすくするため</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="コンストラクタの力">コンストラクタの力</h4>
+
+<ul>
+  <li>コンストラクタの引数が多い場合
+    <ul>
+      <li>長いコンストラクタをプライベートにし、ビルダーパターンの利用
+        <ul>
+          <li><code class="language-plaintext highlighter-rouge">SendMoneyCommandBuilder</code>というクラスを作成</li>
+          <li>新しいフィールドが増える場合、コンストラクタとビルダーを追加する必要
+            <ul>
+              <li>追加を忘れやすい</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>別の方法は、引数を値オブジェクトにまとめること</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="さまざまなユースケースに応じたさまざまな入力モデル">さまざまなユースケースに応じたさまざまな入力モデル</h4>
+
+<ul>
+  <li>異なるユースケースに同じ入力モデルを使いたくなる
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">Register account</code>と<code class="language-plaintext highlighter-rouge">Update account</code>など
+        <ul>
+          <li>上記はidが不要、必要かという違い
+            <ul>
+              <li>nullを許可するのは微妙</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>そこで、ユースケースごとに入力モデルを分ける</li>
+    </ul>
+  </li>
+</ul>
+
+<p>言語によって実装は異なりますが、ベースとなる型を拡張することでDRYを実現できます。FastAPIなどで特に一般的な手法です。Goでは例えば以下のように実装できます。</p>
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">UpdateAccountCommand</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">AccountDetails</span>
+	<span class="n">ID</span> <span class="kt">string</span> <span class="s">`json:"id" validate:"required"`</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="ビジネスルールの検証">ビジネスルールの検証</h4>
+
+<ul>
+  <li>「ソース勘定の残⾼を確認するためにモデルの現在の状態にアクセスする必要」
+    <ul>
+      <li>これはビジネスロジックなのでDTOに書いてはいけない</li>
+      <li>ドメインルールはエンティティ内(Accountなど)に記述
+        <ul>
+          <li><code class="language-plaintext highlighter-rouge">mayWithdraw()</code>など</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>エンティティで検証が難しい場合はユースケースに書く
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">sendMoney()</code>内で、<code class="language-plaintext highlighter-rouge">requireAccountExists()</code>を呼び出すなど</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="豊富なドメインモデルと貧血ドメインモデル">豊富なドメインモデルと貧血ドメインモデル</h4>
+
+<ul>
+  <li>貧血ドメインモデルはゲッター、セッターのみなどのこと</li>
+</ul>
+
+<h4 id="さまざまなユースケースに応じたさまざまな出力モデル">さまざまなユースケースに応じたさまざまな出力モデル</h4>
+
+<ul>
+  <li>ユースケースは呼び出し元に何を返す必要があるか？
+    <ul>
+      <li>本当に必要なデータのみを返す
+        <ul>
+          <li>bool, errorなど</li>
+          <li>例えば、SendMoneyのユースケースで完全なAccountを呼び出し元に返すか？
+            <ul>
+              <li>もし必要なら、新しいユースケースを作成すべき</li>
+            </ul>
+          </li>
+          <li>同じ出力モデルの共有はユースケース間で密結合になる
+            <ul>
+              <li>出力モデルの分離</li>
+              <li>ドメインエンティティを出力モデルにしたい誘惑
+                <ul>
+                  <li>エンティティを入力、出力モデルに利用する方法は後の章で解説</li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p>個人的に、コマンド関数でもモデル全体を返してしまうことがあるので、<code class="language-plaintext highlighter-rouge">error</code>などでシンプルに返すことを意識したいです。</p>
+
+<h4 id="読み取り専用ユースケースの場合はどうでしょうか">読み取り専用ユースケースの場合はどうでしょうか?</h4>
+
+<ul>
+  <li>読み取り専用のユースケース
+    <ul>
+      <li>UIでの残高の表示など</li>
+      <li>クエリ専用の受信ポートの実装</li>
+    </ul>
+  </li>
+</ul>
+
+<p>CQRSの考え方はマイクロサービスだけでなく、サービスファイル内の関数の分割にも有効です。</p>
+
+<h4 id="これは保守可能なソフトウェアの構築にどのように役立ちますか-1">これは保守可能なソフトウェアの構築にどのように役立ちますか?</h4>
+
+<ul>
+  <li>ユースケースの入力と出力を個別にモデル化
+    <ul>
+      <li>副作用の回避、ただし面倒</li>
+      <li>ユースケースを明確に理解できるため、長期的には維持しやすい</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="第6章-webアダプタの実装">第6章: Webアダプタの実装</h3>
+
+<h4 id="依存性の逆転">依存性の逆転</h4>
+
+<ul>
+  <li>コントローラとサービスの間にレイヤーを追加するとテストしやすくなる</li>
+  <li>WebSocketなど双方向の場合
+    <ul>
+      <li>WebSocketControllerは<code class="language-plaintext highlighter-rouge">port.in</code>, <code class="language-plaintext highlighter-rouge">port.out</code>の両方に依存</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="webアダプタの役割">Webアダプタの役割</h4>
+
+<ul>
+  <li>リクエストオブジェクトをユースケースの入力モデルに変換</li>
+  <li>ユースケースの呼び出し</li>
+  <li>ユースケースの出力をHTTPに変換</li>
+</ul>
+
+<h4 id="スライスコントローラー">スライスコントローラー</h4>
+
+<ul>
+  <li>できるだけ狭く、多く作るべき</li>
+  <li>一般的なアプローチは<code class="language-plaintext highlighter-rouge">AccountController</code>の作成
+    <ul>
+      <li>ただし、同じ返却クラスの共有は誤解を招く
+        <ul>
+          <li>例：<code class="language-plaintext highlighter-rouge">create</code>APIではidは不要だが、<code class="language-plaintext highlighter-rouge">update</code>APIでは必要</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>操作ごとのコントローラを作成
+    <ul>
+      <li>場合によっては個別にパッケージに分ける</li>
+      <li>できるだけユースケースに近い命名</li>
+    </ul>
+  </li>
+  <li>以下はGoのサンプルコード</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span> <span class="n">main</span>
+
+<span class="k">import</span> <span class="p">(</span>
+	<span class="o">...</span>
+<span class="p">)</span>
+
+<span class="c">// SendMoneyController は送金処理を管理するコントローラー</span>
+<span class="k">type</span> <span class="n">SendMoneyController</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">SendMoneyUseCase</span> <span class="n">in</span><span class="o">.</span><span class="n">SendMoneyUseCase</span>
+<span class="p">}</span>
+
+<span class="c">// NewSendMoneyController は新しいコントローラーを作成</span>
+<span class="k">func</span> <span class="n">NewSendMoneyController</span><span class="p">(</span><span class="n">sendMoneyUseCase</span> <span class="n">in</span><span class="o">.</span><span class="n">SendMoneyUseCase</span><span class="p">)</span> <span class="o">*</span><span class="n">SendMoneyController</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="o">&amp;</span><span class="n">SendMoneyController</span><span class="p">{</span>
+		<span class="n">SendMoneyUseCase</span><span class="o">:</span> <span class="n">sendMoneyUseCase</span><span class="p">,</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c">// SendMoney は送金処理を実行するエンドポイント</span>
+<span class="k">func</span> <span class="p">(</span><span class="n">ctrl</span> <span class="o">*</span><span class="n">SendMoneyController</span><span class="p">)</span> <span class="n">SendMoney</span><span class="p">(</span><span class="n">c</span> <span class="o">*</span><span class="n">fiber</span><span class="o">.</span><span class="n">Ctx</span><span class="p">)</span> <span class="kt">error</span> <span class="p">{</span>
+	<span class="c">// パスパラメータから値を取得</span>
+	<span class="n">sourceAccountIdStr</span> <span class="o">:=</span> <span class="n">c</span><span class="o">.</span><span class="n">Params</span><span class="p">(</span><span class="s">"sourceAccountId"</span><span class="p">)</span>
+	<span class="n">targetAccountIdStr</span> <span class="o">:=</span> <span class="n">c</span><span class="o">.</span><span class="n">Params</span><span class="p">(</span><span class="s">"targetAccountId"</span><span class="p">)</span>
+	<span class="n">amountStr</span> <span class="o">:=</span> <span class="n">c</span><span class="o">.</span><span class="n">Params</span><span class="p">(</span><span class="s">"amount"</span><span class="p">)</span>
+
+	<span class="c">// 文字列から数値に変換</span>
+	<span class="n">sourceAccountId</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">strconv</span><span class="o">.</span><span class="n">ParseInt</span><span class="p">(</span><span class="n">sourceAccountIdStr</span><span class="p">,</span> <span class="m">10</span><span class="p">,</span> <span class="m">64</span><span class="p">)</span>
+	<span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="n">c</span><span class="o">.</span><span class="n">Status</span><span class="p">(</span><span class="n">fiber</span><span class="o">.</span><span class="n">StatusBadRequest</span><span class="p">)</span><span class="o">.</span><span class="n">SendString</span><span class="p">(</span><span class="s">"Invalid sourceAccountId"</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="o">...</span>
+
+	<span class="c">// コマンドを作成</span>
+	<span class="n">command</span> <span class="o">:=</span> <span class="n">in</span><span class="o">.</span><span class="n">SendMoneyCommand</span><span class="p">{</span>
+		<span class="n">SourceAccountId</span><span class="o">:</span> <span class="n">model</span><span class="o">.</span><span class="n">AccountId</span><span class="p">{</span><span class="n">Value</span><span class="o">:</span> <span class="n">sourceAccountId</span><span class="p">},</span>
+		<span class="n">TargetAccountId</span><span class="o">:</span> <span class="n">model</span><span class="o">.</span><span class="n">AccountId</span><span class="p">{</span><span class="n">Value</span><span class="o">:</span> <span class="n">targetAccountId</span><span class="p">},</span>
+		<span class="n">Money</span><span class="o">:</span>           <span class="n">model</span><span class="o">.</span><span class="n">Money</span><span class="p">{</span><span class="n">Amount</span><span class="o">:</span> <span class="n">amount</span><span class="p">},</span>
+	<span class="p">}</span>
+
+	<span class="c">// 送金処理を実行</span>
+	<span class="n">err</span> <span class="o">=</span> <span class="n">ctrl</span><span class="o">.</span><span class="n">SendMoneyUseCase</span><span class="o">.</span><span class="n">SendMoney</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+	<span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="n">c</span><span class="o">.</span><span class="n">Status</span><span class="p">(</span><span class="n">fiber</span><span class="o">.</span><span class="n">StatusInternalServerError</span><span class="p">)</span><span class="o">.</span><span class="n">SendString</span><span class="p">(</span><span class="s">"Failed to send money"</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="c">// 成功した場合</span>
+	<span class="k">return</span> <span class="n">c</span><span class="o">.</span><span class="n">SendString</span><span class="p">(</span><span class="s">"Money sent successfully"</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="これは保守可能なソフトウェアの構築にどのように役立ちますか-2">これは保守可能なソフトウェアの構築にどのように役立ちますか?</h4>
+
+<p>個人的にコントローラファイルは大きく書くことが多かったので、ユースケースを意識し、ファイルを小さく保つという考え方は非常に参考になりました。</p>
+
+<p>また、RESTは一方向ですが、<code class="language-plaintext highlighter-rouge">WebSocket</code>、<code class="language-plaintext highlighter-rouge">RabbitMQ</code>など双方向通信が必要な場合はフォルダ構造を別に考える必要がありそうです。</p>
+
+<h3 id="第7章-永続化アダプタの実装">第7章: 永続化アダプタの実装</h3>
+<!--
+#### 依存性の逆転
+
+#### 永続化アダプタの役割
+
+#### スライスポートインターフェース
+
+#### 永続アダプタのスライス
+
+#### Spring Data JPAの例
+
+#### データベーストランザクションはどうですか?
+
+#### これは保守可能なソフトウェアの構築にどのように役立ちますか?
+-->
+
+<h3 id="第8章-アーキテクチャ要素のテスト">第8章: アーキテクチャ要素のテスト</h3>
+<!--
+#### テストピラミッド
+
+#### ユニットテストによるドメインエンティティのテスト
+
+#### ユニットテストによるユースケースのテスト
+
+#### 統合テストによるWebアダプタのテスト
+
+#### 統合テストによる永続化アダプタのテスト
+
+#### システムテストによるメインパスのテスト
+
+#### どの程度のテストで十分でしょうか?
+
+#### これは保守可能なソフトウェアの構築にどのように役立ちますか?
+-->
+
+<h3 id="第9章-境界間のマッピング">第9章 境界間のマッピング</h3>
+<!--
+#### 「マッピングなし」戦略
+
+#### 「双方向」マッピング戦略
+
+#### 「完全」マッピング戦略
+
+#### 「一方通行」マッピング戦略
+
+#### どのマッピング戦略をいつ使用すればよいですか?
+
+#### これは保守可能なソフトウェアの構築にどのように役立ちますか?
+-->
+
+<h3 id="第10章-アプリケーションの組み立て">第10章: アプリケーションの組み立て</h3>
+<!--
+#### なぜ組み立てを気にする必要があるのでしょうか?
+
+#### プレーンコードによるアセンブル
+
+#### Springのクラスパススキャンによるアセンブル
+
+#### SpringのJava Configを使ったアセンブル
+
+#### これは保守可能なソフトウェアの構築にどのように役立ちますか?
+-->
+
+<h3 id="第11章意識的に近道をする">第11章：意識的に近道をする</h3>
+<!--
+#### ショートカットが割れた窓のような理由
+
+#### クリーンなスタートの責任
+
+#### ユースケース間でのモデルの共有
+
+#### ドメインエンティティを入力または出力モデルとして使用する
+
+#### 着信ポートをスキップする
+
+#### サービスをスキップする
+
+#### これは保守可能なソフトウェアの構築にどのように役立ちますか?
+-->
+
+<h3 id="第12章-アーキテクチャ境界の強制">第12章 アーキテクチャ境界の強制</h3>
+<!--
+#### 境界と依存関係
+
+#### 可視性修飾子
+
+#### コンパイル後の適合関数
+
+#### ビルドアーティファクト
+
+#### これは保守可能なソフトウェアの構築にどのように役立ちますか?
+-->
+
+<h3 id="第13章-複数の境界付きコンテキストの管理">第13章: 複数の境界付きコンテキストの管理</h3>
+<!--
+#### 境界付けられたコンテキストごとに 1 つの六角形ですか?
+
+#### 分離された境界付きコンテキスト
+
+#### 適切に結合された境界付きコンテキスト
+
+#### これは保守可能なソフトウェアの構築にどのように役立ちますか?
+-->
+
+<h3 id="第14章-ソフトウェアアーキテクチャへのコンポーネントベースのアプローチ">第14章: ソフトウェアアーキテクチャへのコンポーネントベースのアプローチ</h3>
+<!--
+#### コンポーネントによるモジュール性
+
+#### ケーススタディ – 「チェックエンジン」コンポーネントの構築
+
+#### コンポーネント境界の強制
+
+#### これは保守可能なソフトウェアの構築にどのように役立ちますか?
+-->
+
+<h3 id="第15章-アーキテクチャスタイルの決定">第15章 アーキテクチャスタイルの決定</h3>
+<!--
+#### シンプルに始める
+
+#### ドメインを進化させる
+
+#### 自分の経験を信じましょう
+
+#### 場合によります
+-->
+</div>
+
+      <footer>
+        <p>
+          Tags: 
+          <a href="/md/tag/書籍">書籍</a> 
+        </p>
+      </footer>
+    </article>
+
+  </main>
+
+  <!-- サイドバー部分 -->
+  <aside id="sidebar">
+    <h2><a href="/md/about/">About</a></h2>
+
+    <!--
+    <h2><a href="/md/categories/">Categories</a></h2>
+    <ul>
+      
+        <li><a href="/md/category/blog"">blog</a></li>
+      
+    </ul>
+    -->
+    
+    <h2><a href="/md/tags/">Tags</a></h2>
+    <ul>
+      
+        <li><a href="/md/tag/fastapi">FastAPI</a></li>
+      
+        <li><a href="/md/tag/nodejs">Nodejs</a></li>
+      
+        <li><a href="/md/tag/ツール">ツール</a></li>
+      
+        <li><a href="/md/tag/mysql">MySQL</a></li>
+      
+        <li><a href="/md/tag/react">React</a></li>
+      
+        <li><a href="/md/tag/開発">開発</a></li>
+      
+        <li><a href="/md/tag/elasticsearch">elasticsearch</a></li>
+      
+        <li><a href="/md/tag/firebase">firebase</a></li>
+      
+        <li><a href="/md/tag/sqlite">sqlite</a></li>
+      
+        <li><a href="/md/tag/k8s">k8s</a></li>
+      
+        <li><a href="/md/tag/書籍">書籍</a></li>
+      
+        <li><a href="/md/tag/aws">AWS</a></li>
+      
+        <li><a href="/md/tag/cdk">CDK</a></li>
+      
+    </ul>
+    <h2><a href="/md/archives/">Archives</a></h2>
+    <ul>
+      
+      
+        <li><a href="/md/2025/05/">2025-05</a></li>
+      
+        <li><a href="/md/2025/03/">2025-03</a></li>
+      
+        <li><a href="/md/2025/02/">2025-02</a></li>
+      
+    </ul>
+  </aside>
+</div>
+
+<footer>
+  <p>&copy; 2025 ツールの忘備録</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,1148 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/md/assets/css/default.css">
+  <link rel="stylesheet" href="/md/assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <title>ツールの忘備録</title>
+</head>
+<body>
+
+<header>
+  <h1><a href="/md/">ツールの忘備録</a></h1></h1>
+</header>
+
+<div id="content">
+  <!-- メインコンテンツ部分 -->
+  <main>
+        <article>
+      <header>
+        <h1>「gRPC Microservices in Go」を読む</h1>
+        <p class="meta">
+          May 22, 2025 
+          <!--
+          in
+          <a href="/category/blog"
+            >blog</a
+          >
+        -->
+        </p>
+      </header>
+
+      <div class="content"><p>Manning 出版の<code class="language-plaintext highlighter-rouge">gRPC Microservices in Go</code>という書籍を読んだので、気になったことを中心に簡単な感想や要約を書きます。(網羅性はありません)</p>
+
+<p>この書籍はGRPC、クリーンアーキテクチャ、マイクロサービスで必要となるレジリエンスのGoでの実装方法、k8sや<code class="language-plaintext highlighter-rouge">Opentelemetory</code>などのデブオペ技術について基礎的な内容が網羅されています。</p>
+
+<p>日本語の同様の内容の書籍では、エンジニア選書より「クラウドネイティブで実現する マイクロサービス開発・運用 実践ガイド<a href="https://gihyo.jp/book/2023/978-4-297-13783-0">(Gihyo)</a>」が存在します。</p>
+
+<p>扱う技術自体に重複はあまりないので両方読んでも問題ありません。</p>
+
+<p><strong>目次</strong></p>
+
+<ul id="markdown-toc">
+  <li><a href="#パート-1-grpc-とマイクロサービスアーキテクチャ" id="markdown-toc-パート-1-grpc-とマイクロサービスアーキテクチャ">パート 1. gRPC とマイクロサービスアーキテクチャ</a>    <ul>
+      <li><a href="#1-go-grpc-マイクロサービス入門" id="markdown-toc-1-go-grpc-マイクロサービス入門">1 Go gRPC マイクロサービス入門</a></li>
+      <li><a href="#2-grpc-とマイクロサービスの融合" id="markdown-toc-2-grpc-とマイクロサービスの融合">2 gRPC とマイクロサービスの融合</a></li>
+    </ul>
+  </li>
+  <li><a href="#パート-2-grpc-マイクロサービスアプリケーションの開発テストデプロイ" id="markdown-toc-パート-2-grpc-マイクロサービスアプリケーションの開発テストデプロイ">パート 2. gRPC マイクロサービスアプリケーションの開発、テスト、デプロイ</a>    <ul>
+      <li><a href="#3-grpc-と-golang-を使ってみる" id="markdown-toc-3-grpc-と-golang-を使ってみる">3 gRPC と Golang を使ってみる</a></li>
+      <li><a href="#4-マイクロサービスプロジェクトのセットアップ" id="markdown-toc-4-マイクロサービスプロジェクトのセットアップ">4 マイクロサービスプロジェクトのセットアップ</a></li>
+      <li><a href="#5-サービス間通信" id="markdown-toc-5-サービス間通信">5 サービス間通信</a></li>
+      <li><a href="#6-回復力のあるコミュニケーション" id="markdown-toc-6-回復力のあるコミュニケーション">6 回復力のあるコミュニケーション</a></li>
+      <li><a href="#7-マイクロサービスのテスト" id="markdown-toc-7-マイクロサービスのテスト">7 マイクロサービスのテスト</a></li>
+      <li><a href="#8-展開" id="markdown-toc-8-展開">8 展開</a></li>
+    </ul>
+  </li>
+  <li><a href="#パート-3-grpc-とマイクロサービスアーキテクチャ" id="markdown-toc-パート-3-grpc-とマイクロサービスアーキテクチャ">パート 3. gRPC とマイクロサービスアーキテクチャ</a>    <ul>
+      <li><a href="#9-可観測性" id="markdown-toc-9-可観測性">9 可観測性</a></li>
+    </ul>
+  </li>
+</ul>
+
+<hr />
+
+<p><strong>サイト</strong></p>
+
+<ul>
+  <li><a href="https://www.oreilly.com/library/view/grpc-microservices-in/9781633439207/">オライリー</a></li>
+</ul>
+
+<hr />
+
+<h2 id="パート-1-grpc-とマイクロサービスアーキテクチャ">パート 1. gRPC とマイクロサービスアーキテクチャ</h2>
+
+<h3 id="1-go-grpc-マイクロサービス入門">1 Go gRPC マイクロサービス入門</h3>
+
+<ul>
+  <li>grpc は LB、トレース、フォールトトレランス、セキュリティまでもサポート</li>
+</ul>
+
+<h4 id="11-grpc-マイクロサービスの利点">1.1 gRPC マイクロサービスの利点</h4>
+
+<h5 id="111-パフォーマンス">1.1.1 パフォーマンス</h5>
+
+<ul>
+  <li>HTTP/2 のサーバーサイドプッシュ、多重化、ヘッダー圧縮</li>
+</ul>
+
+<h5 id="112-コード生成と相互運用性">1.1.2 コード生成と相互運用性</h5>
+
+<h5 id="113-フォールトトレランス">1.1.3 フォールトトレランス</h5>
+
+<ul>
+  <li>冪等性はフォールトトレランスに重要
+    <ul>
+      <li>再試行した場合にリソースの内容が変更されないようにするため</li>
+    </ul>
+  </li>
+  <li>冪等性ユースケースに適していない場合
+    <ul>
+      <li>再試行オペを停止するかを伝える検証エラーを提供する必要</li>
+    </ul>
+  </li>
+  <li>フォールトトレランスの実現方法
+    <ul>
+      <li>レート制限、サーキットブレイカー、フォールトインジェクション</li>
+    </ul>
+  </li>
+</ul>
+
+<p>冪等性を満たすコードを考えるのは難しいですが、フォールトトレランスを実現する多くの方法は、goのライブラリ、k8s、istioなどが解決してくれます。</p>
+
+<h5 id="114-セキュリティ">1.1.4 セキュリティ</h5>
+
+<ul>
+  <li>TLS, ALTS(Application Layer Transport Security)、トークンベース認証</li>
+</ul>
+
+<h5 id="115-ストリーミング">1.1.5 ストリーミング</h5>
+
+<ul>
+  <li>ページネーションの代わりになる</li>
+</ul>
+
+<h4 id="12-rest-と-rpc">1.2 REST と RPC</h4>
+
+<h4 id="13-grpc-を使用する場合">1.3 gRPC を使用する場合</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">proto</code>ファイルの維持は容易ではない
+    <ul>
+      <li>小規模なアプリには適さない</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="14-本番環境レベルのユースケース">1.4 本番環境レベルのユースケース</h4>
+
+<h5 id="141-マイクロサービス">1.4.1 マイクロサービス</h5>
+
+<ul>
+  <li>今回構築する EC サイトのサービス
+    <ul>
+      <li>製品、カート、チェックアウト、⽀払い、配送</li>
+    </ul>
+  </li>
+  <li>依存関係(例：Checkout→Cart)の管理方法
+    <ul>
+      <li>CI を使って、スタブ生成などを自動化</li>
+    </ul>
+  </li>
+  <li>各マイクロサービスは言語だけでなく、使用する DB も自由
+    <ul>
+      <li>例：MySQL, Mongo, Neo4j</li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="142-コンテナランタイム">1.4.2 コンテナランタイム</h5>
+
+<h5 id="143-cicd-パイプライン">1.4.3 CI/CD パイプライン</h5>
+
+<ul>
+  <li>CI/CD の例
+    <ul>
+      <li>MySQL、Kubernetes、AWS などのサードパーティの統合を確認するための適切な統合テスト</li>
+      <li>サービス間通信の契約テスト</li>
+    </ul>
+  </li>
+  <li>k8s などを使ってもデプロイ後のロールバックは難しい
+    <ul>
+      <li>エラー率、ユーザーフィードバックなどをもとに考える</li>
+      <li>ロールバックか、修正プログラムの導入かを考える</li>
+    </ul>
+  </li>
+</ul>
+
+<p>統合テストをCICDで実行する場合は時間がかかるので、プッシュごとなどではなく、適切な頻度で実行する必要がありそうです。また、
+k8sを使えばコマンドで簡単にロールバックできると考えていましたが、そう単純ではないと感じました。</p>
+
+<h5 id="144-監視と観測可能性">1.4.4 監視と観測可能性</h5>
+
+<ul>
+  <li>メトリクス、ログ、トレース</li>
+  <li>特に、コンテキストのトレースはリクエストのライフサイクル確認に重要</li>
+  <li>トレース ID をつけてグループ化
+    <ul>
+      <li>ダウンストリームサービスを含めた流れを把握</li>
+      <li>エラーだけでなく、遅延検出も重要</li>
+    </ul>
+  </li>
+  <li>監視ダッシュボードで確認したい</li>
+</ul>
+
+<h5 id="145-パブリックアクセス">1.4.5 パブリックアクセス</h5>
+
+<ul>
+  <li>k8s の Nginx コントローラや API ゲートウェイなど</li>
+</ul>
+
+<p>APIゲートウェイやBFFを使わない場合は、<code class="language-plaintext highlighter-rouge">Ingress</code>コントローラや<code class="language-plaintext highlighter-rouge">Istio</code>で公開する場合もありそうです。</p>
+
+<h3 id="2-grpc-とマイクロサービスの融合">2 gRPC とマイクロサービスの融合</h3>
+
+<h4 id="21-モノリシックアーキテクチャ">2.1 モノリシックアーキテクチャ</h4>
+
+<ul>
+  <li>初期バージョンでは有効</li>
+  <li>製品を定期的に評価して、マイクロサービスへの移行時期かを考える</li>
+</ul>
+
+<h5 id="211-開発">2.1.1 開発</h5>
+
+<ul>
+  <li>ファイルが多いと、IDE が重くなる可能性</li>
+  <li>コンパイルやテスト時間が長い</li>
+</ul>
+
+<h5 id="212-デプロイメント">2.1.2 デプロイメント</h5>
+
+<ul>
+  <li>他が変更されていなくても、すべてのテストを実行する必要</li>
+  <li>デプロイ全体が中断される可能性</li>
+</ul>
+
+<h5 id="213-スケーリング">2.1.3 スケーリング</h5>
+
+<h4 id="22-スケールキューブ">2.2 スケールキューブ</h4>
+
+<ul>
+  <li>三元でのスケーリング</li>
+</ul>
+
+<h5 id="221-x-軸のスケーリング">2.2.1 X 軸のスケーリング</h5>
+
+<h5 id="222-z-軸スケーリング">2.2.2 Z 軸スケーリング</h5>
+
+<h5 id="223-y-軸のスケーリング">2.2.3 Y 軸のスケーリング</h5>
+
+<h4 id="23-マイクロサービスアーキテクチャ">2.3 マイクロサービスアーキテクチャ</h4>
+
+<ul>
+  <li>テストが容易</li>
+  <li>障害が発生しても、他のサービスは引き続き利用できる</li>
+</ul>
+
+<h5 id="231-データの一貫性の取り扱い">2.3.1 データの一貫性の取り扱い</h5>
+
+<h5 id="232-サガパターン">2.3.2 サガパターン</h5>
+
+<h5 id="233-振り付けベースのサガ">2.3.3 振り付けベースのサガ</h5>
+
+<ul>
+  <li>それぞれのサービスがイベントを送信し合う(例：order_created_event)</li>
+  <li>replyToChannel パラメーターをデータに含める
+    <ul>
+      <li>発行元が次のサービスを知る必要</li>
+    </ul>
+  </li>
+  <li>Order→(Payment command channel)→Payment→(Create order reply channel)→Order</li>
+</ul>
+
+<h5 id="234-オーケストレーターベースのサガ">2.3.4 オーケストレーターベースのサガ</h5>
+
+<ul>
+  <li>Pub/Sub
+    <ul>
+      <li>ブローカーが単一障害点になりやすい</li>
+    </ul>
+  </li>
+  <li>ロールバックは Payment:refund()、Order:cancel()など</li>
+</ul>
+
+<p>オーケストラサーガは必ずしも正解ではないと感じました。</p>
+
+<h4 id="24-サービス検出">2.4 サービス検出</h4>
+
+<ul>
+  <li>クライアント側のサービス検出
+    <ul>
+      <li>サービスレジストリに接続し、特定のサービスの場所を確認</li>
+    </ul>
+  </li>
+  <li>サーバー側のサービス検出</li>
+  <li>k8s 使えばサービスディスカバリは不要</li>
+</ul>
+
+<h4 id="25-サービス間通信に-grpc-を使用する">2.5 サービス間通信に gRPC を使用する</h4>
+
+<h5 id="251-プロトコルバッファの操作">2.5.1 プロトコルバッファの操作</h5>
+
+<h5 id="252-go-ソースコードの生成">2.5.2 Go ソースコードの生成</h5>
+
+<ul>
+  <li>支払い要求などはストリーミングモードがいい</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">service</span> <span class="n">Payment</span> <span class="p">{</span>
+     <span class="n">Create</span><span class="p">(</span><span class="n">stream</span> <span class="n">CreatePaymentRequest</span><span class="p">)</span>
+     <span class="n">returns</span> <span class="p">(</span><span class="n">CreatePaymentResponse</span><span class="p">){}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>⾮同期的に処理されるため、失敗した操作をマークする⼀意の識別⼦を提供</li>
+</ul>
+
+<h5 id="253-配線の接続">2.5.3 配線の接続</h5>
+
+<ul>
+  <li>タイムアウトは非常に重要</li>
+  <li>10 秒以内に結果が得られない場合に実⾏をキャンセルする例</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ctx</span><span class="p">,</span> <span class="n">cancel</span> <span class="o">:=</span> <span class="n">context</span><span class="o">.</span><span class="n">WithTimeout</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">Background</span><span class="p">(),</span>
+<span class="m">10</span> <span class="o">*</span> <span class="n">time</span><span class="o">.</span><span class="n">Second</span><span class="p">)</span>
+<span class="k">defer</span> <span class="n">cancel</span><span class="p">()</span>
+<span class="n">payment</span> <span class="o">:=</span> <span class="n">pb</span><span class="o">.</span><span class="n">NewPaymentClient</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span>
+<span class="o">...</span>
+</code></pre></div></div>
+
+<h2 id="パート-2-grpc-マイクロサービスアプリケーションの開発テストデプロイ">パート 2. gRPC マイクロサービスアプリケーションの開発、テスト、デプロイ</h2>
+
+<h3 id="3-grpc-と-golang-を使ってみる">3 gRPC と Golang を使ってみる</h3>
+
+<h4 id="31-プロトコルバッファ">3.1 プロトコルバッファ</h4>
+
+<h5 id="311-メッセージタイプの定義">3.1.1 メッセージタイプの定義</h5>
+
+<ul>
+  <li>複数は<code class="language-plaintext highlighter-rouge">repeated</code>を使う</li>
+  <li>フィールド番号は下位互換性のために変更しない</li>
+  <li>フィールドを削除する場合は<code class="language-plaintext highlighter-rouge">reserved</code>を使って予約
+    <ul>
+      <li>同じフィールド番号や名前が使われないようにするため</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">to</code>で範囲を指定</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">message</span> <span class="n">CreateOrderRequest</span> <span class="p">{</span>
+    <span class="n">reserved</span> <span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span> <span class="n">to</span> <span class="m">7</span><span class="p">;</span> <span class="err">❶</span>
+    <span class="n">reserved</span> <span class="s">"customer_id"</span><span class="p">;</span> <span class="err">❷</span>
+    <span class="kt">int64</span> <span class="n">user_id</span> <span class="o">=</span> <span class="m">7</span><span class="p">;</span>
+    <span class="n">repeated</span> <span class="n">Item</span> <span class="n">items</span> <span class="o">=</span> <span class="m">8</span><span class="p">;</span>
+    <span class="n">float</span> <span class="n">amount</span> <span class="o">=</span> <span class="m">9</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>上記では<code class="language-plaintext highlighter-rouge">user_id</code>が使われているので<code class="language-plaintext highlighter-rouge">customer_id</code>を予約している</li>
+  <li>1-15 までは 1 バイトなので頻繁に使うフィールド用に予約</li>
+</ul>
+
+<h5 id="312-プロトコルバッファエンコーディング">3.1.2 プロトコルバッファエンコーディング</h5>
+
+<ul>
+  <li>マーシャリングは、メタデータとデータ自体のエンコード情報を含む</li>
+</ul>
+
+<h4 id="32-スタブの生成">3.2 スタブの生成</h4>
+
+<h5 id="321-プロトコルバッファコンパイラのインストール">3.2.1 プロトコルバッファコンパイラのインストール</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>go <span class="nb">install </span>google.golang.org/protobuf/cmd/protoc-gen-go@latest
+go <span class="nb">install </span>google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+</code></pre></div></div>
+
+<h5 id="322-プロトコルバッファコンパイラの使用">3.2.2 プロトコルバッファコンパイラの使用</h5>
+
+<ul>
+  <li>protocコマンドで生成
+    <div class="language-proto highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">syntax</span> <span class="o">=</span> <span class="err">“</span><span class="n">proto3</span><span class="err">”</span><span class="p">;</span>
+<span class="k">option</span> <span class="na">go_package</span><span class="o">=</span><span class="s">" GitHub/huseyinbabal/microservices/order"</span><span class="p">;</span>
+<span class="o">...</span>
+</code></pre></div>    </div>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">option</code>はパッケージ名</li>
+</ul>
+
+<h4 id="33-proto-ファイルの管理">3.3 .proto ファイルの管理</h4>
+
+<h5 id="331-プロトプロジェクトの構造">3.3.1 プロトプロジェクトの構造</h5>
+
+<ul>
+  <li>以下のような構造になる</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>├── golang
+│ ├── order
+│ │ ├── go.mod
+│ │ ├── go.sum
+│ │ ├── order.pb.go
+│ │ └── order_grpc.pb.go
+</code></pre></div></div>
+
+<ul>
+  <li>Golang の依存関係バージョン
+    <ul>
+      <li>Git をタグ、ブランチ、コミットハッシュとして参照</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git tag <span class="nt">-a</span> golang/order/v1.2.3 <span class="nt">-m</span> <span class="s2">"golang/order/v1.2.3"</span>
+...
+git push <span class="nt">--tags</span>
+go get <span class="nt">-u</span> github.com/huseyinbabal/microservices-proto/golang/order@v1.2.3
+</code></pre></div></div>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">latest</code>を使わずに参照する</li>
+</ul>
+
+<h5 id="332-ソースコード生成の自動化">3.3.2 ソースコード生成の自動化</h5>
+
+<ul>
+  <li>
+    <p>マトリックスを使うとできること</p>
+
+    <ul>
+      <li>1 つのサービスに対して異なるバージョンを使用して多数のバイナリをビルドできる</li>
+    </ul>
+  </li>
+  <li>
+    <p>order、payment、shipping サービスのソースコード生成が実行</p>
+  </li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">on</span><span class="pi">:</span>
+    <span class="na">push</span><span class="pi">:</span>
+    <span class="na">tags</span><span class="pi">:</span>
+        <span class="pi">-</span> <span class="s">v**</span>
+<span class="na">jobs</span><span class="pi">:</span>
+    <span class="na">protoc</span><span class="pi">:</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Generate"</span>
+    <span class="na">runs-on</span><span class="pi">:</span> <span class="s">ubuntu-latest</span>
+    <span class="na">strategy</span><span class="pi">:</span>
+        <span class="na">matrix</span><span class="pi">:</span>
+            <span class="na">service</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">order"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">payment"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">shipping"</span><span class="pi">]</span>
+
+<span class="na">steps</span><span class="pi">:</span>
+    <span class="s">...</span>
+    <span class="s">- name</span><span class="err">:</span> <span class="s">Etract Release Version</span>
+      <span class="s">run</span><span class="err">:</span> <span class="s">echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" &gt;&gt; $GITHUB_ENV ❸</span>
+    <span class="s">- name</span><span class="err">:</span> <span class="s2">"</span><span class="s">Generate</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">Golang"</span>
+      <span class="na">shell</span><span class="pi">:</span> <span class="s">bash</span>
+      <span class="na">run</span><span class="pi">:</span> <span class="pi">|</span>
+        <span class="s">chmod +x "${GITHUB_WORKSPACE}/run.sh"</span>
+        <span class="s">./run.sh $ $</span>
+</code></pre></div></div>
+
+<ul>
+  <li>上の例のシェルスクリプトでは、GRPC のスタブ生成のコマンドを書く</li>
+</ul>
+
+<h4 id="34-後方互換性と前方互換性">3.4 後方互換性と前方互換性</h4>
+
+<h5 id="341-新しいフィールドの追加">3.4.1 新しいフィールドの追加</h5>
+
+<h5 id="342-サーバーをアップグレードするがクライアントはアップグレードしない">3.4.2 サーバーをアップグレードするがクライアントはアップグレードしない</h5>
+
+<h5 id="343-クライアントをアップグレードするがサーバーをアップグレードしない">3.4.3 クライアントをアップグレードするがサーバーをアップグレードしない</h5>
+
+<h5 id="344-フィールドの追加削除">3.4.4 フィールドの追加/削除</h5>
+
+<h5 id="345-フィールドを他のフィールドへ移動する">3.4.5 フィールドを他のフィールドへ移動する</h5>
+
+<p>GRPCはデバッグが難しいことと同様に、互換性を維持するのも非常に難しいと感じた章でした。</p>
+
+<h3 id="4-マイクロサービスプロジェクトのセットアップ">4 マイクロサービスプロジェクトのセットアップ</h3>
+
+<h4 id="41-六角形アーキテクチャ">4.1 六角形アーキテクチャ</h4>
+
+<ul>
+  <li>ポートとアダプター</li>
+</ul>
+
+<h5 id="411-アプリケーション">4.1.1 アプリケーション</h5>
+
+<ul>
+  <li>ポートには読み取りと書き込みクエリがある</li>
+</ul>
+
+<h5 id="412-アクター">4.1.2 アクター</h5>
+
+<h5 id="413-ポート">4.1.3 ポート</h5>
+
+<h5 id="414-アダプタ">4.1.4 アダプタ</h5>
+
+<h4 id="42-注文サービスの実装">4.2 注文サービスの実装</h4>
+
+<ul>
+  <li>フォルダ構造は以下のようになる</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>- cmd
+    - main.go
+-config
+    - config.go
+-internal
+    - adapters
+        - db
+            - db.go
+        - grpc
+            - grpc.go
+            - server.go
+    - application
+        - core
+            - api
+                - api.go
+            - domain
+                - order.go
+    - ports
+        - api.go
+        - db.go
+    go.mod
+</code></pre></div></div>
+
+<ul>
+  <li>内部ポートは<code class="language-plaintext highlighter-rouge">application</code>で、外部ポートは<code class="language-plaintext highlighter-rouge">adapters</code>で具象化する</li>
+</ul>
+
+<h5 id="421-プロジェクトフォルダ">4.2.1 プロジェクトフォルダ</h5>
+
+<h5 id="422-go-プロジェクトの初期化">4.2.2 Go プロジェクトの初期化</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>go mod init GitHub.com/&lt;username&gt;/microservices/order
+</code></pre></div></div>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">go mod</code>コマンドは VCS の URL を引数にとり、<code class="language-plaintext highlighter-rouge">go.mod</code>を作成</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">#</span> <span class="k">go</span><span class="o">.</span><span class="n">mod</span>
+<span class="n">module</span> <span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">huseyinbabal</span><span class="o">/</span><span class="n">microservices</span><span class="o">/</span><span class="n">order</span>
+<span class="k">go</span> <span class="m">1.17</span>
+<span class="o">...</span>
+</code></pre></div></div>
+
+<h5 id="423-アプリケーションコアの実装">4.2.3 アプリケーションコアの実装</h5>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">domain/order.go</code>に構造体を定義</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">OrderItem</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">ProductCode</span> <span class="kt">string</span> <span class="s">`json:"product_code"`</span>
+    <span class="n">UnitPrice</span> <span class="kt">float32</span> <span class="s">`json:"unit_price"`</span>
+    <span class="n">Quantity</span> <span class="kt">int32</span> <span class="s">`json:"quantity"`</span>
+    <span class="o">...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">application/api.go</code>では DB ポートに依存するアプリを作成</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">Application</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">db</span> <span class="n">ports</span><span class="o">.</span><span class="n">DBPort</span>
+<span class="p">}</span>
+
+<span class="k">func</span> <span class="n">NewApplication</span><span class="p">(</span><span class="n">db</span> <span class="n">ports</span><span class="o">.</span><span class="n">DBPort</span><span class="p">)</span> <span class="o">*</span><span class="n">Application</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="o">&amp;</span><span class="n">Application</span><span class="p">{</span>
+        <span class="n">db</span><span class="o">:</span> <span class="n">db</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">func</span> <span class="p">(</span><span class="n">a</span> <span class="n">Application</span><span class="p">)</span> <span class="n">PlaceOrder</span><span class="p">(</span><span class="n">order</span> <span class="n">domain</span><span class="o">.</span><span class="n">Order</span><span class="p">)</span> <span class="p">(</span><span class="n">domain</span><span class="o">.</span><span class="n">Order</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">err</span> <span class="o">:=</span> <span class="n">a</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">Save</span><span class="p">(</span><span class="o">&amp;</span><span class="n">order</span><span class="p">)</span>
+    <span class="o">...</span>
+    <span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>DB ポートのインターフェースで定義した<code class="language-plaintext highlighter-rouge">Save</code>メソッドを呼び出します
+    <ul>
+      <li>実際には、DB インターフェースを実装したアダプタが呼び出されます</li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="424-ポートの実装">4.2.4 ポートの実装</h5>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">internal/ports/api.go</code> を使用して API ポートの実装</li>
+  <li>先ほど定義した<code class="language-plaintext highlighter-rouge">Application</code>構造体はこのインターフェースを実装したことになる</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">APIPort</span> <span class="k">interface</span> <span class="p">{</span>
+    <span class="n">PlaceOrder</span><span class="p">(</span><span class="n">order</span> <span class="n">domain</span><span class="o">.</span><span class="n">Order</span><span class="p">)</span> <span class="p">(</span><span class="n">domain</span><span class="o">.</span><span class="n">Order</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>DB ポートも同様に定義する</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">DBPort</span> <span class="k">interface</span> <span class="p">{</span>
+    <span class="n">Get</span><span class="p">(</span><span class="n">id</span> <span class="kt">string</span><span class="p">)</span> <span class="p">(</span><span class="n">domain</span><span class="o">.</span><span class="n">Order</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+    <span class="n">Save</span><span class="p">(</span><span class="o">*</span><span class="n">domain</span><span class="o">.</span><span class="n">Order</span><span class="p">)</span> <span class="kt">error</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h5 id="425-アダプタの実装">4.2.5 アダプタの実装</h5>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">Adapter</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">db</span> <span class="o">*</span><span class="n">gorm</span><span class="o">.</span><span class="n">DB</span>
+<span class="p">}</span>
+
+<span class="k">func</span> <span class="n">NewAdapter</span><span class="p">(</span><span class="n">dataSourceUrl</span> <span class="kt">string</span><span class="p">)</span> <span class="p">(</span><span class="o">*</span><span class="n">Adapter</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="o">...</span>
+<span class="p">}</span>
+
+<span class="k">type</span> <span class="n">Order</span> <span class="k">struct</span> <span class="p">{</span>
+     <span class="n">gorm</span><span class="o">.</span><span class="n">Model</span>
+     <span class="n">CustomerID</span> <span class="kt">int64</span>
+     <span class="n">Status</span> <span class="kt">string</span>
+     <span class="n">OrderItems</span> <span class="p">[]</span><span class="n">OrderItem</span>
+<span class="p">}</span>
+
+<span class="k">func</span> <span class="p">(</span><span class="n">a</span> <span class="n">Adapter</span><span class="p">)</span> <span class="n">Get</span><span class="p">(</span><span class="n">id</span> <span class="kt">string</span><span class="p">)</span> <span class="p">(</span><span class="n">domain</span><span class="o">.</span><span class="n">Order</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="o">...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>上記は<code class="language-plaintext highlighter-rouge">Gorm</code>に依存し、DB ポートを実装している</li>
+</ul>
+
+<h5 id="426-grpc-アダプタの実装">4.2.6 gRPC アダプタの実装</h5>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">Adapter</span> <span class="k">struct</span> <span class="p">{</span>
+     <span class="n">api</span> <span class="n">ports</span><span class="o">.</span><span class="n">APIPort</span>
+     <span class="n">port</span> <span class="kt">int</span>
+     <span class="n">order</span><span class="o">.</span><span class="n">UnimplementedOrderServer</span>
+     <span class="o">...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>
+    <p>アプリサービス、ポート番号、上位互換性対応が依存関係の構造体</p>
+  </li>
+  <li>
+    <p>次に、<code class="language-plaintext highlighter-rouge">Run()</code>メソッドを定義する</p>
+  </li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">func</span> <span class="p">(</span><span class="n">a</span> <span class="n">Adapter</span><span class="p">)</span> <span class="n">Run</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">grpcServer</span> <span class="o">:=</span> <span class="n">grpc</span><span class="o">.</span><span class="n">NewServer</span><span class="p">()</span>
+    <span class="n">order</span><span class="o">.</span><span class="n">RegisterOrderServer</span><span class="p">(</span><span class="n">grpcServer</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">GetEnv</span><span class="p">()</span> <span class="o">==</span> <span class="s">"development"</span> <span class="p">{</span>
+        <span class="n">reflection</span><span class="o">.</span><span class="n">Register</span><span class="p">(</span><span class="n">grpcServer</span><span class="p">)</span>
+    <span class="p">}</span>
+ <span class="o">...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>上記では注文<code class="language-plaintext highlighter-rouge">GRPC</code>サーバを初期化している</li>
+  <li>
+    <p>開発環境でのみ、<code class="language-plaintext highlighter-rouge">grpcurl</code>のためのリフレクションを有効にしている</p>
+  </li>
+  <li>次に、<code class="language-plaintext highlighter-rouge">proto</code>ファイルで作成した関数を実装する</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">func</span> <span class="p">(</span><span class="n">a</span> <span class="n">Adapter</span><span class="p">)</span> <span class="n">Create</span><span class="p">(</span><span class="n">ctx</span> <span class="n">context</span><span class="o">.</span><span class="n">Context</span><span class="p">,</span> <span class="n">request</span> <span class="o">*</span><span class="n">order</span><span class="o">.</span><span class="n">CreateOrderRequest</span><span class="p">)</span> <span class="p">(</span><span class="o">*</span><span class="n">order</span><span class="o">.</span><span class="n">CreateOrderResponse</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="o">...</span>
+    <span class="k">return</span> <span class="o">&amp;</span><span class="n">order</span><span class="o">.</span><span class="n">CreateOrderResponse</span><span class="p">{</span><span class="n">OrderId</span><span class="o">:</span> <span class="n">result</span><span class="o">.</span><span class="n">ID</span><span class="p">},</span> <span class="no">nil</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h5 id="427-依存性注入とアプリケーションの実行">4.2.7 依存性注入とアプリケーションの実行</h5>
+
+<ul>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">config.go</code>では環境変数の読み取り関数などを定義する</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">main.go</code>で以下のように<code class="language-plaintext highlighter-rouge">main</code>メソッドを定義</p>
+  </li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">dbAdapter</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">db</span><span class="o">.</span><span class="n">NewAdapter</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">GetDataSourceURL</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">Fatalf</span><span class="p">(</span><span class="s">"Failed to connect to database. Error: %v"</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="n">application</span> <span class="o">:=</span> <span class="n">api</span><span class="o">.</span><span class="n">NewApplication</span><span class="p">(</span><span class="n">dbAdapter</span><span class="p">)</span>
+    <span class="n">grpcAdapter</span> <span class="o">:=</span> <span class="n">grpc</span><span class="o">.</span><span class="n">NewAdapter</span><span class="p">(</span><span class="n">application</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">GetApplicationPort</span><span class="p">())</span>
+    <span class="n">grpcAdapter</span><span class="o">.</span><span class="n">Run</span><span class="p">()</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>依存関係エラーが出た場合は、<code class="language-plaintext highlighter-rouge">go mod tidy</code>で依存関係を再編成し、再実行</li>
+</ul>
+
+<h5 id="428-grpc-エンドポイントの呼び出し">4.2.8 gRPC エンドポイントの呼び出し</h5>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">grpcurl</code>コマンドで呼び出せる</li>
+</ul>
+
+<h3 id="5-サービス間通信">5 サービス間通信</h3>
+
+<ul>
+  <li>GRPC でも HTTP と同様に、応答ステータスやエラーの種類が重要</li>
+</ul>
+
+<h4 id="51-grpc-サービス間通信">5.1 gRPC サービス間通信</h4>
+
+<h5 id="511-サーバー側の負荷分散">5.1.1 サーバー側の負荷分散</h5>
+
+<h5 id="512-クライアント側の負荷分散">5.1.2 クライアント側の負荷分散</h5>
+
+<ul>
+  <li>サーバーサイド LB
+    <ul>
+      <li>設定が簡単</li>
+      <li>スループットの制限</li>
+    </ul>
+  </li>
+  <li>クライアント LB
+    <ul>
+      <li>パフォーマンスがいい</li>
+      <li>単一障害点なし</li>
+      <li>設定が難しい</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="52-モジュールに依存しポートとアダプタを実装する">5.2 モジュールに依存し、ポートとアダプタを実装する</h4>
+
+<ul>
+  <li>Order サービスで以下のコマンドで依存関係を追加</li>
+  <li><code class="language-plaintext highlighter-rouge">go get -u github.com/huseyinbabal/microservices-proto/golang/payment</code></li>
+</ul>
+
+<h5 id="521-支払いポート">5.2.1 支払いポート</h5>
+
+<h5 id="522-決済アダプタ">5.2.2 決済アダプタ</h5>
+
+<h5 id="523-支払いポートの実装">5.2.3 支払いポートの実装</h5>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">ports/payment.go</code></li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">PaymentPort</span> <span class="k">interface</span> <span class="p">{</span>
+     <span class="n">Charge</span><span class="p">(</span><span class="o">*</span><span class="n">domain</span><span class="o">.</span><span class="n">Order</span><span class="p">)</span> <span class="kt">error</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h5 id="524-支払いアダプタの実装">5.2.4 支払いアダプタの実装</h5>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">adapters/payment/payment.go</code></li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">Adapter</span> <span class="k">struct</span> <span class="p">{</span>
+     <span class="n">payment</span> <span class="n">payment</span><span class="o">.</span><span class="n">PaymentClient</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>上記の<code class="language-plaintext highlighter-rouge">payment</code>は、<code class="language-plaintext highlighter-rouge">go get</code>で依存関係を追加したので<code class="language-plaintext highlighter-rouge">Order</code>サービスから利用できる</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">func</span> <span class="n">NewAdapter</span><span class="p">(</span><span class="n">paymentServiceUrl</span> <span class="kt">string</span><span class="p">)</span> <span class="p">(</span><span class="err">\</span><span class="o">*</span><span class="n">Adapter</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">var</span> <span class="n">opts</span> <span class="p">[]</span><span class="n">grpc</span><span class="o">.</span><span class="n">DialOption</span> 
+    <span class="n">opts</span> <span class="o">=</span> <span class="nb">append</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span><span class="n">grpc</span><span class="o">.</span><span class="n">WithTransportCredentials</span><span class="p">(</span><span class="n">insecure</span><span class="o">.</span><span class="n">NewCredentials</span><span class="p">()))</span> 
+    <span class="n">conn</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">grpc</span><span class="o">.</span><span class="n">Dial</span><span class="p">(</span><span class="n">paymentServiceUrl</span><span class="p">,</span> <span class="n">opts</span><span class="o">...</span><span class="p">)</span> 
+    <span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="no">nil</span><span class="p">,</span> <span class="n">err</span>
+    <span class="p">}</span>
+    <span class="k">defer</span> <span class="n">conn</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span> 
+    <span class="n">client</span> <span class="o">:=</span> <span class="n">payment</span><span class="o">.</span><span class="n">NewPaymentClient</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span> 
+    <span class="k">return</span> <span class="o">&amp;</span><span class="n">Adapter</span><span class="p">{</span><span class="n">payment</span><span class="o">:</span> <span class="n">client</span><span class="p">},</span> <span class="no">nil</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<ul>
+  <li>上記では<code class="language-plaintext highlighter-rouge">Payment</code>サービスのクライアントGRPCを作成</li>
+  <li>その後、<code class="language-plaintext highlighter-rouge">Order</code>サービスのアダプターに依存関係を追加</li>
+  <li>また、TLSを無効にしている</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">func</span> <span class="p">(</span><span class="n">a</span> <span class="o">*</span><span class="n">Adapter</span><span class="p">)</span> <span class="n">Charge</span><span class="p">(</span><span class="n">order</span> <span class="o">*</span><span class="n">domain</span><span class="o">.</span><span class="n">Order</span><span class="p">)</span> <span class="kt">error</span> <span class="p">{</span>
+     <span class="n">_</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">a</span><span class="o">.</span><span class="n">payment</span><span class="o">.</span><span class="n">Create</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">Background</span><span class="p">(),</span> <span class="o">&amp;</span><span class="n">payment</span><span class="o">.</span><span class="n">CreatePaymentRequest</span><span class="p">{</span> 
+        <span class="n">UserId</span><span class="o">:</span> <span class="n">order</span><span class="o">.</span><span class="n">CustomerID</span><span class="p">,</span>
+        <span class="n">OrderId</span><span class="o">:</span> <span class="n">order</span><span class="o">.</span><span class="n">ID</span><span class="p">,</span>
+        <span class="n">TotalPrice</span><span class="o">:</span> <span class="n">order</span><span class="o">.</span><span class="n">TotalPrice</span><span class="p">(),</span>
+    <span class="p">})</span>
+    <span class="k">return</span> <span class="n">err</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<ul>
+  <li>上の例では、<code class="language-plaintext highlighter-rouge">Order</code>エンティティに<code class="language-plaintext highlighter-rouge">TotalPrice()</code>というメソッドを定義している</li>
+</ul>
+
+<h5 id="525-支払明細書のクライアント設定">5.2.5 支払明細書のクライアント設定</h5>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+     <span class="o">...</span>
+     <span class="n">application</span> <span class="o">:=</span> <span class="n">api</span><span class="o">.</span><span class="n">NewApplication</span><span class="p">(</span><span class="n">dbAdapter</span><span class="p">,</span> <span class="n">paymentAdapter</span><span class="p">)</span> 
+     <span class="n">grpcAdapter</span> <span class="o">:=</span> <span class="n">grpc</span><span class="o">.</span><span class="n">NewAdapter</span><span class="p">(</span><span class="n">application</span><span class="p">,</span><span class="n">config</span><span class="o">.</span><span class="n">GetApplicationPort</span><span class="p">())</span>
+     <span class="n">grpcAdapter</span><span class="o">.</span><span class="n">Run</span><span class="p">()</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<ul>
+  <li>上記では、DBアダプターと、<code class="language-plaintext highlighter-rouge">Payment</code>サービスのクライアントGRPCアダプターをアプリの依存関係に追加</li>
+  <li>その後、アプリを<code class="language-plaintext highlighter-rouge">Order</code>サービスの依存関係に追加し、実行している</li>
+</ul>
+
+<h5 id="526-grpc-での支払いアダプタの使用">5.2.6 gRPC での支払いアダプタの使用</h5>
+
+<h4 id="53-エラー処理">5.3 エラー処理</h4>
+
+<h5 id="531-ステータスコード">5.3.1 ステータスコード</h5>
+
+<ul>
+  <li>HTTPと似たようなステータスも多い
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">INVALID_ARGUMENT</code>, <code class="language-plaintext highlighter-rouge">NOT_FOUND</code>, <code class="language-plaintext highlighter-rouge">PERMISSION_DENIED</code>など</li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="532-エラーコードとメッセージを返す">5.3.2 エラーコードとメッセージを返す</h5>
+
+<ul>
+  <li>以下のようにしてエラーを作成する
+    <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">err</span> <span class="o">=</span> <span class="n">status</span><span class="o">.</span><span class="n">Errorf</span><span class="p">(</span>
+  <span class="n">codes</span><span class="o">.</span><span class="n">InvalidArgument</span><span class="p">,</span>
+  <span class="n">fmt</span><span class="o">.</span><span class="n">Sprintf</span><span class="p">(</span><span class="s">"failed to charge user: %d"</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">UserId</span><span class="p">))</span>
+</code></pre></div>    </div>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">status</code>ライブラリ、<code class="language-plaintext highlighter-rouge">codes</code>ライブラリを使用</li>
+</ul>
+
+<h5 id="533-詳細エラー">5.3.3 詳細エラー</h5>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">func</span> <span class="p">(</span><span class="n">a</span> <span class="n">Application</span><span class="p">)</span> <span class="n">PlaceOrder</span><span class="p">(</span><span class="n">order</span> <span class="n">domain</span><span class="o">.</span><span class="n">Order</span><span class="p">)</span> <span class="p">(</span><span class="n">domain</span><span class="o">.</span><span class="n">Order</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="o">...</span>
+    <span class="n">paymentErr</span> <span class="o">:=</span> <span class="n">a</span><span class="o">.</span><span class="n">payment</span><span class="o">.</span><span class="n">Charge</span><span class="p">(</span><span class="o">&amp;</span><span class="n">order</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">paymentErr</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+        <span class="n">st</span><span class="p">,</span> <span class="n">_</span> <span class="o">:=</span> <span class="n">status</span><span class="o">.</span><span class="n">FromError</span><span class="p">(</span><span class="n">paymentErr</span><span class="p">)</span>  
+        <span class="n">fieldErr</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="n">errdetails</span><span class="o">.</span><span class="n">BadRequest_FieldViolation</span><span class="p">{</span>
+            <span class="n">Field</span><span class="o">:</span>       <span class="s">"payment"</span><span class="p">,</span>
+            <span class="n">Description</span><span class="o">:</span> <span class="n">st</span><span class="o">.</span><span class="n">Message</span><span class="p">(),</span>
+        <span class="p">}</span>  
+        
+        <span class="c">// BadRequestエラーの設定</span>
+        <span class="n">badReq</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="n">errdetails</span><span class="o">.</span><span class="n">BadRequest</span><span class="p">{}</span>  
+        <span class="n">badReq</span><span class="o">.</span><span class="n">FieldViolations</span> <span class="o">=</span> <span class="nb">append</span><span class="p">(</span><span class="n">badReq</span><span class="o">.</span><span class="n">FieldViolations</span><span class="p">,</span> <span class="n">fieldErr</span><span class="p">)</span>  
+
+        <span class="c">// 注文失敗のステータスを作成</span>
+        <span class="n">orderStatus</span> <span class="o">:=</span> <span class="n">status</span><span class="o">.</span><span class="n">New</span><span class="p">(</span><span class="n">codes</span><span class="o">.</span><span class="n">InvalidArgument</span><span class="p">,</span> <span class="s">"order creation failed"</span><span class="p">)</span>  
+        <span class="n">statusWithDetails</span><span class="p">,</span> <span class="n">_</span> <span class="o">:=</span> <span class="n">orderStatus</span><span class="o">.</span><span class="n">WithDetails</span><span class="p">(</span><span class="n">badReq</span><span class="p">)</span>  
+
+        <span class="k">return</span> <span class="n">domain</span><span class="o">.</span><span class="n">Order</span><span class="p">{},</span> <span class="n">statusWithDetails</span><span class="o">.</span><span class="n">Err</span><span class="p">()</span>
+    <span class="p">}</span>
+
+    <span class="c">// 注文成功</span>
+    <span class="k">return</span> <span class="n">order</span><span class="p">,</span> <span class="no">nil</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>上のように書くと、他のサービスのエラーを使用できる</li>
+  <li>また、エラーコードだけでなく、エラーフィールドも追加している</li>
+</ul>
+
+<h5 id="534-クライアント側でのエラー処理">5.3.4 クライアント側でのエラー処理</h5>
+
+<ul>
+  <li>マイクロサービスはエラーの集約も重要
+    <ul>
+      <li>複数のダウンストリームサーバがあることが多いから</li>
+    </ul>
+  </li>
+  <li>以下のようにして、複数のエラーを扱う
+    <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="n">paymentErr</span> <span class="o">:=</span> <span class="n">a</span><span class="o">.</span><span class="n">payment</span><span class="o">.</span><span class="n">Charge</span><span class="p">(</span><span class="o">&amp;</span><span class="n">order</span><span class="p">)</span>
+ <span class="k">if</span> <span class="n">paymentErr</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+  <span class="n">st</span> <span class="o">:=</span> <span class="n">status</span><span class="o">.</span><span class="n">Convert</span><span class="p">(</span><span class="n">paymentErr</span><span class="p">)</span> 
+  <span class="k">var</span> <span class="n">allErrors</span> <span class="p">[]</span><span class="kt">string</span> 
+      <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">detail</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">st</span><span class="o">.</span><span class="n">Details</span><span class="p">(</span>
+          <span class="k">switch</span> <span class="n">t</span> <span class="o">:=</span> <span class="n">detail</span><span class="o">.</span><span class="p">(</span><span class="k">type</span><span class="p">)</span> <span class="p">{</span>
+          <span class="k">case</span> <span class="o">*</span><span class="n">errdetails</span><span class="o">.</span><span class="n">BadRequest</span><span class="o">:</span> 
+              <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">violation</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">t</span><span class="o">.</span><span class="n">GetFieldViolations</span><span class="p">()</span> <span class="p">{</span>
+                  <span class="n">allErrors</span> <span class="o">=</span> <span class="nb">append</span><span class="p">(</span><span class="n">allErrors</span><span class="p">,</span> <span class="n">violation</span><span class="o">.</span><span class="n">Description</span><span class="p">)</span>
+               <span class="p">}</span>
+          <span class="p">}</span>
+          <span class="o">...</span>
+ <span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h5 id="535-支払いサービスの実行">5.3.5 支払いサービスの実行</h5>
+
+<h3 id="6-回復力のあるコミュニケーション">6 回復力のあるコミュニケーション</h3>
+
+<!--
+#### 6.1 回復力パターン
+
+##### 6.1.1 タイムアウトパターン
+
+##### 6.1.2 再試行パターン
+
+##### 6.1.3 サーキットブレーカーパターン
+
+#### 6.2 エラー処理
+
+##### 6.2.1 gRPC エラーモデル
+
+##### 6.2.2 gRPCエラー応答
+
+#### 6.3 gRPC通信のセキュリティ保護
+
+##### 6.3.1 TLSハンドシェイク
+
+##### 6.3.2 証明書の生成
+
+##### 6.3.3 gRPC TLS 認証情報
+
+#### まとめ
+-->
+
+<h3 id="7-マイクロサービスのテスト">7 マイクロサービスのテスト</h3>
+
+<!--
+#### 7.1 テストピラミッド
+
+#### 7.2 ユニットテストによるテスト
+
+##### 7.2.1 テスト対象システム
+
+##### 7.2.2 テストワークフロー
+
+##### 7.2.3 モックの操作
+
+##### 7.2.4 モックの実装
+
+##### 7.2.5 自動モック生成
+
+#### 7.3 統合テスト
+
+##### 7.3.1 テストスイートの準備
+
+##### 7.3.2 テストコンテナの操作
+
+#### 7.4 エンドツーエンドテスト
+
+##### 7.4.1 仕様
+
+##### 7.4.2 Docker Composeサービス定義の理解
+
+##### 7.4.3 エンドツーエンドのテストフォルダ構造
+
+##### 7.4.4 データベース層
+
+##### 7.4.5 支払いサービス層
+
+##### 7.4.6 注文サービス層
+
+##### 7.4.7 スタックに対するテストの実行
+
+#### 7.5 テスト範囲
+
+##### 7.5.1 カバレッジ情報
+
+##### 7.5.2 CIパイプラインでのテスト
+
+#### まとめ
+-->
+
+<h3 id="8-展開">8 展開</h3>
+
+<!--
+#### 8.1 ドッカー
+
+##### 8.1.1 イメージの構築
+
+#### 8.2 Kubernetes
+
+##### 8.2.1 Kubernetesアーキテクチャ
+
+##### 8.2.2 Kubernetesリソース
+
+##### 8.2.3 マイクロサービス展開のイーグルビュー
+
+##### 8.2.4 ポッド
+
+##### 8.2.5 デプロイメント
+
+##### 8.2.6 サービス
+
+##### 8.2.7 NGINX Ingressコントローラ
+
+#### 8.3 証明書管理
+
+##### 8.3.1 インストール
+
+##### 8.3.2 クラスタ発行者
+
+##### 8.3.3 Ingressでの証明書の使用
+
+##### 8.3.4 クライアント側の証明書
+
+#### 8.4 展開戦略
+
+##### 8.4.1 ローリングアップデート
+
+##### 8.4.2 ブルーグリーンデプロイメント
+
+##### 8.4.3 カナリアデプロイメント
+
+##### 8.4.4 展開に関する最終的な考察
+
+#### まとめ
+-->
+
+<h2 id="パート-3-grpc-とマイクロサービスアーキテクチャ">パート 3. gRPC とマイクロサービスアーキテクチャ</h2>
+
+<h3 id="9-可観測性">9 可観測性</h3>
+
+<!--
+#### 9.1 可観測性
+
+##### 9.1.1 トレース
+
+##### 9.1.2 メトリクス
+
+##### 9.1.3 ログ
+
+#### 9.2 オープンテレメトリー
+
+##### 9.2.1 計器の位置
+
+##### 9.2.2 計装
+
+##### 9.2.3 メトリックバックエンド
+
+##### 9.2.4 サービスパフォーマンス監視
+
+#### 9.3 Kubernetesにおける可観測性
+
+##### 9.3.1 イェーガー オールインワン
+
+##### 9.3.2 OpenTelemetryコレクター
+
+##### 9.3.3 プロメテウス
+
+##### 9.3.4 Jaegerのインストール
+
+##### 9.3.5 注文サービス用の OpenTelemetry インターセプター
+
+##### 9.3.6 注文サービスの指標を理解する
+
+##### 9.3.7 アプリケーションログ
+
+##### 9.3.8 ログ収集
+
+##### 9.3.9 ロギングバックエンドとしてのElasticsearch
+
+##### 9.3.10 ログダッシュボードとしての Kibana
+
+#### まとめ
+-->
+</div>
+
+      <footer>
+        <p>
+          Tags: 
+          <a href="/md/tag/書籍">書籍</a> 
+        </p>
+      </footer>
+    </article>
+
+  </main>
+
+  <!-- サイドバー部分 -->
+  <aside id="sidebar">
+    <h2><a href="/md/about/">About</a></h2>
+
+    <!--
+    <h2><a href="/md/categories/">Categories</a></h2>
+    <ul>
+      
+        <li><a href="/md/category/blog"">blog</a></li>
+      
+    </ul>
+    -->
+    
+    <h2><a href="/md/tags/">Tags</a></h2>
+    <ul>
+      
+        <li><a href="/md/tag/fastapi">FastAPI</a></li>
+      
+        <li><a href="/md/tag/nodejs">Nodejs</a></li>
+      
+        <li><a href="/md/tag/ツール">ツール</a></li>
+      
+        <li><a href="/md/tag/mysql">MySQL</a></li>
+      
+        <li><a href="/md/tag/react">React</a></li>
+      
+        <li><a href="/md/tag/開発">開発</a></li>
+      
+        <li><a href="/md/tag/elasticsearch">elasticsearch</a></li>
+      
+        <li><a href="/md/tag/firebase">firebase</a></li>
+      
+        <li><a href="/md/tag/sqlite">sqlite</a></li>
+      
+        <li><a href="/md/tag/k8s">k8s</a></li>
+      
+        <li><a href="/md/tag/書籍">書籍</a></li>
+      
+        <li><a href="/md/tag/aws">AWS</a></li>
+      
+        <li><a href="/md/tag/cdk">CDK</a></li>
+      
+    </ul>
+    <h2><a href="/md/archives/">Archives</a></h2>
+    <ul>
+      
+      
+        <li><a href="/md/2025/05/">2025-05</a></li>
+      
+        <li><a href="/md/2025/03/">2025-03</a></li>
+      
+        <li><a href="/md/2025/02/">2025-02</a></li>
+      
+    </ul>
+  </aside>
+</div>
+
+<footer>
+  <p>&copy; 2025 ツールの忘備録</p>
+</footer>
+
+</body>
+</html>

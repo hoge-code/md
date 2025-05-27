@@ -1,0 +1,1215 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/md/assets/css/default.css">
+  <link rel="stylesheet" href="/md/assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <title>ツールの忘備録</title>
+</head>
+<body>
+
+<header>
+  <h1><a href="/md/">ツールの忘備録</a></h1></h1>
+</header>
+
+<div id="content">
+  <!-- メインコンテンツ部分 -->
+  <main>
+        <article>
+      <header>
+        <h1>「AWS上のシステム設計」を読む</h1>
+        <p class="meta">
+          May 22, 2025 
+          <!--
+          in
+          <a href="/category/blog"
+            >blog</a
+          >
+        -->
+        </p>
+      </header>
+
+      <div class="content"><p>オライリーの<code class="language-plaintext highlighter-rouge">AWS上のシステム設計</code>という書籍を読んだので、気になったことを中心に簡単な感想や要約を書きます。(網羅性はありません)</p>
+
+<p>この本は大きく３部に分かれていて、第一部ではクラウドでのシステム設計について、第二部ではAWSサービスについて、そして第三部ではケーススタディについて書かれています。</p>
+
+<p>第一部と第二部は基本的な内容が多いので読んでいて少し退屈に感じましたが、第三部は非常に参考になり、興味深かったです。この章では、サンプルプロジェクトをもとに、NFR(非機能要件)で具体的な数値(RFPなど)を計算し、それを満たすAWSサービスを比較しています。</p>
+
+<p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#第一部システム設計について" id="markdown-toc-第一部システム設計について">第一部　システム設計について</a></li>
+  <li><a href="#第二部aws上のサービス" id="markdown-toc-第二部aws上のサービス">第二部　AWS上のサービス</a></li>
+  <li><a href="#第三部システム設計の使用例" id="markdown-toc-第三部システム設計の使用例">第三部　システム設計の使用例</a>    <ul>
+      <li><a href="#14-url短縮サービス" id="markdown-toc-14-url短縮サービス">14. URL短縮サービス</a></li>
+      <li><a href="#15-ウェブクローラーと検索エンジン" id="markdown-toc-15-ウェブクローラーと検索エンジン">15. ウェブ・クローラーと検索エンジン</a></li>
+      <li><a href="#16-ソーシャルネットワークとニュースフィードシステム" id="markdown-toc-16-ソーシャルネットワークとニュースフィードシステム">16. ソーシャルネットワークとニュースフィードシステム</a></li>
+      <li><a href="#17-オンラインゲームのリーダーボード" id="markdown-toc-17-オンラインゲームのリーダーボード">17. オンラインゲームのリーダーボード</a></li>
+      <li><a href="#18-ホテル予約システム" id="markdown-toc-18-ホテル予約システム">18. ホテル予約システム</a></li>
+      <li><a href="#19-チャットアプリケーション" id="markdown-toc-19-チャットアプリケーション">19. チャットアプリケーション</a></li>
+      <li><a href="#20-ストリーミングサービスのビデオ処理パイプライン" id="markdown-toc-20-ストリーミングサービスのビデオ処理パイプライン">20. ストリーミングサービスのビデオ処理パイプライン</a></li>
+      <li><a href="#21-オンライン株式取引プラットフォーム" id="markdown-toc-21-オンライン株式取引プラットフォーム">21. オンライン株式取引プラットフォーム</a></li>
+    </ul>
+  </li>
+</ul>
+
+<hr />
+
+<p><strong>サイト</strong></p>
+
+<ul>
+  <li><a href="https://www.oreilly.com/library/view/aws/9798341634060/">オライリー</a></li>
+</ul>
+
+<hr />
+
+<h2 id="第一部システム設計について">第一部　システム設計について</h2>
+<!--
+### 4. キャッシュポリシーと戦略
+
+### 5. LBのアプローチとテクニック
+-->
+
+<h2 id="第二部aws上のサービス">第二部　AWS上のサービス</h2>
+<!--
+### 12. メッセージング、モニタリングなど
+-->
+
+<h2 id="第三部システム設計の使用例">第三部　システム設計の使用例</h2>
+
+<h3 id="14-url短縮サービス">14. URL短縮サービス</h3>
+
+<ul>
+  <li>この章ではURL短縮サービスを作成
+    <ul>
+      <li>長いURLに対応する短いURLを作成するサービスのこと</li>
+      <li>例えば、LinkeredInは投稿のURLを自動的に短縮する
+        <ul>
+          <li>読みやすさのため</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="システム要件">システム要件</h4>
+
+<p><strong>考えるべきこと</strong></p>
+<ul>
+  <li>このシステムが解決するユースケース</li>
+  <li>ユーザー数</li>
+  <li>既存のシステムが既に存在するか
+    <ul>
+      <li>もし存在すれば、独自システム構築に意味はない</li>
+    </ul>
+  </li>
+  <li>システムの遅延が重要か</li>
+</ul>
+
+<h5 id="機能要件と非機能要件">機能要件と非機能要件</h5>
+
+<ul>
+  <li>長いURLにリダイレクトさせる必要</li>
+  <li>URLに有効期限を設定する必要</li>
+</ul>
+
+<h5 id="システム規模">システム規模</h5>
+
+<p><strong>考えるべき指標</strong></p>
+<ul>
+  <li>RPS(req per sec), QPS(query per sec)</li>
+  <li>長いURLにリダイレクトするユーザー数
+    <ul>
+      <li>平均負荷とピーク時の負荷</li>
+    </ul>
+  </li>
+  <li>必要なストレージ容量</li>
+</ul>
+
+<p><strong>今回の仮定</strong></p>
+<ul>
+  <li>長いURLから短いURLを生成:1,000 RPS</li>
+  <li>短縮 URL から長い URL へのリダイレクト: 20,000 RPS</li>
+  <li>システム内でのURL永続化の平均期間:1年</li>
+</ul>
+
+<p><strong>スケールで考えるべきこと</strong></p>
+<ul>
+  <li>Auroraなどを使う場合の予想されるコスト</li>
+  <li>最初からパーティション分割は必要か</li>
+  <li>EC2インスタンスの種類や数</li>
+  <li>Lambdaのメモリ要件</li>
+  <li>システム負荷テスト</li>
+</ul>
+
+<h5 id="収納スペース">収納スペース</h5>
+
+<ul>
+  <li>1年間の生成されるURLの求め方
+    <ul>
+      <li>(1,000リクエスト/秒)× 60(1分あたり)×60(1時間あたり)×24(1日あたり)×365(年間)~315億3000万</li>
+    </ul>
+  </li>
+  <li>URLの理想的な長さ
+    <ul>
+      <li>安全のために15文字などでは長くなるので意味がない</li>
+      <li>60文字を使う場合、60^7=3.5兆でよい</li>
+    </ul>
+  </li>
+  <li>必要なDB容量の求め方
+    <ul>
+      <li>短縮URL=7バイト</li>
+      <li>長いURL=100バイト程度</li>
+      <li>メタデータは1KBなどと大きい</li>
+    </ul>
+  </li>
+  <li>一個のURLにつき1KBと考える</li>
+  <li>1年間の合計ストレージ数
+    <ul>
+      <li>315 億 3,000 万× 1 KB = 29.37 TB</li>
+    </ul>
+  </li>
+</ul>
+
+<p>DBの容量計算について今まで考えたことがありませんでしたが参考になりました。大雑把ではありますが、RPSやデータごとのバイト数を考えれば、一年間のデータ容量が計算できると分かりました。</p>
+
+<h4 id="デザインから始める">デザインから始める</h4>
+
+<h5 id="url短縮アルゴリズム">URL短縮アルゴリズム</h5>
+
+<h5 id="システムapi">システムAPI</h5>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>POST /v1/createShortUrl
+{
+     longUrl,
+     customUrl,
+     expiry,
+     userMetadata
+}
+</code></pre></div></div>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">expiry</code>などはクライアント側でも指定できるほうが柔軟性が高い</li>
+  <li><code class="language-plaintext highlighter-rouge">Metadata</code>はIP、地理情報、ブラウザなど
+    <ul>
+      <li>分析に役立つ</li>
+    </ul>
+  </li>
+</ul>
+
+<p>このようにオプションをクライアントで柔軟に指定できるようにする手法は「APIデザインパターン」という書籍でも紹介されていました。</p>
+
+<p>メタデータに関しては、ヘッダーから取得するか、DBではなくログに保存するかなども考える必要がありそうです。</p>
+
+<h5 id="システムに関する考察">システムに関する考察</h5>
+
+<h5 id="データベースの選択">データベースの選択</h5>
+
+<ul>
+  <li>RDBの場合は最初から論理パーティション戦略がお勧め</li>
+  <li>DynamoDBの特徴
+    <ul>
+      <li>TTL設定</li>
+      <li>読み取り、書き込みのスケールアップの心配なし</li>
+      <li>DynamoDBストリーム
+        <ul>
+          <li>これは分析にも役立つ</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>DynamoDBのほうがRDBよりすぐに利用できることが多い</li>
+</ul>
+
+<p>個人的にRDB→NoSQLへの移行が主流だと思っていたが、システムの成長につれてRDBへ移行することも多いと知りました。NoSQLは柔軟性だけでなく、すぐに使い始められるのも大きな利点だと思いました。</p>
+
+<p><strong>Dynamoのスケーリング</strong></p>
+<ul>
+  <li>オンデマンド容量モードから始めるのが分かりやすい
+    <ul>
+      <li>トラフィックパターンを把握</li>
+    </ul>
+  </li>
+  <li>把握出来たらプロビジョニングモードへ移行
+    <ul>
+      <li>RCU(read cap unit), WCU(write cap unit)を考える</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>DynamoDBの設計</strong></p>
+<ul>
+  <li>PK {userId}</li>
+  <li>ソートキー SU
+    <ul>
+      <li>定数文字列を定義し、ソートキーの定義をスキップできる</li>
+      <li>これは推奨される手法</li>
+    </ul>
+  </li>
+  <li>ユーザーが作成した全てのURLを取得
+    <ul>
+      <li>GSIが必要</li>
+      <li>PK {userId}</li>
+      <li>SK u#{timestamp}</li>
+    </ul>
+  </li>
+</ul>
+
+<p>DynamoDBは使いたいクエリが増えた場合、GSIやLSIをその都度作成する必要があるので複雑なデータの場合は面倒になりそうです。</p>
+
+<h5 id="カスタムドメインサポート">カスタム・ドメイン・サポート</h5>
+
+<h4 id="aws上でシステムを起動する">AWS上でシステムを起動する</h4>
+
+<h5 id="デイゼロアーキテクチャ">デイ・ゼロ・アーキテクチャ</h5>
+
+<p><strong>EC2</strong></p>
+<ul>
+  <li>最初から1000万人を考えるのは意味がない</li>
+  <li>最初はDBなども含めたEC2みたいな構成でも問題ない
+    <ul>
+      <li>けど流石にLB、MAZくらいは導入すべき</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>Lambda</strong></p>
+<ul>
+  <li>URL短縮Lambda, リダイレクト用Lambda</li>
+</ul>
+
+<p><strong>App Runner</strong></p>
+<ul>
+  <li>VPC内のすべてのリソースを起動</li>
+</ul>
+
+<p>EC2で<code class="language-plaintext highlighter-rouge">docker-compose</code>などを使い、ウェブサーバやDBサーバを同じマシンで動かすのは本番環境では非推奨だと思っていましたが、クラウド移植性はいいですし、初期段階なら悪くないように感じました。</p>
+
+<h5 id="数百万人そしてそれ以上へのスケーリング">数百万人、そしてそれ以上へのスケーリング</h5>
+
+<p><strong>オブザーバビリティを高める</strong></p>
+<ul>
+  <li>アラームの例</li>
+  <li>LONG_URL_REDIRECTION_ERRORS
+    <ul>
+      <li>エラーが 1 分あたり 10 を超えるエラーが 5 分間連続発生した場合</li>
+    </ul>
+  </li>
+  <li>SHORT_URL_CREATION_FAILURE
+    <ul>
+      <li>短縮 URL 作成 API が定義されたしきい値を超えて失敗した場合</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>ストレージレイヤー</strong></p>
+<ul>
+  <li>キャッシュの導入</li>
+  <li>Redisなどが有名だが、DynamoDBにもDAXがある</li>
+</ul>
+
+<p><strong>コンピューティングレイヤー</strong></p>
+<ul>
+  <li>ECS Fargate→ECS EC2など
+    <ul>
+      <li>より詳細にハードウェア設定を制御できる</li>
+      <li>長期的に使う場合は安いことがある</li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="デイエヌアーキテクチャー">デイ・エヌ・アーキテクチャー</h5>
+
+<ul>
+  <li>異なるAWSアカウントでホスト
+    <ul>
+      <li>データフローコストの増加や管理難</li>
+      <li>各アカウントの責任が簡単になる</li>
+    </ul>
+  </li>
+  <li>複数のVPCの利用
+    <ul>
+      <li>PrivateLinkはCIDR重複を考える必要がない</li>
+      <li>Transit Gatewayは双方向通信ができる</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="15-ウェブクローラーと検索エンジン">15. ウェブ・クローラーと検索エンジン</h3>
+<!--
+#### システム要件
+
+##### 機能要件と非機能要件
+
+##### システム規模
+
+#### デザインから始める
+
+##### ウェブ・クローラーを設計する
+
+##### 検索エンジンを設計する
+
+#### AWS上でシステムを起動する
+
+##### 0日目 アーキテクチャ
+
+##### 数百万人、そしてそれ以上へのスケーリング
+
+##### デイ・エヌ・アーキテクチャー
+-->
+
+<h3 id="16-ソーシャルネットワークとニュースフィードシステム">16. ソーシャルネットワークとニュースフィードシステム</h3>
+
+<ul>
+  <li>タイムラインのようなシステムを構築する</li>
+</ul>
+
+<h4 id="システム要件-1">システム要件</h4>
+
+<h5 id="機能要件と非機能要件-1">機能要件と非機能要件</h5>
+
+<ul>
+  <li>特定のハッシュタグ、場所の投稿を取得</li>
+  <li>フォローユーザーの動向</li>
+</ul>
+
+<h5 id="システム規模-1">システム規模</h5>
+
+<p><strong>書き込みトラフィック</strong></p>
+<ul>
+  <li>毎秒の新規投稿数 = 10,000</li>
+  <li>毎秒アップロードされる写真 = 800</li>
+  <li>毎秒アップロードされる動画数 = 200</li>
+  <li>ユーザーあたりの平均フォロワー数 = 1,000</li>
+  <li>ユーザーアカウントの最⼤フォロワー数 = 2億⼈</li>
+</ul>
+
+<p><strong>読み込みトラフィック</strong></p>
+<ul>
+  <li>プラットフォーム上の⽉間アクティブユーザー数 = 5億⼈</li>
+  <li>ユーザータイムラインの毎秒の取得 = 100,000</li>
+</ul>
+
+<p><strong>重要なこと</strong></p>
+<ul>
+  <li>書き込み、読み込みトラフィックを別々に考える</li>
+  <li>テキスト、画像、動画ごとに要件は異なる</li>
+  <li>平均と最大値を考える</li>
+</ul>
+
+<h4 id="デザインから始める-1">デザインから始める</h4>
+
+<ul>
+  <li>ユーザーが投稿を⾏った場合、その投稿はユーザーのすべてのフォロワーに送信する必要</li>
+</ul>
+
+<h5 id="新しい投稿を処理する">新しい投稿を処理する</h5>
+
+<ul>
+  <li>国によって事後検証が異なる
+    <ul>
+      <li>政治的発言を許可しないなど</li>
+    </ul>
+  </li>
+  <li>ユーザーゲートウェイサービスなどの構築
+    <ul>
+      <li>一般的な検証、リクエストブロックなどを一貫して行う</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>投稿後に、どうやってフォロワーのTLに反映するか?</strong></p>
+<ul>
+  <li>プッシュ型
+    <ul>
+      <li>フォロワーの取得→TLの作成→redisなどに保存</li>
+    </ul>
+  </li>
+  <li>プル型
+    <ul>
+      <li>リアルタイムに新しい投稿の取得</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>ユーザーペルソナを考える</strong></p>
+<ul>
+  <li>一般人(100人のフォロワー)
+    <ul>
+      <li>プッシュ型が有効</li>
+    </ul>
+  </li>
+  <li>有名人(1億人のフォロワー)
+    <ul>
+      <li>プッシュ型では無理</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>具体的方法</strong></p>
+<ul>
+  <li>投稿サービスはグラフDBからフォロワーIDを取得</li>
+  <li>redisにTLを構築
+    <ul>
+      <li>この際、アクティブユーザーのTLにのみ保存</li>
+      <li>最大で30ポストのみのTLを保存</li>
+    </ul>
+  </li>
+  <li>残りはDBから直接提供され、キャッシュで更新</li>
+  <li>key: userid, value: postid, postedby, posttype
+    <ul>
+      <li>本文すべてをキャッシュに含めないことに注意</li>
+      <li>本文、追加のメタデータは別のredisに保存される</li>
+    </ul>
+  </li>
+  <li>TLサービスはredisと、非アクティブユーザのDBを参照してマージ</li>
+  <li>CDC、オーケストレーションなどの利用
+<img src="/md/assets/images/image.png" alt="ポスト作成後のフロー" />
+<strong>重要なこと</strong></li>
+  <li>グラフDBでの関係性の管理</li>
+  <li>ユーザーペルソナを考え、処理を使い分ける</li>
+  <li>キャッシュ効率化手法
+    <ul>
+      <li>参照のみの保持や、低頻度アクセスデータは保存しない</li>
+    </ul>
+  </li>
+  <li>コマンド操作後のEDAでのオーケストレーション</li>
+</ul>
+
+<p><strong>ユーザー投稿サービスDB</strong></p>
+
+<ul>
+  <li>S3での重複コンテンツの処理
+    <ul>
+      <li>ハッシュを作成することで解決</li>
+      <li>同じメディアのアップロードを防ぐ</li>
+    </ul>
+  </li>
+  <li>CloudfrontとS3の統合</li>
+  <li>Snowflakeは大規模なUUID生成に適している</li>
+  <li>AWSではKeyspacesはCassandra互換</li>
+  <li>一個の投稿のサイズは0.5KB程度(400文字制限)</li>
+  <li>
+    <p>いいね、コメントなどに強い一貫性は不要</p>
+  </li>
+  <li>アプリ自体に古いデータを保存し、バックグラウンドで同期する手法もある</li>
+</ul>
+
+<p><strong>Redisのパフォーマンスを考える</strong></p>
+<ul>
+  <li>Redisクラスターモードという選択肢</li>
+  <li>例：平均1000人のフォロワー、RPS: 100投稿
+    <ul>
+      <li>redisへの呼び出しは1秒100,000回</li>
+    </ul>
+  </li>
+  <li>リクエストのバッチ処理が有効
+    <ul>
+      <li>redisの場合はパイプライン</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>キャッシュの無効化</strong></p>
+<ul>
+  <li>例：フォローを解除した場合、キャッシュからエントリを削除</li>
+  <li>グラフDBにも変更をストリームする機能がある
+    <ul>
+      <li>ユースケースごとに処理される</li>
+    </ul>
+  </li>
+</ul>
+
+<p>取り合えずキャッシュなどではダメで、扱い方を間違えた場合、redis自体がSPOFになりかねないと思いました。また、キャッシュ無効化はTTL設定だけでなく、忘れないようにする必要があります。</p>
+
+<h5 id="ユーザの接続を管理する">ユーザの接続を管理する</h5>
+
+<ul>
+  <li>グラフDBでは様々な関係性を指定できる
+    <ul>
+      <li>CONNECTED_TO, WORKS_AT, WORKED_AT, HAS_SKILL</li>
+    </ul>
+  </li>
+  <li>イベントも発行できる</li>
+</ul>
+
+<h5 id="検索サービス">検索サービス</h5>
+
+<ul>
+  <li>特定のキーワード、タグの投稿を取得
+    <ul>
+      <li>場所、時間、興味などで並び替える</li>
+    </ul>
+  </li>
+  <li>メディアコンテンツの検索
+    <ul>
+      <li>S3アップロード後に、MLでキーワードを生成する手法もある</li>
+    </ul>
+  </li>
+  <li>Search Service アグリゲーターではGraphQLフェデレーションを使える</li>
+  <li>下の画像のindexはElasticsearchのこと
+<img src="/md/assets/images/image-1.png" alt="検索サービス" /></li>
+</ul>
+
+<p><strong>重要なこと</strong></p>
+<ul>
+  <li>種類によって、Elasticsearchインデックスを使い分けている</li>
+  <li>Search serviceのコマンドとクエリサービスを分けている</li>
+</ul>
+
+<h4 id="aws上でシステムを起動する-1">AWS上でシステムを起動する</h4>
+
+<h5 id="0日目-アーキテクチャ">0日目 アーキテクチャ</h5>
+
+<ul>
+  <li>取り合えず全部lambdaみたいなアーキテクチャ</li>
+</ul>
+
+<h5 id="数百万人そしてそれ以上へのスケーリング-1">数百万人、そしてそれ以上へのスケーリング</h5>
+
+<ul>
+  <li>DynamoDBではスケーリングで課題
+    <ul>
+      <li>3000RCU, 1000WCUのハードリミット</li>
+    </ul>
+  </li>
+  <li>急な人気の上昇などの場合、DB負荷が大きくなる
+    <ul>
+      <li>メッセージング・キューを挟むのが効果的</li>
+      <li>User post service → Queue → DB</li>
+    </ul>
+  </li>
+  <li>複数のリクエストのバッチ書き込み
+    <ul>
+      <li>例：いいねを一個ずつ増やすのは効率が悪い</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>システム移行</strong></p>
+<ul>
+  <li>A/Bテスト</li>
+  <li>1%, 10%…と徐々にトラフィックを分割</li>
+  <li>100%ロールアウト後、古いシステムをいつオフにするか決める</li>
+  <li>DB移行を伴わない場合は比較的簡単</li>
+</ul>
+
+<p><strong>DB移行</strong></p>
+<ul>
+  <li>変換レイヤーを使ったオフラインバッチ</li>
+  <li>移行期間中は二重書き込みの必要</li>
+  <li>読み取り戦略も二重
+    <ul>
+      <li>比較のための検証レイヤーを作成する必要</li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="デイエヌアーキテクチャー-1">デイ・エヌ・アーキテクチャー</h5>
+
+<p><img src="/md/assets/images/image-2.png" alt="最終構造" /></p>
+
+<h4 id="結論">結論</h4>
+
+<ul>
+  <li>システム境界の特定だけでなく、ユーザー行動の理解が重要</li>
+</ul>
+
+<h3 id="17-オンラインゲームのリーダーボード">17. オンラインゲームのリーダーボード</h3>
+
+<ul>
+  <li>ゲームのランキングシステムのようなものを構築</li>
+</ul>
+
+<h4 id="システム要件-2">システム要件</h4>
+
+<h5 id="機能要件と非機能要件-2">機能要件と非機能要件</h5>
+
+<p><strong>FR</strong></p>
+<ul>
+  <li>マイルストーンの達成などで即座に反映される</li>
+  <li>グローバル順位、フレンド内での順位、時間別(日、週、月)</li>
+  <li>通知システムとの統合</li>
+  <li>膨大な規模、リアルタイム性に対応したシステムは複雑</li>
+</ul>
+
+<p><strong>NFR</strong></p>
+<ul>
+  <li>書き込みは1秒未満</li>
+  <li>読み込みは100ミリ秒未満</li>
+  <li>オフピーク時、トーナメントなどのピーク時に柔軟に対応</li>
+</ul>
+
+<h5 id="システム規模-2">システム規模</h5>
+
+<ul>
+  <li>履歴をいつまで保持するか?
+    <ul>
+      <li>例：一年保持後、S3 Glacierなどへアーカイブ</li>
+      <li>データ圧縮の使用</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="デザインから始める-2">デザインから始める</h4>
+
+<h5 id="概念と原則">概念と原則</h5>
+
+<ul>
+  <li>redisソートなどの利用</li>
+  <li>地域、友人、時間など、様々なクエリパターンのサポート</li>
+</ul>
+
+<p><strong>遅延</strong></p>
+<ul>
+  <li>書き込みは500ミリ秒までが目安</li>
+  <li>ネットワーク遅延、DB書き込み、実装オーバーヘッドなどの可能性
+    <ul>
+      <li>書き込み最適化のために、非同期処理とバッチ書き込みの使用</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>最終的な⼀貫性</strong></p>
+<ul>
+  <li>わずかな遅延はこのシステムでは許容される</li>
+</ul>
+
+<p><strong>パーティション分割</strong></p>
+<ul>
+  <li>プレイヤーIDのハッシュ</li>
+  <li>地域別
+    <ul>
+      <li>レイテンシーの削減、法律準拠など</li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="大まかなシステム設計">大まかなシステム設計</h5>
+<p><img src="/md/assets/images/image-3.png" alt="リーダーボード構成" /></p>
+
+<h4 id="aws上でシステムを起動する-2">AWS上でシステムを起動する</h4>
+
+<h5 id="0日目-アーキテクチャ-1">0日目 アーキテクチャ</h5>
+
+<ul>
+  <li>上記のLambdaでの構成図
+<img src="/md/assets/images/image-4.png" alt="lambda" /></li>
+  <li>ランキングサービスでは、ランキング変更時にSNS経由で通知を送ることを考える</li>
+</ul>
+
+<h5 id="数百万人そしてそれ以上へのスケーリング-2">数百万人、そしてそれ以上へのスケーリング</h5>
+
+<p><strong>コンピューティング</strong></p>
+<ul>
+  <li>Lambdaはフルマネージドが故に、設定オプションは限られる
+    <ul>
+      <li>AWSに同時実行制限の引き上げをリクエストなど</li>
+    </ul>
+  </li>
+  <li>Lambda→AWS Fargate, ECS with EC2の利用
+    <ul>
+      <li>パフォーマンスと制御性の向上</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>ECSのメリット</strong></p>
+<ul>
+  <li>要件に基づいたCPUとメモリリソースの割り当て</li>
+  <li>DBへの永続的な接続→接続のオーバーヘッドの削減</li>
+  <li>ランタイム環境のカスタマイズ</li>
+  <li>自動スケーリングポリシーの設定
+    <ul>
+      <li>ECSタスク数の調整など</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Lambdaを使えば全てが解決されるわけではない理由が分かりました。</p>
+
+<p><strong>Redis</strong></p>
+<ul>
+  <li>クラスターモード
+    <ul>
+      <li>複数のノードに分散
+        <ul>
+          <li>多くのデータの格納、高スループット</li>
+          <li>自動フェイルオーバーでフォールトトレランスの向上</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>Global Datastore
+    <ul>
+      <li>キャッシュデータのリージョン間レプリケーション
+        <ul>
+          <li>DynamoDB Global Tableと同様</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>データ取得のスケーリング</strong></p>
+<ul>
+  <li>AppSyncなどマネージドGraphQLサービスの利用</li>
+</ul>
+
+<p><strong>TCO</strong></p>
+<ul>
+  <li>初期費、維持費、再設計費</li>
+</ul>
+
+<p><strong>初期費用</strong></p>
+<ul>
+  <li>AWS Pricing Calculator
+    <ul>
+      <li>サービスごとの費用を計算できる</li>
+      <li>DynamoDBの場合の例
+        <ul>
+          <li>750GB/月、読み取りTPS200, 書き込みTPS150</li>
+          <li>月額800ドルになる</li>
+        </ul>
+      </li>
+      <li>API Gatewayなども同様に計算</li>
+    </ul>
+  </li>
+</ul>
+
+<p>AWSのコストサービスはCost Explorerくらいしか知りませんでしたが、上記のサービスを使えば簡単に見積もりができると分かりました。</p>
+
+<h5 id="デイエヌアーキテクチャー-2">デイ・エヌ・アーキテクチャー</h5>
+
+<ul>
+  <li>Redisソートセットコマンドの使用例
+    <ul>
+      <li>ZREVRANGE . 0 99: 上位100名の取得</li>
+      <li>ZRANK . userId: 現在の位置を取得</li>
+      <li>特定のユーザーのランク近くを表示することも可能</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="18-ホテル予約システム">18. ホテル予約システム</h3>
+
+<ul>
+  <li>特定のエリアの施設の表示</li>
+  <li>二重支払いの処理法など順守すべきエッジケースが多い</li>
+</ul>
+
+<h4 id="システム要件-3">システム要件</h4>
+
+<ul>
+  <li>支払いの受け入れはこのシステムか不動産か?
+    <ul>
+      <li>不動産に支払ポリシーの決定を任せるほうが柔軟</li>
+    </ul>
+  </li>
+  <li>近くに観光スポットはあるか?
+    <ul>
+      <li>外部APIの利用</li>
+    </ul>
+  </li>
+  <li>ダイナミックプライシングの実装
+    <ul>
+      <li>MLなどの利用</li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="機能要件と非機能要件-3">機能要件と非機能要件</h5>
+
+<ul>
+  <li>不動産所有者、顧客の2種類のユーザー</li>
+  <li>現在、過去の予約、レビューなど</li>
+  <li>地理情報に基づいて宿泊施設を検索</li>
+  <li>予約のキャンセル
+    <ul>
+      <li>返金する場合はその方法も考える</li>
+    </ul>
+  </li>
+  <li>レビュー
+    <ul>
+      <li>滞在後にのみレビューできるようにする</li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="システム規模-3">システム規模</h5>
+
+<h4 id="デザインから始める-3">デザインから始める</h4>
+
+<ul>
+  <li>以下の2種類の大きなサービスが存在
+<img src="/md/assets/images/image-5.png" alt="予約システム" /></li>
+</ul>
+
+<h5 id="プロパティオンボーディングアーキテクチャ">プロパティ・オンボーディング・アーキテクチャ</h5>
+
+<h5 id="物件検索アーキテクチャ">物件検索アーキテクチャ</h5>
+
+<ul>
+  <li>主なパラメータはlocation</li>
+  <li>ペット可能か、朝食はあるかなど多くのフィルター</li>
+  <li>DynamoDBでは限界があるのでElasticsearchの導入
+    <ul>
+      <li>CDC → Queue → schema converter → elasticsearch</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>部屋の空席状況の確認</strong></p>
+<ul>
+  <li>結果整合性のDBから取得する方法もある
+    <ul>
+      <li>パフォーマンスの向上</li>
+    </ul>
+  </li>
+  <li>例：
+    <ul>
+      <li>部屋の空き状況が少ない場合のみ、強力な整合性DBの結果を待つ</li>
+      <li>それ以外は、結果整合性DBの結果のみ利用</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>Elasticsearchの設定とスケーリング</strong></p>
+<ul>
+  <li>シャードサイズの目安
+    <ul>
+      <li>検索: 10-30GB</li>
+      <li>ログ分析など: 30-50GB</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>検索のためのGraphQLフェデレーション</strong></p>
+<ul>
+  <li>多くのことを考える必要がある
+    <ul>
+      <li>例：宿泊施設の詳細、評価、選択した⽇付範囲の料⾦…
+<img src="/md/assets/images/image-6.png" alt="GraphQL" /></li>
+    </ul>
+  </li>
+  <li>Apolloの使用
+    <ul>
+      <li>デフォルトで10秒ごとにリゾルバからフェッチされる</li>
+    </ul>
+  </li>
+  <li>地理空間機能はredisにもある</li>
+</ul>
+
+<h5 id="物件予約アーキテクチャ">物件予約アーキテクチャ</h5>
+
+<ul>
+  <li>顧客は現在の予約にのみ関心があり、過去の予約はあまり参照しない
+    <ul>
+      <li>2つのデータストアに分ける
+        <ul>
+          <li>アーカイブはバッチ処理で行う</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>PostgreSQLの場合
+    <ul>
+      <li>削除してもソフトデリート</li>
+      <li>実際の削除は定期的なバキュームプロセスが必要
+        <ul>
+          <li>パフォーマンスが妨げられる</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>DynamoDBの場合
+    <ul>
+      <li>TTL機能の活用で自動削除</li>
+    </ul>
+  </li>
+</ul>
+
+<p>DBアーキテクチャをあまり理解していないので、MySQLやPostgreで物理的に削除されないことは知りませんでした。MySQLでは<code class="language-plaintext highlighter-rouge">OPTIMIZE TABLE</code>で断片化を防ぎます。</p>
+
+<p><strong>DynamoDBのクエリパターン</strong></p>
+<ul>
+  <li>強力な整合性は、PK, LSIに限定される</li>
+</ul>
+
+<p><strong>ロック</strong></p>
+<ul>
+  <li>ルームの予約は、空室状況の確認、ルームの予約の2ステップ</li>
+  <li>悲観ロック
+    <ul>
+      <li>読み取りステップでロック</li>
+      <li>リクエストが多いと、ボトルネックになる</li>
+    </ul>
+  </li>
+  <li>楽観ロック
+    <ul>
+      <li>更新ステップでロック</li>
+      <li>データのバージョン管理で実現</li>
+      <li>DynamoDBにも楽観ロックオプションが存在
+        <ul>
+          <li>DynamoDBVersionAttributeアノテーション</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p>GSIでは最終的整合性(最新のデータが反映されない可能性)らしいです。</p>
+
+<p>調べてみたら、DynamoDBVersionAttributeアノテーションはJava特有の概念で、他言語だと自分でテーブルにversion属性を追加する必要がありそうです。</p>
+
+<p><strong>チケット予約の例</strong></p>
+<ul>
+  <li>当面の間、座席を保持したい場合</li>
+  <li>Redisで実現</li>
+  <li>ユーザーIDに対し、DBエントリ(HOLD_FOR_ID)を保持
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">SETEX seat_{theatreId}_{showId}_{seatId} .</code></li>
+    </ul>
+  </li>
+  <li>HOLD_START_AT_TIMEで20分などを設定
+    <ul>
+      <li>それを超えると、保留はキャンセルされる</li>
+    </ul>
+  </li>
+  <li>支払い完了後、DELで削除</li>
+  <li>Redisクラスター(あるいは分散)だと追加、削除が難しくなる
+    <ul>
+      <li>Redlockアルゴリズム, Jedis, Lettuceライブラリの推奨</li>
+    </ul>
+  </li>
+</ul>
+
+<p>正直ロックは楽観ロックくらいしか実装方法を知りませんでしたが、Redisのロックについて学習する必要がありそうです。</p>
+
+<p>Redlockは各言語でライブラリが提供されています。初期化時に、複数のRedisノードのURLを指定します。</p>
+
+<p><strong>支払処理アーキテクチャ</strong>
+<img src="/md/assets/images/image-7.png" alt="予約アーキテクチャ" /></p>
+<ul>
+  <li>Walletサービス
+    <ul>
+      <li>特典、任意の方法で追加されたカスタム金額など</li>
+    </ul>
+  </li>
+  <li>PayInサービス
+    <ul>
+      <li>客→予約システム、予約システム→客(払い戻し)</li>
+    </ul>
+  </li>
+  <li>PayOutサービス
+    <ul>
+      <li>不動産所有者との支払い</li>
+      <li>手数料を差し引き、口座に送金</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>イベント名</strong></p>
+<ul>
+  <li>最終状態: SUCCESS、FAILURE、REFUND、CANCELED</li>
+  <li>中間: PAYMENT_CREATED、PROCESSING</li>
+</ul>
+
+<p><strong>冪等性</strong></p>
+<ul>
+  <li>全てのリクエストにはIDが含まれる
+    <ul>
+      <li>DynamoDBではclientToken機能がある</li>
+    </ul>
+  </li>
+</ul>
+
+<p>ClientTokenはトランザクションの再試行を防ぐ仕組みで、以下のように使うらしいです。</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">try</span><span class="p">:</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">dynamodb</span><span class="p">.</span><span class="nf">transact_write_items</span><span class="p">(</span>
+        <span class="n">TransactItems</span><span class="o">=</span><span class="n">transaction_items</span><span class="p">,</span>
+        <span class="n">ClientRequestToken</span><span class="o">=</span><span class="n">client_token</span>  
+    <span class="p">)</span>
+<span class="bp">...</span>
+</code></pre></div></div>
+<p>マイクロサービスで冪等性を満たす場合、<code class="language-plaintext highlighter-rouge">x-client-request-id</code>ヘッダーなどにUUIDを追加し、既にデータが存在すれば追加や更新処理を省略します。</p>
+
+<p><strong>ダイナミックプライシング</strong>
+<img src="/md/assets/images/image-8.png" alt="dynamic pricing" /></p>
+<ul>
+  <li>イベントの重複などは、キューか消費システムで実装すべき</li>
+  <li>Kafkaでは、パーティション(SQS group id)でexactly-once セマンティクス(EOS)とイベントの順序付けをサポート</li>
+</ul>
+
+<p>KafkaもSQS FIFOキューもあまり知らないが、Kafkaのトピック内のパーティション(=イベントリスト)内で順序保証されるらしいです。(パーティション間ではされない)</p>
+
+<p>FIFOキューでは、例えば注文IDをメッセージグループIDとして使うと、順序通りに送信されるらしいです。</p>
+
+<p>通常キューでは重複排除のために、<code class="language-plaintext highlighter-rouge">MessageDeduplicationId</code>を使います。</p>
+
+<h5 id="レビュー-アーキテクチャ">レビュー アーキテクチャ</h5>
+
+<ul>
+  <li>レビューにもテキスト検索が必要な場合</li>
+</ul>
+
+<h4 id="aws上でシステムを起動する-3">AWS上でシステムを起動する</h4>
+
+<h5 id="0日目-アーキテクチャ-2">0日目 アーキテクチャ</h5>
+
+<h5 id="数百万人そしてそれ以上へのスケーリング-3">数百万人、そしてそれ以上へのスケーリング</h5>
+
+<h5 id="デイエヌアーキテクチャー-3">デイ・エヌ・アーキテクチャー</h5>
+
+<h3 id="19-チャットアプリケーション">19. チャットアプリケーション</h3>
+<!--
+#### システム要件
+
+##### 機能要件と非機能要件
+
+##### システム規模
+
+#### デザインから始める
+
+##### メッセージング・アーキテクチャ
+
+##### Erlangを使ったWhatsAppアーキテクチャ
+
+#### AWS上でシステムを起動する
+
+##### 0日目 アーキテクチャ
+
+##### 数百万人、そしてそれ以上へのスケーリング
+
+##### デイ・エヌ・アーキテクチャー
+-->
+
+<h3 id="20-ストリーミングサービスのビデオ処理パイプライン">20. ストリーミングサービスのビデオ処理パイプライン</h3>
+<!--
+#### システム要件
+
+##### 機能要件と非機能要件
+
+##### システム規模
+
+#### デザインから始める
+
+##### ビデオエンコーディング
+
+##### ビデオ品質の検証
+
+##### コンテンツ・インデックス
+
+##### コンテンツ配信
+
+#### AWS上でシステムを起動する
+
+##### 0日目 アーキテクチャ
+
+##### 数百万人、そしてそれ以上へのスケーリング
+
+##### デイ・エヌ・アーキテクチャー
+-->
+
+<h3 id="21-オンライン株式取引プラットフォーム">21. オンライン株式取引プラットフォーム</h3>
+<!--
+#### システム要件
+
+##### 機能要件と非機能要件
+
+##### システム規模
+
+#### デザインから始める
+
+##### ストックティック・システムを設計する
+
+##### 受注管理システムの設計
+
+##### 超低遅延システムの設計
+
+##### 損益ダッシュボードを構築する
+
+#### AWS上でシステムを起動する
+
+##### 0日目 アーキテクチャ
+
+##### 数百万人、そしてそれ以上へのスケーリング
+
+##### デイ・エヌ・アーキテクチャー
+-->
+</div>
+
+      <footer>
+        <p>
+          Tags: 
+          <a href="/md/tag/書籍">書籍</a>,  
+          <a href="/md/tag/aws">AWS</a> 
+        </p>
+      </footer>
+    </article>
+
+  </main>
+
+  <!-- サイドバー部分 -->
+  <aside id="sidebar">
+    <h2><a href="/md/about/">About</a></h2>
+
+    <!--
+    <h2><a href="/md/categories/">Categories</a></h2>
+    <ul>
+      
+        <li><a href="/md/category/blog"">blog</a></li>
+      
+    </ul>
+    -->
+    
+    <h2><a href="/md/tags/">Tags</a></h2>
+    <ul>
+      
+        <li><a href="/md/tag/fastapi">FastAPI</a></li>
+      
+        <li><a href="/md/tag/nodejs">Nodejs</a></li>
+      
+        <li><a href="/md/tag/ツール">ツール</a></li>
+      
+        <li><a href="/md/tag/mysql">MySQL</a></li>
+      
+        <li><a href="/md/tag/react">React</a></li>
+      
+        <li><a href="/md/tag/開発">開発</a></li>
+      
+        <li><a href="/md/tag/elasticsearch">elasticsearch</a></li>
+      
+        <li><a href="/md/tag/firebase">firebase</a></li>
+      
+        <li><a href="/md/tag/sqlite">sqlite</a></li>
+      
+        <li><a href="/md/tag/k8s">k8s</a></li>
+      
+        <li><a href="/md/tag/書籍">書籍</a></li>
+      
+        <li><a href="/md/tag/aws">AWS</a></li>
+      
+        <li><a href="/md/tag/cdk">CDK</a></li>
+      
+    </ul>
+    <h2><a href="/md/archives/">Archives</a></h2>
+    <ul>
+      
+      
+        <li><a href="/md/2025/05/">2025-05</a></li>
+      
+        <li><a href="/md/2025/03/">2025-03</a></li>
+      
+        <li><a href="/md/2025/02/">2025-02</a></li>
+      
+    </ul>
+  </aside>
+</div>
+
+<footer>
+  <p>&copy; 2025 ツールの忘備録</p>
+</footer>
+
+</body>
+</html>

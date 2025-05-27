@@ -1,0 +1,991 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/md/assets/css/default.css">
+  <link rel="stylesheet" href="/md/assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <title>ツールの忘備録</title>
+</head>
+<body>
+
+<header>
+  <h1><a href="/md/">ツールの忘備録</a></h1></h1>
+</header>
+
+<div id="content">
+  <!-- メインコンテンツ部分 -->
+  <main>
+        <article>
+      <header>
+        <h1>「Domain-Driven Design with Golang」を読む</h1>
+        <p class="meta">
+          May 22, 2025 
+          <!--
+          in
+          <a href="/category/blog"
+            >blog</a
+          >
+        -->
+        </p>
+      </header>
+
+      <div class="content"><p>オライリーの<code class="language-plaintext highlighter-rouge">Domain-Driven Design with Golang</code>という書籍を読んだので、気になったことを中心に簡単な感想や要約を書きます。(網羅性はありません)</p>
+
+<p>Goの書籍の場合、マイクロサービスやデブオペが中心となることが多いですが、この本はDDDやクリーンアーキテクチャなど、設計が中心になっています。</p>
+
+<p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#パート1-ドメイン駆動設計入門" id="markdown-toc-パート1-ドメイン駆動設計入門">パート1: ドメイン駆動設計入門</a>    <ul>
+      <li><a href="#第1章-ドメイン駆動設計の簡単な歴史" id="markdown-toc-第1章-ドメイン駆動設計の簡単な歴史">第1章 ドメイン駆動設計の簡単な歴史</a></li>
+      <li><a href="#第2章-ドメインユビキタス言語境界付きコンテキストの理解" id="markdown-toc-第2章-ドメインユビキタス言語境界付きコンテキストの理解">第2章 ドメイン、ユビキタス言語、境界付きコンテキストの理解</a></li>
+      <li><a href="#第3章-エンティティ値オブジェクト集計" id="markdown-toc-第3章-エンティティ値オブジェクト集計">第3章: エンティティ、値オブジェクト、集計</a></li>
+      <li><a href="#第4章-ファクトリーリポジトリサービスの探索" id="markdown-toc-第4章-ファクトリーリポジトリサービスの探索">第4章: ファクトリー、リポジトリ、サービスの探索</a></li>
+    </ul>
+  </li>
+  <li><a href="#パート2-golangを使った実践的なドメイン駆動設計" id="markdown-toc-パート2-golangを使った実践的なドメイン駆動設計">パート2: Golangを使った実践的なドメイン駆動設計</a>    <ul>
+      <li><a href="#第5章-モノリシックアプリケーションへのドメイン駆動設計の適用" id="markdown-toc-第5章-モノリシックアプリケーションへのドメイン駆動設計の適用">第5章: モノリシックアプリケーションへのドメイン駆動設計の適用</a></li>
+      <li><a href="#第6章-dddを使用したマイクロサービスの構築" id="markdown-toc-第6章-dddを使用したマイクロサービスの構築">第6章: DDDを使用したマイクロサービスの構築</a></li>
+      <li><a href="#第7章-分散システムのためのddd" id="markdown-toc-第7章-分散システムのためのddd">第7章 分散システムのためのDDD</a></li>
+      <li><a href="#第8章-tddbddddd" id="markdown-toc-第8章-tddbddddd">第8章: TDD、BDD、DDD</a></li>
+    </ul>
+  </li>
+</ul>
+
+<hr />
+
+<p><strong>サイト</strong></p>
+
+<ul>
+  <li><a href="https://www.oreilly.com/library/view/domain-driven-design-with/9781804613450/">オライリー</a></li>
+</ul>
+
+<hr />
+
+<h2 id="パート1-ドメイン駆動設計入門">パート1: ドメイン駆動設計入門</h2>
+
+<h3 id="第1章-ドメイン駆動設計の簡単な歴史">第1章 ドメイン駆動設計の簡単な歴史</h3>
+<!--
+#### DDD以前の世界
+
+##### では、OOD パターンとは何でしょうか?
+
+#### エリック・エヴァンスとDDD
+
+#### DDDの3つの柱
+
+#### DDDの採用
+
+#### DDD はいつ使用すればよいですか?
+
+#### まとめ
+
+#### さらに読む
+-->
+
+<h3 id="第2章-ドメインユビキタス言語境界付きコンテキストの理解">第2章 ドメイン、ユビキタス言語、境界付きコンテキストの理解</h3>
+
+<h4 id="技術要件">技術要件</h4>
+
+<h4 id="舞台設定">舞台設定</h4>
+
+<ul>
+  <li>この章では、コーヒー店のネット通販を想定
+    <ul>
+      <li>3つのサブスクプラン</li>
+      <li>登録したユーザーをリードユーザーという</li>
+      <li>サブスクに登録すると、カスタマーという</li>
+    </ul>
+  </li>
+  <li>取り合えずインターフェースを作成してみる
+```go
+// ユーザータイプ
+type UserType int</li>
+</ul>
+
+<p>// サブスクリプションタイプ
+type SubscriptionType int</p>
+
+<p>const (
+	// ユーザータイプの定義
+	unknownUserType UserType = iota
+	lead
+	customer
+	churned
+	lostLead
+)</p>
+
+<p>const (
+	// サブスクリプションタイプの定義
+	unknownSubscriptionType SubscriptionType = iota
+	basic
+	premium
+	exclusive
+)</p>
+
+<p>// ユーザー追加リクエスト
+type UserAddRequest struct {
+	UserType       UserType
+	Email          string
+	SubType        SubscriptionType
+	PaymentDetails PaymentDetails
+}</p>
+
+<p>// ユーザー修正リクエスト
+type UserModifyRequest struct {
+	ID             string
+	UserType       UserType
+	Email          string
+	SubType        SubscriptionType
+	PaymentDetails PaymentDetails
+}</p>
+
+<p>// ユーザー
+type User struct {
+	ID             string
+	PaymentDetails PaymentDetails
+}</p>
+
+<p>// ユーザーマネージャーインターフェース
+type UserManager interface {
+	AddUser(ctx context.Context, request UserAddRequest) (User, error)
+	ModifyUser(ctx context.Context, request UserModifyRequest) (User, error)
+}</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+#### ドメインとサブドメイン
+
+- この例では、`payments`と`subscriptions`
+    - チームはドメインで分割されることが多い
+    - 更にドメインができると、チームが分割される
+
+#### ユビキタス言語
+
+- customerはチームによって違う意味を持つ場合がある
+- 用語集をドキュメントに管理し、定期的にレビューすることが重要
+- 開発者は定義が正しいか、エッジケースを考える必要
+
+##### ユビキタス言語の利点
+
+- ITプロジェクトが失敗するよくある理由
+    - `got lost in translation`
+- 具体例：顧客ごとに複数のアカウントをサポートしたい
+    - しかし、顧客エンティティが存在しない
+    - アカウントごとに一人のユーザーという仮定
+    - `customer`ではなく`user`が使われていた
+        - ユビキタス言語を使用していれば避けられたかもしれない
+
+- 登録→lead user→サブスク→customerというサンプルコード
+```go
+// リード作成リクエスト
+type LeadRequest struct {
+	email string
+}
+
+// リード
+type Lead struct {
+	id string
+}
+
+// リード作成インターフェース
+type LeadCreator interface {
+	CreateLead(ctx context.Context, request LeadRequest) (Lead, error)
+}
+
+// 顧客
+type Customer struct {
+	leadID string
+	userID string
+}
+
+// リード変換インターフェース
+type LeadConvertor interface {
+	Convert(ctx context.Context, subSelection SubscriptionType) (Customer, error)
+}
+
+// リードを顧客に変換
+func (l Lead) Convert(ctx context.Context, subSelection SubscriptionType) (Customer, error) {
+	// TODO 実装する
+}
+</code></pre></div></div>
+
+<ul>
+  <li>このようにユビキタス言語をコードに反映する
+    <ul>
+      <li>こうすることで、ドメインの用語で会話できるようになる</li>
+    </ul>
+  </li>
+  <li>議事録をとることなどがユビキタス言語習得に役立つ</li>
+  <li>その後、用語集に追加</li>
+  <li>用語集は境界づけられたコンテキストでのみ有効
+    <ul>
+      <li>その用語をプロジェクト全体に適用しようとすると厳格さを失う</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="境界付けられたコンテキスト">境界付けられたコンテキスト</h4>
+
+<ul>
+  <li>サブスク、マーケティングにおいて、顧客のモデルが異なる
+    <ul>
+      <li>マッピングを行うことが必要</li>
+      <li>そのために、以下の3つの方法</li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="オープンホストサービス">オープンホストサービス</h5>
+
+<ul>
+  <li>HTTPエンドポイントを公開</li>
+</ul>
+
+<h5 id="公開された言語">公開された言語</h5>
+
+<ul>
+  <li>OpenAPIなどの手法
+    <ul>
+      <li>これは<code class="language-plaintext highlighter-rouge">gorilla</code>などもサポート</li>
+    </ul>
+  </li>
+  <li>open-apiジェネレータの利用
+    <ul>
+      <li>以下は設定ファイルの例</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>package: oapi
+output: ./openapi.gen.go
+generate:
+      models: true
+      client: true
+</code></pre></div></div>
+<ul>
+  <li>クライアントも追加できる</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>go <span class="nb">install </span>github.com/deepmap/oapi-codegen/cmd/oapi-codegen@latest
+oapi-codegen <span class="nt">--config</span><span class="o">=</span>config.yml  ./oapi.yaml
+</code></pre></div></div>
+
+<p>OpenAPIで設定ファイルを作成したり、CIで利用する手法は知りませんでした。</p>
+
+<p>生成するコードが雑なことが多いので、個人的にOASのコード生成はあまり好きではありませんが、上手く活用すれば、クライアントだけでなく、サーバ生成も効率化できるかもしれません。</p>
+
+<ul>
+  <li>GRPCの手法
+    <ul>
+      <li>ここでは<code class="language-plaintext highlighter-rouge">buf</code>が紹介されている</li>
+    </ul>
+  </li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">buf</code>は知りませんでしたが、コード品質のチェック、依存関係の管理、CICDとの統合など、<code class="language-plaintext highlighter-rouge">protoc</code>より優れている点が多いらしいです。</p>
+
+<h5 id="腐敗防止層">腐敗防止層</h5>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// キャンペーン構造体</span>
+<span class="k">type</span> <span class="n">Campaign</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">ID</span>      <span class="kt">string</span>   
+    <span class="n">Title</span>   <span class="kt">string</span>    
+    <span class="n">Goal</span>    <span class="kt">string</span>    
+    <span class="n">EndDate</span> <span class="n">time</span><span class="o">.</span><span class="n">Time</span> 
+<span class="p">}</span>
+
+<span class="c">// マーケティングキャンペーンモデル</span>
+<span class="k">type</span> <span class="n">MarketingCampaignModel</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">Id</span>       <span class="kt">string</span> <span class="s">`json:"id"`</span> 
+    <span class="n">Metadata</span> <span class="k">struct</span> <span class="p">{</span>
+        <span class="n">Name</span>     <span class="kt">string</span> <span class="s">`json:"name"`</span>     
+        <span class="n">Category</span> <span class="kt">string</span> <span class="s">`json:"category"`</span> 
+        <span class="n">EndDate</span>  <span class="kt">string</span> <span class="s">`json:"endDate"`</span>  
+    <span class="p">}</span> <span class="s">`json:"metadata"`</span>
+<span class="p">}</span>
+
+<span class="c">// MarketingCampaignModelをCampaignに変換するメソッド</span>
+<span class="k">func</span> <span class="p">(</span><span class="n">m</span> <span class="o">*</span><span class="n">MarketingCampaignModel</span><span class="p">)</span> <span class="n">ToCampaign</span><span class="p">()</span> <span class="p">(</span><span class="o">*</span><span class="n">Campaign</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="o">...</span>
+    <span class="k">return</span> <span class="o">&amp;</span><span class="n">Campaign</span><span class="p">{</span>
+        <span class="o">...</span>
+    <span class="p">},</span> <span class="no">nil</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>より複雑なシステムでは、腐敗防止サービスを作成する場合もある
+    <ul>
+      <li>microserviceA→腐敗防止サービス→microserviceBなど</li>
+      <li>古いサービスが新しいサービスに移行する場合などに有効</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="第3章-エンティティ値オブジェクト集計">第3章: エンティティ、値オブジェクト、集計</h3>
+
+<h4 id="技術要件-1">技術要件</h4>
+
+<h4 id="エンティティの操作">エンティティの操作</h4>
+
+<ul>
+  <li>IDが必要</li>
+</ul>
+
+<h5 id="適切な識別子を生成する">適切な識別子を生成する</h5>
+
+<ul>
+  <li>UUIDは128ビット
+```go
+import “github.com/google/uuid”</li>
+</ul>
+
+<p>// SomeEntity構造体
+type SomeEntity struct {
+    id uuid.UUID
+}</p>
+
+<p>// 新しいSomeEntityを作成する関数
+func NewSomeEntity() *SomeEntity {
+    id := uuid.New()
+    return &amp;SomeEntity{id: id}
+}</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+- PostgreSQLなどはUUIDを生成できる
+
+個人的にRDBの`AUTO INCREMENT`を使う場合が多いが、DDDではエンティティでPKを生成し、保存するほうがいい気がします。
+
+##### エンティティを定義する際の警告
+
+- DB設計に任せると、貧血ドメインモデルになる
+- 以下はゲッター、セッターだからのエンティティのリファクタリング後
+```go
+type AuctionRefactored struct {
+	id            int
+	startingPrice money.Money
+	sellerID      int
+	createdAt     time.Time
+	auctionStart  time.Time
+	auctionEnd    time.Time
+}
+
+// オークションの経過時間を取得するメソッド
+func (a *AuctionRefactored) GetAuctionElapsedDuration() time.Duration {
+	return a.auctionEnd.Sub(a.auctionStart) // auctionEnd - auctionStart
+}
+
+// UTCでのオークション終了時間を取得するメソッド
+func (a *AuctionRefactored) GetAuctionEndTimeInUTC() time.Time {
+	return a.auctionEnd
+}
+
+// オークション終了時間を設定するメソッド
+func (a *AuctionRefactored) SetAuctionEnd(auctionEnd time.Time) error {
+	if err := a.validateTimeZone(auctionEnd); err != nil {
+		return err
+	}
+	a.auctionEnd = auctionEnd
+	return nil
+}
+
+// タイムゾーンがUTCかどうかを検証するヘルパーメソッド
+func (a *AuctionRefactored) validateTimeZone(t time.Time) error {
+	tz, _ := t.Zone()
+	if tz != time.UTC.String() {
+		return errors.New("time zone must be UTC")
+	}
+	return nil
+}
+</code></pre></div></div>
+<ul>
+  <li>エンティティがビジネスロジックを持つことが分かりやすい</li>
+  <li>UTCのみを扱うことを示し、エラーで強制</li>
+</ul>
+
+<p><strong>なぜDBと同じモデルを使用するのはよくないのか?</strong></p>
+<ul>
+  <li>初期段階ではあまり問題がない</li>
+  <li>オークションに関するメタデータはドメインモデルに属さないから
+    <ul>
+      <li>閲覧したユーザー、広告の効果、ユーザーの移動を追跡するトレースID</li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="オブジェクトリレーショナルマッピングに関する注意">オブジェクトリレーショナルマッピングに関する注意</h5>
+
+<h4 id="値オブジェクトの操作">値オブジェクトの操作</h4>
+
+<ul>
+  <li>良くない例
+```go
+// Point構造体
+type Point struct {
+  x int
+  y int
+}</li>
+</ul>
+
+<p>// NewPointは新しいPointインスタンスを作成する関数
+func NewPoint(x, y int) *Point {
+    return &amp;Point{
+        x: x,
+        y: y,
+    }
+}</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+- `&amp;`を使用すると、メモリへの参照となるので、同じ値でも等しくなくなる
+
+- 良い例
+```go
+// Point構造体
+type Point struct {
+    x int
+    y int
+}
+
+// NewPointは新しいPointインスタンスを作成する関数（値渡し）
+func NewPoint(x, y int) Point {
+    return Point{
+        x: x,
+        y: y,
+    }
+}
+</code></pre></div></div>
+
+<ul>
+  <li>ポインタを返していない</li>
+  <li>値オブジェクトではプロパティは小文字にする
+    <ul>
+      <li>置き換える場合は、他のOOP言語みたいに新しいインスタンスを返却</li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="エンティティと値オブジェクトのどちらを使用するかをどのように決定すればよいですか">エンティティと値オブジェクトのどちらを使用するかをどのように決定すればよいですか?</h5>
+
+<ul>
+  <li>可能な限り値オブジェクトを利用
+    <ul>
+      <li>最も安全であるから</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="集約パターン">集約パターン</h4>
+
+<ul>
+  <li>DDDで最も難しく、間違って実装されることが多い
+    <ul>
+      <li>最悪の場合、不整合が発生</li>
+      <li>Order, team, walletなど</li>
+    </ul>
+  </li>
+  <li>トランザクション境界として機能
+    <ul>
+      <li>注文がキャンセルされると、全ての商品を在庫に戻す</li>
+      <li>新しいカードを追加すると、残高が合計残高に反映されるなど</li>
+    </ul>
+  </li>
+  <li>Wallet Aggregateのサンプル
+```go
+package main</li>
+</ul>
+
+<p>import (
+	…
+)</p>
+
+<p>type WalletItem interface {
+	GetBalance() (money.Money, error)
+}</p>
+
+<p>type Wallet struct {
+	id         uuid.UUID
+	ownerID    uuid.UUID
+	walletItems []WalletItem
+}</p>
+
+<p>// GetWalletBalanceはウォレットの合計残高を取得するメソッド
+func (w Wallet) GetWalletBalance() (money.Money, error) {
+	var bal money.Money</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// 各ウォレットアイテムから残高を取得して合計を算出
+for _, v := range w.walletItems {
+	itemBal, err := v.GetBalance()
+	if err != nil {
+		return bal, errors.New("failed to get balance")
+	}
+
+	// 残高を加算
+	bal, err = bal.Add(itemBal)
+	if err != nil {
+		return bal, errors.New("failed to increment balance")
+	}
+}
+
+return bal, nil } ```
+</code></pre></div></div>
+
+<h5 id="集約の発見">集約の発見</h5>
+
+<h5 id="集約の設計">集約の設計</h5>
+
+<ul>
+  <li>可能な限り小さく保つべき
+    <ul>
+      <li>スケーラビリティの向上</li>
+      <li>トランザクションが成功する可能性の向上</li>
+    </ul>
+  </li>
+  <li>例えば、以下は不適切
+    <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">Order</span> <span class="k">struct</span> <span class="p">{</span>
+  <span class="n">items</span>          <span class="p">[]</span><span class="n">item</span>       
+  <span class="n">taxAmount</span>      <span class="n">money</span><span class="o">.</span><span class="n">Money</span>
+  <span class="n">discount</span>       <span class="n">money</span><span class="o">.</span><span class="n">Money</span> 
+  <span class="n">paymentCardID</span>  <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span>   
+  <span class="n">customerID</span>     <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span>    
+  <span class="n">marketingOptIn</span> <span class="kt">bool</span>          
+<span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+  <li>オプトイン、オプトアウトは注文と関係ないから</li>
+</ul>
+
+<h5 id="単一の境界付きコンテキストを超えた集約">単一の境界付きコンテキストを超えた集約</h5>
+
+<ul>
+  <li>境界づけられたコンテキストが変更される場合</li>
+  <li>atomic性と最終的な一貫性のトレードオフを考える</li>
+</ul>
+
+<h3 id="第4章-ファクトリーリポジトリサービスの探索">第4章: ファクトリー、リポジトリ、サービスの探索</h3>
+
+<ul>
+  <li>サービス
+    <ul>
+      <li>ドメイン、アプリ、インフラサービスがある</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="技術要件-2">技術要件</h4>
+
+<h4 id="ファクトリーパターンの紹介">ファクトリーパターンの紹介</h4>
+
+<ul>
+  <li>ファクトリはカプセル化も提供</li>
+  <li>誰かが営業時間外に予約を作成しようとした場合のサンプル
+```go
+// Booking構造体は、予約情報を保持
+type Booking struct {
+  id            uuid.UUID
+  from          time.Time
+  to            time.Time
+  hairDresserID uuid.UUID
+}</li>
+</ul>
+
+<p>// CreateBookingは新しい予約を作成する関数
+func CreateBooking(from, to time.Time, hairDresserID uuid.UUID) (*Booking, error) {
+	// 営業終了時刻（例: 17:00pm）を設定
+	closingTime, _ := time.Parse(time.Kitchen, “5:00PM”)</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// 予約時間が営業時間外か確認
+if from.After(closingTime) {
+	return nil, errors.New("no appointments after closing time")
+}
+
+// 予約を作成して返す
+return &amp;Booking{
+	id:            uuid.New(),           // 新しい予約IDを生成
+	from:          from,                 // 予約開始時刻
+	to:            to,                   // 予約終了時刻
+	hairDresserID: hairDresserID,       // 美容師IDは引数から取得
+}, nil } ```
+</code></pre></div></div>
+
+<ul>
+  <li>上記では、UUID生成と検証をファクトリ内で記述</li>
+</ul>
+
+<h5 id="エンティティファクトリー">エンティティファクトリー</h5>
+
+<ul>
+  <li>ファクトリ関数がIDを生成するか、パラメータとして渡すか
+    <ul>
+      <li>ファクトリが生成するのが一般的</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="golangでリポジトリパターンを実装する">Golangでリポジトリパターンを実装する</h4>
+
+<h4 id="サービスを理解する">サービスを理解する</h4>
+
+<ul>
+  <li>3種類のサービスがある</li>
+</ul>
+
+<h5 id="ドメインサービス">ドメインサービス</h5>
+
+<ul>
+  <li>値オブジェクト、エンティティに書きづらい処理
+    <ul>
+      <li>一つのドメインオブジェクトを別のに変換</li>
+      <li>2つのドメインオブジェクトを利用して計算</li>
+    </ul>
+  </li>
+  <li>良くない例
+```go
+type ShoppingCart struct {
+  ID          int
+  Products    []Product <br />
+  IsFull      bool
+  MaxCartSize int
+ }</li>
+</ul>
+
+<p>func (s *ShoppingCart) AddToCart(p Product) bool {
+    if s.IsFull{
+        …
+    }
+    if p.CanBeBought() {
+        …
+    }
+    …
+}</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+- 上記の実装中に別のエンティティを参照し、関係ないロジックを追加している
+- リファクタリング後
+```go
+// CheckoutServiceは、カート内の商品に関連する処理を行うサービス
+type CheckoutService struct {
+	shoppingCart *ShoppingCart
+}
+
+// NewCheckoutServiceは、新しいCheckoutServiceを作成するコンストラクタ
+func NewCheckoutService(shoppingCart *ShoppingCart) *CheckoutService {
+	return &amp;CheckoutService{shoppingCart: shoppingCart}
+}
+
+// AddProductToBasketは、ショッピングカートに商品を追加するメソッド
+func (c *CheckoutService) AddProductToBasket(p *Product) error {
+	// カートが満杯の場合は追加できない
+	if c.shoppingCart.IsFull {
+		return errors.New("cannot add to cart, it's full")
+	}
+
+	// 商品が購入可能であればカートに追加
+	if p.CanBeBought() {
+		c.shoppingCart.Products = append(c.shoppingCart.Products, *p)
+	}
+
+	// カートが満杯かどうかチェックし、満杯の場合はIsFullをtrueに設定
+	if len(c.shoppingCart.Products) &gt;= c.shoppingCart.MaxCartSize {
+		c.shoppingCart.IsFull = true
+	}
+
+	return nil
+}
+</code></pre></div></div>
+<ul>
+  <li>複数のエンティティにまたがるロジックを書く
+    <ul>
+      <li>より多くのエンティティを書く可能性
+        <ul>
+          <li>例：割引、配送エンティティ</li>
+        </ul>
+      </li>
+      <li>拡張性が上がる</li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="アプリケーションサービス">アプリケーションサービス</h5>
+
+<ul>
+  <li>この層では書きすぎてはいけない
+    <ul>
+      <li>調整のみで、殆どのロジックは下の層に書くべき</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// BookingDomainServiceは、予約の作成を担当するインターフェース</span>
+<span class="k">type</span> <span class="n">BookingDomainService</span> <span class="k">interface</span> <span class="p">{</span>
+	<span class="n">CreateBooking</span><span class="p">(</span><span class="n">ctx</span> <span class="n">context</span><span class="o">.</span><span class="n">Context</span><span class="p">,</span> <span class="n">booking</span> <span class="n">Booking</span><span class="p">)</span> <span class="kt">error</span>
+<span class="p">}</span>
+
+<span class="c">// BookingAppServiceは、予約に関するアプリケーション層のサービス</span>
+<span class="k">type</span> <span class="n">BookingAppService</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">bookingRepo</span>          <span class="n">BookingRepository</span>
+	<span class="n">bookingDomainService</span> <span class="n">BookingDomainService</span>
+<span class="p">}</span>
+
+<span class="o">...</span>
+
+<span class="c">// CreateBookingは、新しい予約を作成するためのメソッド</span>
+<span class="k">func</span> <span class="p">(</span><span class="n">b</span> <span class="o">*</span><span class="n">BookingAppService</span><span class="p">)</span> <span class="n">CreateBooking</span><span class="p">(</span><span class="n">ctx</span> <span class="n">context</span><span class="o">.</span><span class="n">Context</span><span class="p">,</span> <span class="n">booking</span> <span class="n">Booking</span><span class="p">)</span> <span class="kt">error</span> <span class="p">{</span>
+    <span class="n">u</span><span class="p">,</span> <span class="n">ok</span> <span class="o">:=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">Value</span><span class="p">(</span><span class="n">accountCtxKey</span><span class="p">)</span><span class="o">.</span><span class="p">(</span><span class="o">*</span><span class="n">chapter2</span><span class="o">.</span><span class="n">Customer</span><span class="p">)</span>
+    <span class="o">...</span>
+	<span class="c">// 予約をドメインサービスを使って作成</span>
+	<span class="n">err</span> <span class="o">:=</span> <span class="n">b</span><span class="o">.</span><span class="n">bookingDomainService</span><span class="o">.</span><span class="n">CreateBooking</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">booking</span><span class="p">)</span>
+    <span class="o">...</span>
+	<span class="n">b</span><span class="o">.</span><span class="n">bookingRepo</span><span class="o">.</span><span class="n">Save</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">booking</span><span class="p">)</span>
+    <span class="o">...</span>
+	<span class="k">return</span> <span class="no">nil</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>ここでは、インフラサービスも簡単に追加でき、下の例では注文後のメール送信も簡単に追加できる。</p>
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">BookingAppService</span> <span class="k">struct</span> <span class="p">{</span>
+   <span class="n">bookingRepo</span>          <span class="n">BookingRepository</span>
+   <span class="n">bookingDomainService</span> <span class="n">BookingDomainService</span>
+   <span class="n">emailService</span>         <span class="n">EmailSender</span>
+ <span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="パート2-golangを使った実践的なドメイン駆動設計">パート2: Golangを使った実践的なドメイン駆動設計</h2>
+
+<h3 id="第5章-モノリシックアプリケーションへのドメイン駆動設計の適用">第5章: モノリシックアプリケーションへのドメイン駆動設計の適用</h3>
+
+<h4 id="技術要件-3">技術要件</h4>
+
+<h4 id="モノリシック-アプリケーションとはどういう意味でしょうか">モノリシック アプリケーションとはどういう意味でしょうか?</h4>
+
+<h4 id="舞台設定-1">舞台設定</h4>
+
+<ul>
+  <li>10杯コーヒーを買えば1杯ただで飲める</li>
+  <li>毎月無制限のコーヒーを飲めるサブスク</li>
+  <li>
+    <p>割引</p>
+  </li>
+  <li>以下のユビキタス言語を特定
+    <ul>
+      <li>Coffee lovers: 顧客</li>
+      <li>CoffeeBux: ロイヤルティプログラム</li>
+      <li>Tinu, medium massive: サイズ</li>
+    </ul>
+  </li>
+  <li>次のドメインを特定
+    <ul>
+      <li>店、商品、忠義、予約</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="coffeecoシステムを使い始める">CoffeeCoシステムを使い始める</h4>
+
+<ul>
+  <li>product.goは値オブジェクトか？
+    <ul>
+      <li>不変か？値だけで他のオブジェクトと比較できるか？</li>
+      <li>とりあえず値オブジェクトが無難</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">Product</span> <span class="k">struct</span> <span class="p">{</span>
+   <span class="n">ItemName</span>  <span class="kt">string</span>
+   <span class="n">BasePrice</span> <span class="n">money</span><span class="o">.</span><span class="n">Money</span>
+ <span class="p">}</span>
+
+<span class="k">type</span> <span class="n">Store</span> <span class="k">struct</span> <span class="p">{</span>
+   <span class="n">ID</span>              <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span>
+   <span class="n">Location</span>        <span class="kt">string</span>
+   <span class="n">ProductsForSale</span> <span class="p">[]</span><span class="n">coffeeco</span><span class="o">.</span><span class="n">Product</span>
+ <span class="p">}</span>
+
+<span class="k">type</span> <span class="n">Purchase</span> <span class="k">struct</span> <span class="p">{</span>
+   <span class="n">id</span>                 <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span>
+   <span class="n">Store</span>              <span class="n">store</span><span class="o">.</span><span class="n">Store</span>
+   <span class="n">ProductsToPurchase</span> <span class="p">[]</span><span class="n">coffeeco</span><span class="o">.</span><span class="n">Product</span>
+   <span class="n">total</span>              <span class="n">money</span><span class="o">.</span><span class="n">Money</span>
+   <span class="n">PaymentMeans</span>       <span class="n">payment</span><span class="o">.</span><span class="n">Means</span>
+   <span class="n">timeOfPurchase</span>     <span class="n">time</span><span class="o">.</span><span class="n">Time</span>
+   <span class="n">CardToken</span>          <span class="o">*</span><span class="kt">string</span>
+ <span class="p">}</span>
+</code></pre></div></div>
+<ul>
+  <li>上記の<code class="language-plaintext highlighter-rouge">Purchase</code>はエンティティ</li>
+  <li>また、<code class="language-plaintext highlighter-rouge">CardToken</code>は任意なのでアドレスにしている</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">CoffeeBux</span> <span class="k">struct</span> <span class="p">{</span>
+   <span class="n">ID</span>                                    <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span>
+   <span class="n">store</span>                                 <span class="n">store</span><span class="o">.</span><span class="n">Store</span>
+   <span class="n">coffeeLover</span>                           <span class="n">coffeeco</span><span class="o">.</span><span class="n">CoffeeLover</span>
+   <span class="n">FreeDrinksAvailable</span>                   <span class="kt">int</span>
+   <span class="n">RemainingDrinkPurchasesUntilFreeDrink</span> <span class="kt">int</span>
+ <span class="p">}</span>
+</code></pre></div></div>
+
+<p>個人的に値オブジェクトかどうか考える際に、不変かどうかは分かりづらいので、値を比較できるどうかで考えると分かりやすく感じました。</p>
+
+<h5 id="製品リポジトリの実装">製品リポジトリの実装</h5>
+
+<h5 id="支払い処理のためのインフラストラクチャサービスの追加">支払い処理のためのインフラストラクチャサービスの追加</h5>
+
+<h5 id="coffeebuxでお支払い">CoffeeBuxでお支払い</h5>
+
+<p>p18</p>
+
+<h5 id="店舗固有の割引を追加する">店舗固有の割引を追加する</h5>
+
+<h5 id="サービスの拡張">サービスの拡張</h5>
+
+<h4 id="まとめ">まとめ</h4>
+
+<h4 id="さらに読む">さらに読む</h4>
+
+<h3 id="第6章-dddを使用したマイクロサービスの構築">第6章: DDDを使用したマイクロサービスの構築</h3>
+<!--
+#### 技術要件
+
+#### マイクロサービスとはどういう意味でしょうか?
+
+##### マイクロサービスの利点は何ですか?
+
+##### マイクロサービスの欠点は何ですか?
+
+#### 私の会社はマイクロサービスを導入すべきでしょうか?
+
+#### 舞台設定（再び）
+
+#### 推奨システムの構築
+
+#### 腐敗防止層の再検討
+
+#### オープンホストサービス経由でサービスを公開する
+
+#### まとめ
+-->
+
+<h3 id="第7章-分散システムのためのddd">第7章 分散システムのためのDDD</h3>
+<!--
+#### 技術要件
+
+#### 分散システムとは何ですか?
+
+##### CAP定理とデータベース
+
+#### 分散システムパターン
+
+##### CQRS
+
+##### EDA
+
+#### 失敗への対処
+
+##### 2相コミット（2PC）
+
+##### サガパターン
+
+#### メッセージ バスとは何ですか?
+
+##### カフカ
+
+##### ラビットMQ
+
+##### NATS
+
+#### まとめ
+
+#### さらに読む
+-->
+
+<h3 id="第8章-tddbddddd">第8章: TDD、BDD、DDD</h3>
+<!--
+#### 技術要件
+
+#### TDD
+
+##### テストを追加する
+
+##### 今書いたテストを実行すると失敗するはずです（そして、それは予想通りです）。
+
+##### テストに合格するためにできるだけ少ないコードを記述する
+
+##### リファクタリング
+
+#### 二分脊椎
+
+#### まとめ
+-->
+</div>
+
+      <footer>
+        <p>
+          Tags: 
+          <a href="/md/tag/書籍">書籍</a> 
+        </p>
+      </footer>
+    </article>
+
+  </main>
+
+  <!-- サイドバー部分 -->
+  <aside id="sidebar">
+    <h2><a href="/md/about/">About</a></h2>
+
+    <!--
+    <h2><a href="/md/categories/">Categories</a></h2>
+    <ul>
+      
+        <li><a href="/md/category/blog"">blog</a></li>
+      
+    </ul>
+    -->
+    
+    <h2><a href="/md/tags/">Tags</a></h2>
+    <ul>
+      
+        <li><a href="/md/tag/fastapi">FastAPI</a></li>
+      
+        <li><a href="/md/tag/nodejs">Nodejs</a></li>
+      
+        <li><a href="/md/tag/ツール">ツール</a></li>
+      
+        <li><a href="/md/tag/mysql">MySQL</a></li>
+      
+        <li><a href="/md/tag/react">React</a></li>
+      
+        <li><a href="/md/tag/開発">開発</a></li>
+      
+        <li><a href="/md/tag/elasticsearch">elasticsearch</a></li>
+      
+        <li><a href="/md/tag/firebase">firebase</a></li>
+      
+        <li><a href="/md/tag/sqlite">sqlite</a></li>
+      
+        <li><a href="/md/tag/k8s">k8s</a></li>
+      
+        <li><a href="/md/tag/書籍">書籍</a></li>
+      
+        <li><a href="/md/tag/aws">AWS</a></li>
+      
+        <li><a href="/md/tag/cdk">CDK</a></li>
+      
+    </ul>
+    <h2><a href="/md/archives/">Archives</a></h2>
+    <ul>
+      
+      
+        <li><a href="/md/2025/05/">2025-05</a></li>
+      
+        <li><a href="/md/2025/03/">2025-03</a></li>
+      
+        <li><a href="/md/2025/02/">2025-02</a></li>
+      
+    </ul>
+  </aside>
+</div>
+
+<footer>
+  <p>&copy; 2025 ツールの忘備録</p>
+</footer>
+
+</body>
+</html>

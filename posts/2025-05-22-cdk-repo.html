@@ -1,0 +1,458 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/md/assets/css/default.css">
+  <link rel="stylesheet" href="/md/assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <title>ツールの忘備録</title>
+</head>
+<body>
+
+<header>
+  <h1><a href="/md/">ツールの忘備録</a></h1></h1>
+</header>
+
+<div id="content">
+  <!-- メインコンテンツ部分 -->
+  <main>
+        <article>
+      <header>
+        <h1>Hands-On AWS CDKのリポジトリを読む</h1>
+        <p class="meta">
+          May 22, 2025 
+          <!--
+          in
+          <a href="/category/blog"
+            >blog</a
+          >
+        -->
+        </p>
+      </header>
+
+      <div class="content"><p>オライリーの<code class="language-plaintext highlighter-rouge">Hands-On AWS CDK</code>という書籍のGitHubリポジトリのコードを読んだので、気になったことを中心に簡単な感想や要約を書きます。(網羅性はありません)</p>
+
+<p>自分の知る範囲では日本語のCDKの書籍は存在せず、個人的にAWSドキュメントは情報量が多すぎて全て目を通すのは難しく感じるので、この書籍(とリポジトリ)はCDKの基礎を学ぶ上で非常に有効でした。</p>
+
+<p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#githubフォルダ" id="markdown-toc-githubフォルダ">.githubフォルダ</a></li>
+  <li><a href="#infrastructurebin" id="markdown-toc-infrastructurebin"><code class="language-plaintext highlighter-rouge">infrastructure/bin/</code></a></li>
+  <li><a href="#infrastructurelibconstructs" id="markdown-toc-infrastructurelibconstructs">infrastructure/lib/constructs</a></li>
+  <li><a href="#infrastructurelibstacks" id="markdown-toc-infrastructurelibstacks">infrastructure/lib/stacks</a></li>
+</ul>
+
+<hr />
+
+<p><strong>サイト</strong></p>
+
+<ul>
+  <li><a href="https://github.com/hands-on-aws-cdk-book/hands-on-aws-cdk-book-projects/tree/main">GitHub</a></li>
+  <li><a href="https://www.oreilly.com/library/view/aws-cdk/9798341640801/">オライリー</a></li>
+</ul>
+
+<p>treeコマンドで出力してみると以下のような構造になっています。</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>├───.github
+│   └───workflows
+├───infrastructure
+│   ├───bin
+│   ├───lib
+│   │   ├───constructs
+│   │   │   ├───chatbot
+│   │   │   ├───custom-lambda
+│   │   │   ├───custom-s3-bucket
+│   │   │   └───rest-api
+│   │   └───stacks
+│   │       ├───api
+│   │       │   └───lambda
+│   │       ├───auth
+│   │       ├───chatbot
+│   │       ├───data-pipeline
+│   │       ├───hello-cdk
+│   │       │   └───lambda
+│   │       ├───shared-resources
+│   │       └───web
+│   └───test
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="githubフォルダ">.githubフォルダ</h3>
+
+<h4 id="cdk-orchestratoryaml"><code class="language-plaintext highlighter-rouge">cdk-orchestrator.yaml</code></h4>
+
+<p>ルートyamlで他のyamlを呼び出すような構造になっています。</p>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">jobs</span><span class="pi">:</span>
+  <span class="na">project-tools-update</span><span class="pi">:</span>
+    <span class="na">uses</span><span class="pi">:</span> <span class="s">./.github/workflows/reusable-project-tools-update.yaml</span>
+    <span class="na">with</span><span class="pi">:</span>
+      <span class="na">environment</span><span class="pi">:</span> <span class="s2">"</span><span class="s">dev"</span>
+      <span class="s">...</span>
+    <span class="na">secrets</span><span class="pi">:</span>
+      <span class="s">...</span>
+
+  <span class="na">cdk-pre-deploy</span><span class="pi">:</span>
+    <span class="na">uses</span><span class="pi">:</span> <span class="s">./.github/workflows/reusable-cdk-pre-deploy.yaml</span>
+    <span class="s">...</span>
+</code></pre></div></div>
+<p>この際、変数だけでなく、Githubに保存した環境変数も渡しています。</p>
+
+<h4 id="reusable-cdk-deployyaml"><code class="language-plaintext highlighter-rouge">reusable-cdk-deploy.yaml</code></h4>
+
+<p>先ほどのyamlから呼び出されるファイルです。</p>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">on</span><span class="pi">:</span>
+  <span class="na">workflow_call</span><span class="pi">:</span>
+    <span class="na">inputs</span><span class="pi">:</span>
+      <span class="na">environment</span><span class="pi">:</span>
+        <span class="na">required</span><span class="pi">:</span> <span class="kc">true</span>
+        <span class="na">type</span><span class="pi">:</span> <span class="s">string</span>
+        <span class="s">...</span>
+    <span class="na">secrets</span><span class="pi">:</span>
+      <span class="na">AWS_GH_ACTION_OIDC_ROLE</span><span class="pi">:</span>
+        <span class="na">required</span><span class="pi">:</span> <span class="kc">true</span>
+
+<span class="na">env</span><span class="pi">:</span>
+  <span class="na">environment</span><span class="pi">:</span> <span class="s">$</span>
+  <span class="na">directory</span><span class="pi">:</span> <span class="s">$</span>
+
+<span class="na">permissions</span><span class="pi">:</span>
+  <span class="na">id-token</span><span class="pi">:</span> <span class="s">write</span> 
+  <span class="na">contents</span><span class="pi">:</span> <span class="s">read</span>
+
+<span class="na">jobs</span><span class="pi">:</span>
+  <span class="na">cdk-deploy</span><span class="pi">:</span>
+    <span class="na">runs-on</span><span class="pi">:</span> <span class="s">ubuntu-latest</span>
+    <span class="na">env</span><span class="pi">:</span>
+      <span class="na">AWS_REGION</span><span class="pi">:</span> <span class="s">us-east-1</span>
+      <span class="na">environment</span><span class="pi">:</span> <span class="s">$</span>
+      <span class="na">directory</span><span class="pi">:</span> <span class="s">$</span>
+      <span class="s">...</span>
+</code></pre></div></div>
+<p>上記のファイルで注目すべき点は以下です。</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">terraform</code>などと同じように受け取る変数を制限すること</li>
+  <li>環境変数を2回定義して上書きしていること</li>
+  <li><code class="language-plaintext highlighter-rouge">JWTトークン</code>認証のために<code class="language-plaintext highlighter-rouge">permissions</code>で読み取り権限を要求していること</li>
+</ul>
+
+<p>また、上記では省略していますが、<code class="language-plaintext highlighter-rouge">cdk synth --context</code>や<code class="language-plaintext highlighter-rouge">cdk deploy --context</code>などのコマンドでCDKをデプロイしています。</p>
+
+<h3 id="infrastructurebin"><code class="language-plaintext highlighter-rouge">infrastructure/bin/</code></h3>
+
+<h4 id="maints">main.ts</h4>
+
+<p>エントリーポイントファイルです。このファイルでは、複数のスタックをインポートし、呼び出しています。</p>
+
+<p>ファイルの先頭ではシェルスクリプトのように使用言語を定義し、ソースマップを呼び出しています。</p>
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#!/usr/bin/env node
+</span><span class="k">import</span> <span class="dl">"</span><span class="s2">source-map-support/register</span><span class="dl">"</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>これは必須のコンテキストが設定されていない場合にエラーを出力する関数です。</p>
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nf">checkRequiredContext</span><span class="p">(</span><span class="nx">app</span><span class="p">:</span> <span class="nx">cdk</span><span class="p">.</span><span class="nx">App</span><span class="p">,</span> <span class="nx">key</span><span class="p">:</span> <span class="kr">string</span><span class="p">):</span> <span class="k">void</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">contextValue</span> <span class="o">=</span> <span class="nx">app</span><span class="p">.</span><span class="nx">node</span><span class="p">.</span><span class="nf">tryGetContext</span><span class="p">(</span><span class="nx">key</span><span class="p">);</span>
+  <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">contextValue</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="s2">`Error: Missing required context value for '</span><span class="p">${</span><span class="nx">key</span><span class="p">}</span><span class="s2">'.`</span><span class="p">);</span>
+    <span class="nx">process</span><span class="p">.</span><span class="nf">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>こちらでは、共通で使用する環境変数を定義しています。</p>
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">appEnv</span><span class="p">:</span> <span class="nx">cdk</span><span class="p">.</span><span class="nx">Environment</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">account</span><span class="p">:</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">CDK_DEFAULT_ACCOUNT</span><span class="p">,</span>
+  <span class="na">region</span><span class="p">:</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">CDK_DEFAULT_REGION</span><span class="p">,</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>上記で定義した<code class="language-plaintext highlighter-rouge">appEnv</code>は、スタックに渡すデフォルトのプロップス内に入れています。</p>
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/** Default props to be used by all stacks */</span>
+<span class="kd">const</span> <span class="nx">defaultStackProps</span><span class="p">:</span> <span class="nx">cdk</span><span class="p">.</span><span class="nx">StackProps</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">env</span><span class="p">:</span> <span class="nx">appEnv</span><span class="p">,</span>
+  <span class="na">description</span><span class="p">:</span><span class="dl">""</span><span class="p">,</span>
+  <span class="na">tags</span><span class="p">:</span> <span class="p">{</span>
+    <span class="na">Environment</span><span class="p">:</span> <span class="nx">deployment</span><span class="p">,</span>
+    <span class="na">Project</span><span class="p">:</span> <span class="dl">"</span><span class="s2">HomeEnergyCoach</span><span class="dl">"</span><span class="p">,</span>
+  <span class="p">},</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>上記のデフォルトスタックプロップスは、以下のように拡張して再利用できます。</p>
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">chatbotStack</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ChatbotStack</span><span class="p">(</span><span class="nx">app</span><span class="p">,</span> <span class="s2">`ChatbotStack`</span><span class="p">,</span> <span class="p">{</span>
+  <span class="p">...</span><span class="nx">defaultStackProps</span><span class="p">,</span>
+  <span class="na">calculatedEnergyTable</span><span class="p">:</span> <span class="nx">sharedResourcesStack</span><span class="p">.</span><span class="nx">calculatedEnergyTable</span><span class="p">,</span>
+  <span class="p">...</span>
+<span class="p">});</span>
+</code></pre></div></div>
+
+<p>ファイルの最後では、依存性を追加し、デプロイの安定性を高めています。</p>
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">dataPipelineStack</span><span class="p">.</span><span class="nf">addDependency</span><span class="p">(</span><span class="nx">sharedResourcesStack</span><span class="p">);</span>
+<span class="nx">webStack</span><span class="p">.</span><span class="nf">addDependency</span><span class="p">(</span><span class="nx">authStack</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>CLIだけでなく、プログラムからテンプレートを作成するようにします。</p>
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">app</span><span class="p">.</span><span class="nf">synth</span><span class="p">();</span>
+</code></pre></div></div>
+
+<h3 id="infrastructurelibconstructs">infrastructure/lib/constructs</h3>
+
+<p>カスタムコンストラクタを作成しています。これらのコンストラクタはスタック内で呼び出されます。呼び出しの流れは<code class="language-plaintext highlighter-rouge">main.ts</code>→<code class="language-plaintext highlighter-rouge">stacks/xxx.ts</code>→<code class="language-plaintext highlighter-rouge">constructs/xxx.ts</code>になります。</p>
+
+<h4 id="chatbot">chatbot</h4>
+
+<p>こちらではチャットボットアプリ作成のためのカスタムリソースを作成しています。</p>
+
+<h5 id="chatbot-constructts">chatbot-construct.ts</h5>
+
+<p>まず、<code class="language-plaintext highlighter-rouge">interface</code>でコンストラクタが受け取るプロップスを定義します。この際、<code class="language-plaintext highlighter-rouge">dynamodb.Table</code>などは別のコンストラクタで定義したものを利用しています。</p>
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">interface</span> <span class="nx">ChatbotConstructProps</span> <span class="p">{</span>
+  <span class="k">readonly</span> <span class="nx">table</span><span class="p">:</span> <span class="nx">dynamodb</span><span class="p">.</span><span class="nx">Table</span><span class="p">;</span>
+  <span class="k">readonly</span> <span class="nx">applicationName</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+  <span class="k">readonly</span> <span class="nx">identityCenterInstanceArn</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+  <span class="k">readonly</span> <span class="nx">knowledgeBaseBucket</span><span class="p">:</span> <span class="nx">s3</span><span class="p">.</span><span class="nx">Bucket</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">Construct</code>クラスを拡張し、独自のコンストラクタを作成しています。先ほど作成した<code class="language-plaintext highlighter-rouge">ChatbotConstructProps</code>はコンストラクタで受け取ります。</p>
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">class</span> <span class="nc">ChatbotConstruct</span> <span class="kd">extends</span> <span class="nc">Construct</span> <span class="p">{</span>
+  <span class="k">public</span> <span class="k">readonly</span> <span class="nx">chatbotId</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+  <span class="k">public</span> <span class="k">readonly</span> <span class="nx">knowledgeBase</span><span class="p">:</span> <span class="nx">s3</span><span class="p">.</span><span class="nx">Bucket</span><span class="p">;</span>
+
+  <span class="nf">constructor</span><span class="p">(</span><span class="nx">scope</span><span class="p">:</span> <span class="nx">Construct</span><span class="p">,</span> <span class="nx">id</span><span class="p">:</span> <span class="kr">string</span><span class="p">,</span> <span class="nx">props</span><span class="p">:</span> <span class="nx">ChatbotConstructProps</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">super</span><span class="p">(</span><span class="nx">scope</span><span class="p">,</span> <span class="nx">id</span><span class="p">);</span>
+
+    <span class="c1">// Use the provided knowledge base bucket</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">knowledgeBase</span> <span class="o">=</span> <span class="nx">props</span><span class="p">.</span><span class="nx">knowledgeBaseBucket</span><span class="p">;</span>
+    <span class="p">...</span>
+</code></pre></div></div>
+
+<p>こちらではカスタムリソースを作成しています。
+<code class="language-plaintext highlighter-rouge">cr</code>は<code class="language-plaintext highlighter-rouge">import * as cr from "aws-cdk-lib/custom-resources";</code>のようにインポートしています。</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="c1">// Create the AWS custom resource for Q Business application</span>
+    <span class="kd">const</span> <span class="nx">application</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">cr</span><span class="p">.</span><span class="nc">AwsCustomResource</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="dl">"</span><span class="s2">ApplicationResource</span><span class="dl">"</span><span class="p">,</span> <span class="p">{</span>
+      <span class="na">onCreate</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">service</span><span class="p">:</span> <span class="dl">"</span><span class="s2">QBusiness</span><span class="dl">"</span><span class="p">,</span>
+        <span class="na">action</span><span class="p">:</span> <span class="dl">"</span><span class="s2">createApplication</span><span class="dl">"</span><span class="p">,</span>
+        <span class="na">parameters</span><span class="p">:</span> <span class="p">{</span>
+          <span class="na">displayName</span><span class="p">:</span> <span class="nx">props</span><span class="p">.</span><span class="nx">applicationName</span><span class="p">,</span>
+          <span class="p">...</span>
+        <span class="p">}</span>
+        <span class="p">...</span>
+      <span class="p">}</span>
+      <span class="p">...</span>
+    <span class="p">});</span>
+</code></pre></div></div>
+
+<h4 id="custom-lambda">custom-lambda</h4>
+
+<p><code class="language-plaintext highlighter-rouge">Lambda</code>関数作成簡略化や、ベストプラクティスを準拠するためにカスタム<code class="language-plaintext highlighter-rouge">Lambda</code>コンストラクタを作成します。</p>
+
+<p>正直<code class="language-plaintext highlighter-rouge">SAM</code>などを使ったほうが簡潔に書けますが、<code class="language-plaintext highlighter-rouge">Lambda</code>の定義を<code class="language-plaintext highlighter-rouge">CDK</code>内で一貫して書けるのはメリットだと思います。</p>
+
+<h5 id="custom-lambda-constructts">custom-lambda-construct.ts</h5>
+
+<p>以下のようにプロップスを定義します。</p>
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">interface</span> <span class="nx">CustomLambdaProps</span> <span class="p">{</span>
+  <span class="k">readonly</span> <span class="nx">lambdaName</span><span class="p">?:</span> <span class="kr">string</span><span class="p">;</span>
+  <span class="k">readonly</span> <span class="nx">concurrencyLimit</span><span class="p">?:</span> <span class="nx">Integer</span><span class="p">;</span>
+  <span class="k">readonly</span> <span class="nx">timeout</span><span class="p">?:</span> <span class="nx">Duration</span><span class="p">;</span>
+  <span class="k">readonly</span> <span class="nx">runtime</span><span class="p">:</span> <span class="nx">lambda</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">;</span>
+  <span class="k">readonly</span> <span class="nx">role</span><span class="p">?:</span> <span class="nx">IRole</span><span class="p">;</span>
+  <span class="k">readonly</span> <span class="nx">description</span><span class="p">?:</span> <span class="kr">string</span><span class="p">;</span>
+  <span class="k">readonly</span> <span class="nx">handler</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+  <span class="k">readonly</span> <span class="nx">code</span><span class="p">:</span> <span class="nx">lambda</span><span class="p">.</span><span class="nx">Code</span><span class="p">;</span>
+  <span class="k">readonly</span> <span class="nx">layers</span><span class="p">?:</span> <span class="nb">Array</span><span class="o">&lt;</span><span class="nx">lambda</span><span class="p">.</span><span class="nx">ILayerVersion</span><span class="o">&gt;</span><span class="p">;</span>
+  <span class="k">readonly</span> <span class="nx">environment</span><span class="p">?:</span> <span class="nb">Record</span><span class="o">&lt;</span><span class="kr">string</span><span class="p">,</span> <span class="kr">string</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>カスタム<code class="language-plaintext highlighter-rouge">Lambda</code>を作成します。この際、<code class="language-plaintext highlighter-rouge">Lambda</code>と関連性の高いDLQ用の<code class="language-plaintext highlighter-rouge">SQS</code>もこのコンストラクタの中で定義します。</p>
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">class</span> <span class="nc">CustomLambdaConstruct</span> <span class="kd">extends</span> <span class="nc">lambda</span><span class="p">.</span><span class="nb">Function</span> <span class="p">{</span>
+  <span class="p">...</span>
+  <span class="nf">constructor</span><span class="p">(</span><span class="nx">scope</span><span class="p">:</span> <span class="nx">Construct</span><span class="p">,</span> <span class="nx">id</span><span class="p">:</span> <span class="kr">string</span><span class="p">,</span> <span class="nx">props</span><span class="p">:</span> <span class="nx">CustomLambdaProps</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// Create a FIFO dead letter queue for failed executions</span>
+    <span class="kd">const</span> <span class="nx">dlq</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">sqs</span><span class="p">.</span><span class="nc">Queue</span><span class="p">(</span><span class="nx">scope</span><span class="p">,</span> <span class="s2">`</span><span class="p">${</span><span class="nx">id</span><span class="p">}</span><span class="s2">DLQ`</span><span class="p">,</span> <span class="p">{</span>
+      <span class="na">queueName</span><span class="p">:</span> <span class="s2">`</span><span class="p">${</span><span class="nx">id</span><span class="p">}</span><span class="s2">dlq.fifo`</span><span class="p">,</span>
+      <span class="na">deliveryDelay</span><span class="p">:</span> <span class="nx">Duration</span><span class="p">.</span><span class="nf">millis</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+      <span class="na">contentBasedDeduplication</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+      <span class="na">enforceSSL</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+      <span class="na">retentionPeriod</span><span class="p">:</span> <span class="nx">Duration</span><span class="p">.</span><span class="nf">days</span><span class="p">(</span><span class="mi">14</span><span class="p">),</span>
+    <span class="p">});</span>
+  <span class="p">...</span>
+<span class="p">});</span>
+</code></pre></div></div>
+
+<p>以下のように、受け取ったプロップスを親クラスに渡します。</p>
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="c1">// Call the parent constructor with the provided props and defaults</span>
+    <span class="k">super</span><span class="p">(</span><span class="nx">scope</span><span class="p">,</span> <span class="nx">id</span><span class="p">,</span> <span class="p">{</span>
+      <span class="p">...</span><span class="nx">props</span><span class="p">,</span>
+      <span class="na">runtime</span><span class="p">:</span> <span class="nx">props</span><span class="p">.</span><span class="nx">runtime</span><span class="p">,</span>
+      <span class="na">code</span><span class="p">:</span> <span class="nx">props</span><span class="p">.</span><span class="nx">code</span><span class="p">,</span>
+      <span class="na">handler</span><span class="p">:</span> <span class="nx">props</span><span class="p">.</span><span class="nx">handler</span><span class="p">,</span>
+      <span class="na">layers</span><span class="p">:</span> <span class="nx">props</span><span class="p">.</span><span class="nx">layers</span><span class="p">,</span>
+      <span class="na">description</span><span class="p">:</span> <span class="nx">props</span><span class="p">.</span><span class="nx">description</span><span class="p">,</span>
+      <span class="na">role</span><span class="p">:</span> <span class="nx">props</span><span class="p">.</span><span class="nx">role</span><span class="p">,</span>
+      <span class="na">timeout</span><span class="p">:</span> <span class="nx">props</span><span class="p">.</span><span class="nx">timeout</span> <span class="p">?</span> <span class="nx">props</span><span class="p">.</span><span class="nx">timeout</span> <span class="p">:</span> <span class="nx">Duration</span><span class="p">.</span><span class="nf">minutes</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span>
+      <span class="na">environment</span><span class="p">:</span> <span class="nx">props</span><span class="p">.</span><span class="nx">environment</span> <span class="o">||</span> <span class="kc">undefined</span><span class="p">,</span>
+      <span class="na">architecture</span><span class="p">:</span> <span class="nx">lambda</span><span class="p">.</span><span class="nx">Architecture</span><span class="p">.</span><span class="nx">ARM_64</span><span class="p">,</span> <span class="c1">// Use Graviton2 for better performance and cost</span>
+      <span class="na">deadLetterQueueEnabled</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+      <span class="na">deadLetterQueue</span><span class="p">:</span> <span class="nx">dlq</span><span class="p">,</span>
+      <span class="na">tracing</span><span class="p">:</span> <span class="nx">lambda</span><span class="p">.</span><span class="nx">Tracing</span><span class="p">.</span><span class="nx">ACTIVE</span><span class="p">,</span> <span class="c1">// Enable X-Ray tracing</span>
+    <span class="p">}</span>
+  <span class="p">)</span>
+</code></pre></div></div>
+
+<p>上記は以下の特徴を持っています。</p>
+<ul>
+  <li>X-Rayトレーシングがデフォルトで有効</li>
+  <li>パフォーマンス向上とコスト削減のためのARM64アーキテクチャ（Graviton2）</li>
+  <li>実行失敗時のFIFOデッドレターキュー</li>
+  <li>設定可能なタイムアウトと同時実行制限</li>
+  <li>環境変数のサポート</li>
+  <li>Lambdaレイヤーのサポート</li>
+</ul>
+
+<p>最後にセキュリティ準拠のために、<code class="language-plaintext highlighter-rouge">cdk-nag</code>を使います。</p>
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      <span class="nx">NagSuppressions</span><span class="p">.</span><span class="nf">addResourceSuppressions</span><span class="p">(</span>
+      <span class="k">this</span><span class="p">,</span>
+      <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="na">id</span><span class="p">:</span> <span class="dl">"</span><span class="s2">AwsSolutions-IAM4</span><span class="dl">"</span><span class="p">,</span>
+          <span class="na">reason</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Lambda execution role has appropriate permissions</span><span class="dl">"</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="p">...</span>
+      <span class="p">],</span>
+      <span class="kc">true</span>
+    <span class="p">);</span>
+</code></pre></div></div>
+
+<!--
+#### custom-s3-bucket
+
+##### custom-s3-bucket-construct.ts
+
+#### rest-api
+
+##### rest-api-construct.ts
+-->
+
+<h3 id="infrastructurelibstacks">infrastructure/lib/stacks</h3>
+<!--
+#### api
+
+##### api-stack.ts
+
+##### lambda/chat/index.ts
+
+##### lambda/get-readings/index.ts
+
+##### lambda/get-symmary/index.ts
+
+#### auth
+
+##### stack-auth.ts
+
+#### chatbot
+
+##### chatbot-stack.ts
+
+#### data-pipeline
+
+##### stack-data-pipeline.ts
+
+##### lambda/lambda-calculate-notify/index.ts
+
+##### lambda/lambda-transform-to-json/index.ts
+
+#### hello-cdk
+
+##### hello-cdk-stack.ts
+
+##### lambda/index.js
+
+#### shared-resources
+
+##### stack-shared-resources.ts
+
+#### web
+
+##### web-stack.ts
+-->
+</div>
+
+      <footer>
+        <p>
+          Tags: 
+          <a href="/md/tag/cdk">CDK</a>,  
+          <a href="/md/tag/書籍">書籍</a> 
+        </p>
+      </footer>
+    </article>
+
+  </main>
+
+  <!-- サイドバー部分 -->
+  <aside id="sidebar">
+    <h2><a href="/md/about/">About</a></h2>
+
+    <!--
+    <h2><a href="/md/categories/">Categories</a></h2>
+    <ul>
+      
+        <li><a href="/md/category/blog"">blog</a></li>
+      
+    </ul>
+    -->
+    
+    <h2><a href="/md/tags/">Tags</a></h2>
+    <ul>
+      
+        <li><a href="/md/tag/fastapi">FastAPI</a></li>
+      
+        <li><a href="/md/tag/nodejs">Nodejs</a></li>
+      
+        <li><a href="/md/tag/ツール">ツール</a></li>
+      
+        <li><a href="/md/tag/mysql">MySQL</a></li>
+      
+        <li><a href="/md/tag/react">React</a></li>
+      
+        <li><a href="/md/tag/開発">開発</a></li>
+      
+        <li><a href="/md/tag/elasticsearch">elasticsearch</a></li>
+      
+        <li><a href="/md/tag/firebase">firebase</a></li>
+      
+        <li><a href="/md/tag/sqlite">sqlite</a></li>
+      
+        <li><a href="/md/tag/k8s">k8s</a></li>
+      
+        <li><a href="/md/tag/書籍">書籍</a></li>
+      
+        <li><a href="/md/tag/aws">AWS</a></li>
+      
+        <li><a href="/md/tag/cdk">CDK</a></li>
+      
+    </ul>
+    <h2><a href="/md/archives/">Archives</a></h2>
+    <ul>
+      
+      
+        <li><a href="/md/2025/05/">2025-05</a></li>
+      
+        <li><a href="/md/2025/03/">2025-03</a></li>
+      
+        <li><a href="/md/2025/02/">2025-02</a></li>
+      
+    </ul>
+  </aside>
+</div>
+
+<footer>
+  <p>&copy; 2025 ツールの忘備録</p>
+</footer>
+
+</body>
+</html>

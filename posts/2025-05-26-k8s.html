@@ -1,0 +1,969 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/md/assets/css/default.css">
+  <link rel="stylesheet" href="/md/assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <title>ツールの忘備録</title>
+</head>
+<body>
+
+<header>
+  <h1><a href="/md/">ツールの忘備録</a></h1></h1>
+</header>
+
+<div id="content">
+  <!-- メインコンテンツ部分 -->
+  <main>
+        <article>
+      <header>
+        <h1>「Kubernetes：アップ・アンド・ランニング」を読む</h1>
+        <p class="meta">
+          May 26, 2025 
+          <!--
+          in
+          <a href="/category/blog"
+            >blog</a
+          >
+        -->
+        </p>
+      </header>
+
+      <div class="content"><p>オライリーの<code class="language-plaintext highlighter-rouge">Kubernetes：アップ・アンド・ランニング</code>という書籍を途中まで読んだので、気になったことを中心に簡単な感想や要約を書きます。(網羅性はありません)</p>
+
+<p><code class="language-plaintext highlighter-rouge">k8s</code>を扱う上で基本的な内容が網羅された書籍になっています。</p>
+
+<p><strong>目次</strong></p>
+
+<ul id="markdown-toc">
+  <li><a href="#1はじめに" id="markdown-toc-1はじめに">1.はじめに</a></li>
+  <li><a href="#2コンテナの作成と実行" id="markdown-toc-2コンテナの作成と実行">2.コンテナの作成と実行</a></li>
+  <li><a href="#3kubernetesクラスタをデプロイする" id="markdown-toc-3kubernetesクラスタをデプロイする">3.Kubernetesクラスタをデプロイする</a></li>
+</ul>
+
+<hr />
+
+<p><strong>サイト</strong></p>
+
+<ul>
+  <li><a href="https://www.oreilly.com/library/view/kubernetes-3/9798341624382/">オライリー</a></li>
+  <li><a href="https://github.com/kubernetes-up-and-running/examples">GitHub</a></li>
+</ul>
+
+<hr />
+
+<h3 id="1はじめに">1.はじめに</h3>
+<!--
+#### 速度
+
+##### 不変性の価値
+
+##### 宣言的コンフィギュレーション
+
+##### 自己治癒システム
+
+#### サービスとチームの規模を拡大する
+
+##### デカップリング
+
+##### アプリケーションとクラスタのための容易なスケーリング
+
+##### マイクロサービスでは開発チームをスケールさせる
+
+##### 一貫性とスケーリングのための懸念事項の分離
+
+#### インフラを抽象化する
+
+#### 効率性
+
+#### クラウド・ネイティブ・エコシステム
+
+#### 概要
+-->
+
+<h3 id="2コンテナの作成と実行">2.コンテナの作成と実行</h3>
+
+<ul>
+  <li>Open Container InitiativeがOCIイメージ形式で標準化している</li>
+</ul>
+
+<h4 id="コンテナイメージ">コンテナイメージ</h4>
+
+<ul>
+  <li>ローカルからイメージをビルド</li>
+  <li>コンテナレジストリからイメージをダウンロード</li>
+  <li>イメージは複数のレイヤーで構成されている
+    <ul>
+      <li>各レイヤーからファイルを追加、削除、変更</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>コンテナの設定</strong></p>
+<ul>
+  <li>ネットワークの設定⽅法</li>
+  <li>名前空間の分離⽅法</li>
+  <li>リソース制約(cgroup)</li>
+  <li>コンテナインスタンスにどのようなsyscall制限を設定するか</li>
+</ul>
+
+<h4 id="dockerでアプリケーションイメージを構築する">Dockerでアプリケーションイメージを構築する</h4>
+
+<h5 id="ドッカーファイル">ドッカーファイル</h5>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">.dockerignore</code>ファイルの追加を忘れずに
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>node_modules
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h5 id="画像サイズを最適化する">画像サイズを最適化する</h5>
+
+<ul>
+  <li>イメージの大きさを常に気にする</li>
+  <li>後続のレイヤーによって削除されたファイルは実際にはイメージに含まれることに注意
+    <ul>
+      <li>ただアクセスできないだけ</li>
+      <li>プルするたびに、ネットワークを介して送信されてしまう</li>
+    </ul>
+  </li>
+  <li>レイヤーを変更するたびに、そのあとのレイヤーもすべて変更される
+    <ul>
+      <li>前のレイヤーを変更すると、後ろのレイヤーを再構築、プルする必要</li>
+      <li><code class="language-plaintext highlighter-rouge">npm install</code>と<code class="language-plaintext highlighter-rouge">cp server.js .</code>のどちらを先に書くべきか？
+        <ul>
+          <li><code class="language-plaintext highlighter-rouge">server.js</code>が変更された場合を考える</li>
+          <li><code class="language-plaintext highlighter-rouge">node</code>パッケージを後に書くと、<code class="language-plaintext highlighter-rouge">server.js</code>の変更ごとにプルする必要
+            <ul>
+              <li>変更される可能性の低いものから書く</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="イメージセキュリティー">イメージ・セキュリティー</h5>
+
+<ul>
+  <li>例えば、PWを含んだコンテナを作らない</li>
+  <li>一個のレイヤーでファイルを削除しても、その前のレイヤーからは削除されない</li>
+  <li>イメージは実行することが目的なので、最小化が重要
+    <ul>
+      <li>不要なライブラリなど、無駄な脆弱性を残さない</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="多段階イメージビルド">多段階イメージビルド</h4>
+
+<ul>
+  <li>大きいイメージはデプロイが遅くなる
+```dockerfile
+…</li>
+</ul>
+
+<p>FROM alpine
+USER nobody:nobody
+COPY –from=build /go/bin/kuard /kuard
+CMD [ “/kuard” ]</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>- ビルドイメージとデプロイイメージで分ける
+- 500MB→20MBまでこの例では削減できた
+  - デプロイ時間の大幅な短縮
+
+マルチステージビルドは有名ですが、ここまでサイズが変わるとは思いませんでした。また、`USER`や`ENV`はあまり使用したことがなかったので意識したいです。
+
+#### リモートレジストリに画像を保存する
+
+- Gitと同様に、Dockerレジストリにも様々な選択肢
+  - セキュリティ、コラボレーション機能で選ぶ
+- プライベート、パブリックリポジトリ
+
+#### コンテナ・ランタイム・インターフェイス
+
+##### Dockerでコンテナを実行する
+
+##### クアード・アプリケーションを探る
+
+##### リソースの使用を制限する
+
+- 内部的には`cgroup`の機能で実装されている
+```bash
+  --memory 200m \
+  --memory-swap 1G \
+  --cpu-shares 1024 \
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">docker-compose.yaml</code>だけでなく、<code class="language-plaintext highlighter-rouge">docker</code>コマンドでもリソースを制限できるのは知りませんでした。</p>
+
+<h4 id="クリーンアップ">クリーンアップ</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">docker system prune</code>
+    <ul>
+      <li>全てのイメージを削除するコマンド</li>
+      <li>cronジョブで実行する方法もある</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="概要">概要</h4>
+
+<h3 id="3kubernetesクラスタをデプロイする">3.Kubernetesクラスタをデプロイする</h3>
+
+<h4 id="パブリッククラウドプロバイダにkubernetesをインストールする">パブリッククラウドプロバイダにKubernetesをインストールする</h4>
+
+<h5 id="google-kubernetes-engineでkubernetesをインストールする">Google Kubernetes EngineでKubernetesをインストールする</h5>
+
+<h5 id="azure-kubernetes-serviceでkubernetesをインストールする">Azure Kubernetes ServiceでKubernetesをインストールする</h5>
+
+<h5 id="amazon-web-servicesにkubernetesをインストールする">Amazon Web ServicesにKubernetesをインストールする</h5>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">eksctl create cluster</code></li>
+</ul>
+
+<h4 id="minikubeを使ってkubernetesをローカルにインストールする">minikubeを使ってKubernetesをローカルにインストールする</h4>
+
+<h4 id="dockerでkubernetesを実行する">DockerでKubernetesを実行する</h4>
+
+<ul>
+  <li>最近は<code class="language-plaintext highlighter-rouge">kind</code>が人気
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="nv">$ </span>kind create cluster <span class="nt">--wait</span> 5m
+ <span class="nv">$ </span><span class="nb">export </span><span class="nv">KUBECONFIG</span><span class="o">=</span><span class="s2">"</span><span class="si">$(</span>kind get kubeconfig-path<span class="si">)</span><span class="s2">"</span>
+ <span class="nv">$ </span>kubectl cluster-info
+ <span class="nv">$ </span>kind delete cluster
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h4 id="kubernetesクライアント">Kubernetesクライアント</h4>
+
+<h5 id="クラスタの状態をチェックする">クラスタの状態をチェックする</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>kubectl get componentstatuses
+</code></pre></div></div>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">scheduler</code>と<code class="language-plaintext highlighter-rouge">etcd</code>サーバーを確認できる</li>
+  <li><code class="language-plaintext highlighter-rouge">Healthy</code>となっていることを確認</li>
+</ul>
+
+<h5 id="kubernetesノードをリストアップする">Kubernetesノードをリストアップする</h5>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">kubectl get nodes</code>→<code class="language-plaintext highlighter-rouge">kubectl describe nodes</code>の流れ
+    <ul>
+      <li>labels: ARMプロセッサやOS情報</li>
+      <li>Conditions: 操作の情報</li>
+      <li>Capacity: 容量</li>
+      <li>System-info</li>
+      <li>Non-terminated pods: ポッド情報
+        <ul>
+          <li>kube-dnsなどを確認できる</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="クラスターコンポーネント">クラスターコンポーネント</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">kube-system</code>名前空間</li>
+</ul>
+
+<h5 id="kubernetesプロキシ">Kubernetesプロキシ</h5>
+
+<ul>
+  <li>Daemonsetを使用して実行している
+    <ul>
+      <li>使用しない場合もある</li>
+      <li>プロキシがクラスター内の全てのノードに存在する必要
+        <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl get daemonSets <span class="nt">--namespace</span><span class="o">=</span>kube-system kube-proxy
+</code></pre></div>        </div>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="kubernetes-dns">Kubernetes DNS</h5>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl get deployments <span class="nt">--namespace</span><span class="o">=</span>kube-system core-dns
+kubectl get services <span class="nt">--namespace</span><span class="o">=</span>kube-system core-dns
+</code></pre></div></div>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> NAME       CLUSTER-IP   EXTERNAL-IP   PORT(S)         AGE
+ core-dns   10.96.0.10   &lt;none&gt;  53/UDP,53/TCP   45d
+</code></pre></div></div>
+<ul>
+  <li>クラスター内のコンテナにログイン後、<code class="language-plaintext highlighter-rouge">/etc/resolv.conf</code>を確認できる</li>
+</ul>
+
+<h5 id="kubernetes-ui">Kubernetes UI</h5>
+
+<ul>
+  <li>クラウドプロバイダーなど、多数のGUIがある
+    <ul>
+      <li>オープンソースやvscodeなどもある</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="4一般的なkubectlコマンド">4.一般的なkubectlコマンド</h4>
+
+<h4 id="名前空間">名前空間</h4>
+
+<ul>
+  <li>デフォルトは、<code class="language-plaintext highlighter-rouge">default</code>名前空間と対話</li>
+  <li><code class="language-plaintext highlighter-rouge">--all-namespaces</code>
+    <ul>
+      <li>クラスター内の全てのポッドの一覧表示など</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="コンテクスト">コンテクスト</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">$HOME/.kube/config</code>ファイル</li>
+  <li><code class="language-plaintext highlighter-rouge">set-context</code>だけでなく、<code class="language-plaintext highlighter-rouge">use-context</code>まで必要</li>
+  <li><code class="language-plaintext highlighter-rouge">set-context</code>コマンドで、<code class="language-plaintext highlighter-rouge">--users</code>, <code class="language-plaintext highlighter-rouge">--clusters</code>フラグの使用
+    <ul>
+      <li>異なるクラスタ、ユーザでの認証</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="kubernetes-apiオブジェクトを表示する">Kubernetes APIオブジェクトを表示する</h4>
+
+<ul>
+  <li>k8sリソースはRestFulリソースを提供
+    <ul>
+      <li>kubectlはこのURLにHTTP要求をし、パスに存在するオブジェクトにアクセス</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">-o wide</code>: 詳細</li>
+  <li><code class="language-plaintext highlighter-rouge">-o json | yaml</code></li>
+  <li>kubectlの出力でヘッダーを削除することが一般的
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">awk</code>コマンドと組み合わせる</li>
+    </ul>
+  </li>
+  <li>オブジェクトから特定のフィールドを抽出
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">JSONPath</code>クエリ言語の使用
+        <ul>
+          <li>指定されたPodのIPアドレスを抽出して出⼒するコマンド
+            <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>kubectl get pods my-pod <span class="nt">-o</span> jsonpath <span class="nt">--template</span><span class="o">={</span>.status.podIP<span class="o">}</span>
+</code></pre></div>            </div>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">--watch</code>オプション</li>
+</ul>
+
+<h4 id="kubernetesオブジェクトを作成更新破棄する">Kubernetesオブジェクトを作成、更新、破棄する</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">--dry-run</code>: サーバに送信せずターミナル出力</li>
+  <li><code class="language-plaintext highlighter-rouge">kubectl edit</code>: 定義を含むエディターが起動</li>
+  <li><code class="language-plaintext highlighter-rouge">delete -f</code>, <code class="language-plaintext highlighter-rouge">delete resource name</code>: 削除</li>
+</ul>
+
+<h4 id="オブジェクトにラベルと注釈を付ける">オブジェクトにラベルと注釈を付ける</h4>
+
+<ul>
+  <li>labelコマンドとannotateコマンド</li>
+  <li>barという名前のPodにcolor=redラベルを追加するコマンド
+    <ul>
+      <li>` $ kubectl label pods bar color=red`</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">--overwrite</code>フラグで上書き</li>
+  <li><code class="language-plaintext highlighter-rouge">ラベル名-</code>でラベルの削除</li>
+</ul>
+
+<h4 id="デバッグコマンド">デバッグ・コマンド</h4>
+
+<ul>
+  <li>Podに複数のコンテナがある場合は<code class="language-plaintext highlighter-rouge">-c</code>でコンテナを選択</li>
+  <li><code class="language-plaintext highlighter-rouge">logs</code>と<code class="language-plaintext highlighter-rouge">exec -it --bash</code>コマンド</li>
+  <li>bashがない場合は、<code class="language-plaintext highlighter-rouge">kubectl attach -it pod</code></li>
+  <li><code class="language-plaintext highlighter-rouge">kubectl port-forward &lt;pod-name&gt; 8080:80</code>
+    <ul>
+      <li>ローカルのポート8080:リモートの80</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">kubectl get events</code>
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">--watch</code></li>
+      <li>全ての名前空間は<code class="language-plaintext highlighter-rouge">-A</code></li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">kubectl top pods</code></li>
+</ul>
+
+<h4 id="クラスター管理">クラスター管理</h4>
+
+<h4 id="コマンド自動補完">コマンド自動補完</h4>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">brew install bash-completion</code></li>
+  <li>macOSでは<code class="language-plaintext highlighter-rouge">${HOME}/.bash_profile</code>ファイルに追記</li>
+</ul>
+
+<h4 id="クラスターの別の見方">クラスターの別の見方</h4>
+
+<ul>
+  <li>Rancher DashboardやHeadlampプロジェクトなど</li>
+  <li><code class="language-plaintext highlighter-rouge">kubectl help</code>コマンド</li>
+</ul>
+
+<h4 id="5ポッド">5.ポッド</h4>
+
+<h4 id="kubernetesにおけるpod">KubernetesにおけるPod</h4>
+
+<ul>
+  <li>各コンテナは独自のcgroupで実行されるが、いくつかのLinux名前空間を共有</li>
+  <li>同じPodで実行されるアプリ
+    <ul>
+      <li>独自のIPアドレスとネットワーク空間を共有する</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="podを使って考える">Podを使って考える</h4>
+
+<ul>
+  <li>WordPressとMySQLを同じPodに置くのはアンチパターン</li>
+</ul>
+
+<h4 id="ポッドマニフェスト">ポッド・マニフェスト</h4>
+
+<ul>
+  <li>宣言型構成は多くの利点がある
+    <ul>
+      <li>可読性、レビューのしやすさ、文章化など</li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="ポッドを作成する">ポッドを作成する</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>kubectl run kuard <span class="nt">--generator</span><span class="o">=</span>run-pod/v1 <span class="se">\</span>
+  <span class="nt">--image</span><span class="o">=</span>gcr.io/kuar-demo/kuard-amd64:blue
+<span class="nv">$ </span>kubectl get pods <span class="c"># pending</span>
+<span class="nv">$ </span>kubectl delete pods/kuard
+</code></pre></div></div>
+
+<p>コマンドで作成することはあまりないと思いますが、一応オプションなども覚えておきたいです。</p>
+
+<h5 id="podマニフェストの作成">Podマニフェストの作成</h5>
+
+<h4 id="ランニングポッド">ランニングポッド</h4>
+
+<h5 id="リストポッド">リスト・ポッド</h5>
+
+<h5 id="ポッド詳細">ポッド詳細</h5>
+
+<ul>
+  <li>` $ kubectl describe pods kuard`
+    <ul>
+      <li>ラベル、アノテーション、IP、ポート、イメージなどを確認できる</li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="podを削除する">Podを削除する</h5>
+
+<ul>
+  <li>podはすぐにいは削除されない
+    <ul>
+      <li>デフォルトでは30秒</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="ポッドにアクセスする">ポッドにアクセスする</h4>
+
+<h5 id="ログでより多くの情報を得る">ログでより多くの情報を得る</h5>
+
+<h5 id="execを使ってコンテナ内でコマンドを実行する">execを使ってコンテナ内でコマンドを実行する</h5>
+
+<h5 id="コンテナとの間でファイルをコピーする">コンテナとの間でファイルをコピーする</h5>
+
+<ul>
+  <li>コンテナへのファイルのコピーはアンチパターン
+    <ul>
+      <li>ただし、緊急時には仕方がない</li>
+      <li>すぐにイメージのビルドを行うべき</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="正常性確認">正常性確認</h4>
+
+<ul>
+  <li>デフォルトでは、メインプロセス軌道を確認するだけ</li>
+</ul>
+
+<h5 id="ライブネスプローブ">ライブネス・プローブ</h5>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      <span class="na">livenessProbe</span><span class="pi">:</span>
+        <span class="na">httpGet</span><span class="pi">:</span>
+          <span class="na">path</span><span class="pi">:</span> <span class="s">/healthy</span>
+          <span class="na">port</span><span class="pi">:</span> <span class="m">8080</span>
+        <span class="na">initialDelaySeconds</span><span class="pi">:</span> <span class="m">5</span>
+        <span class="na">timeoutSeconds</span><span class="pi">:</span> <span class="m">1</span>
+        <span class="na">periodSeconds</span><span class="pi">:</span> <span class="m">10</span>
+        <span class="na">failureThreshold</span><span class="pi">:</span> <span class="m">3</span>
+</code></pre></div></div>
+<ul>
+  <li>httpGetプローブの使用</li>
+  <li>コンテナ起動5行後から呼び出される</li>
+  <li>1秒以内に応答する必要(200-400)</li>
+  <li>3回連続失敗でコンテナは再起動
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl port-forward kuard 8080:8080
+</code></pre></div>    </div>
+  </li>
+  <li>ブラウザで、http://localhost:8080にアクセス
+    <ul>
+      <li>Liveness Probeを選択</li>
+      <li>コンテナを再起動できる</li>
+    </ul>
+  </li>
+  <li>実際の再起動の動作はPodの<code class="language-plaintext highlighter-rouge">restartPolicy</code>で決定される
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">Always</code>, <code class="language-plaintext highlighter-rouge">onFailure</code>, <code class="language-plaintext highlighter-rouge">Never</code></li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="レディネスプローブ">レディネスプローブ</h5>
+
+<ul>
+  <li>稼働状態と準備状態を区別する
+    <ul>
+      <li>readinessプローブとliveness プローブを組み合わせる</li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="スタートアッププローブ">スタートアップ・プローブ</h5>
+
+<ul>
+  <li>スロースタートコンテナを管理する代替⽅法</li>
+</ul>
+
+<h5 id="高度なプローブ設定">高度なプローブ設定</h5>
+
+<ul>
+  <li>プローブを開始するまでの待機時間</li>
+  <li>真の失敗と⾒なすべき失敗の数</li>
+  <li>失敗数をリセットするために必要な成功の数など</li>
+</ul>
+
+<h5 id="その他の正常性確認型チェック">その他の正常性確認型チェック</h5>
+
+<ul>
+  <li>tcpSocketヘルスチェックもサポート
+    <ul>
+      <li>非HTTPアプリで役立つ</li>
+    </ul>
+  </li>
+  <li>execプローブ
+    <ul>
+      <li>スクリプトが0コードを返した場合に成功</li>
+      <li>カスタムアプリ検証ロジックに役立つ</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="リソース管理">リソース管理</h4>
+
+<h5 id="リソースの要求最低限必要なリソース">リソースの要求最低限必要なリソース</h5>
+
+<ul>
+  <li>CPUとメモリを考える</li>
+  <li>CPU半分以上、128メモリ以上のリクエストの例
+    <div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">resources</span><span class="pi">:</span>
+<span class="na">requests</span><span class="pi">:</span>
+  <span class="na">cpu</span><span class="pi">:</span> <span class="s2">"</span><span class="s">500m"</span>
+  <span class="na">memory</span><span class="pi">:</span> <span class="s2">"</span><span class="s">128Mi"</span>
+</code></pre></div>    </div>
+  </li>
+  <li>requestsは最小値であることに注意</li>
+</ul>
+
+<p>k8sでも<code class="language-plaintext highlighter-rouge">docker-compose.yaml</code>みたいに書けるのは知りませんでした。</p>
+
+<h5 id="リソースの使用量を制限する">リソースの使用量を制限する</h5>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      <span class="na">resources</span><span class="pi">:</span>
+        <span class="na">requests</span><span class="pi">:</span>
+          <span class="na">cpu</span><span class="pi">:</span> <span class="s2">"</span><span class="s">500m"</span>
+          <span class="na">memory</span><span class="pi">:</span> <span class="s2">"</span><span class="s">128Mi"</span>
+        <span class="na">limits</span><span class="pi">:</span>
+          <span class="na">cpu</span><span class="pi">:</span> <span class="s2">"</span><span class="s">1000m"</span>
+          <span class="na">memory</span><span class="pi">:</span> <span class="s2">"</span><span class="s">256Mi"</span>
+</code></pre></div></div>
+<ul>
+  <li>1000m = 1.0CPU</li>
+</ul>
+
+<h4 id="ボリュームでデータを永続化する">ボリュームでデータを永続化する</h4>
+
+<ul>
+  <li>Podの削除、再起動でファイルシステムのデータも消える
+    <ul>
+      <li>ステートレスWebアプリでは問題ない</li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="podでボリュームを使用する">Podでボリュームを使用する</h5>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">spec.volumes</code>, <code class="language-plaintext highlighter-rouge">container.volumeMounts</code>の編集</li>
+  <li>pod内の異なるコンテナは、異なるマウントパスで同じボリュームをマウントできる</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">apiVersion</span><span class="pi">:</span> <span class="s">v1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">Pod</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">kuard</span>
+<span class="na">spec</span><span class="pi">:</span>
+  <span class="na">volumes</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s2">"</span><span class="s">kuard-data"</span>
+      <span class="na">hostPath</span><span class="pi">:</span>
+        <span class="na">path</span><span class="pi">:</span> <span class="s2">"</span><span class="s">/var/lib/kuard"</span>
+  <span class="na">containers</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">kuard</span>
+      <span class="na">image</span><span class="pi">:</span> <span class="s">gcr.io/kuar-demo/kuard-amd64:blue</span>
+      <span class="na">volumeMounts</span><span class="pi">:</span>
+        <span class="pi">-</span> <span class="na">mountPath</span><span class="pi">:</span> <span class="s2">"</span><span class="s">/data"</span>
+          <span class="na">name</span><span class="pi">:</span> <span class="s2">"</span><span class="s">kuard-data"</span>
+      <span class="na">ports</span><span class="pi">:</span>
+        <span class="s">...</span>
+</code></pre></div></div>
+
+<h5 id="podでボリュームを使うさまざまな方法">Podでボリュームを使うさまざまな方法</h5>
+
+<ul>
+  <li>真に永続的なデータの保存
+    <ul>
+      <li>NFS, iSCSIのプロトコル</li>
+      <li>EBSなど</li>
+    </ul>
+  </li>
+  <li>NFSサーバの例
+```yaml
+ volumes:
+    <ul>
+      <li>name: “kuard-data”
+nfs:
+  server: my.nfs.server.local
+  path: “/exports”
+```</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="すべてをまとめる">すべてをまとめる</h4>
+
+<ul>
+  <li>永続ボリューム、レディネスプローブとライブネスプローブ、リソース制限の組み合わせ
+```yaml
+apiVersion: v1
+ kind: Pod
+ metadata:
+name: kuard
+ spec:
+volumes:
+    <ul>
+      <li>name: “kuard-data”
+nfs:
+  server: my.nfs.server.local
+  path: “/exports”
+containers:</li>
+      <li>image: gcr.io/kuar-demo/kuard-amd64:blue
+name: kuard
+ports:
+        <ul>
+          <li>containerPort: 8080
+name: http
+protocol: TCP
+resources:
+  requests:
+cpu: “500m”
+memory: “128Mi”
+  limits:
+cpu: “1000m”
+memory: “256Mi”
+volumeMounts:</li>
+          <li>mountPath: “/data”
+name: “kuard-data”
+livenessProbe:
+  httpGet:
+path: /healthy
+port: 8080
+  initialDelaySeconds: 5
+  timeoutSeconds: 1
+  periodSeconds: 10
+  failureThreshold: 3
+readinessProbe:
+  httpGet:
+path: /ready
+port: 8080
+  initialDelaySeconds: 30
+  timeoutSeconds: 1
+  periodSeconds: 10
+  failureThreshold: 3
+```</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="6ラベルと注釈">6.ラベルと注釈</h4>
+<!--
+#### ラベル
+
+##### ラベルを貼る
+
+##### ラベルを修正する
+
+##### ラベル・セレクタ
+
+##### APIオブジェクトのラベルセレクタ
+
+##### Kubernetesアーキテクチャにおけるラベル
+
+#### 注釈
+
+#### 清掃
+
+#### 概要
+-->
+
+<h4 id="7サービス検出">7.サービス検出</h4>
+<!--
+#### サービス検出とは何か？
+
+#### サービスオブジェクト
+
+##### サービスDNS
+
+##### レディネス・チェック
+
+#### クラスターの先を見る
+
+#### ロードバランサの統合
+
+#### 詳細
+
+##### エンドポイント
+
+##### マニュアルサービス検出
+
+##### クラスタIP環境変数
+
+#### 他の環境とつながる
+
+##### クラスタ外のリソースに接続する
+
+##### 外部リソースをクラスタ内のサービスに接続する
+
+#### 清掃
+
+#### 概要
+-->
+
+<h4 id="8イングレスを使ったhttpロードバランサ">8.イングレスを使ったHTTPロードバランサ</h4>
+<!--
+#### イングレス仕様とイングレス・コントローラーの比較
+
+#### コンターの設置
+
+##### DNSを設定する
+
+##### ローカルhostsファイルを構成する
+
+#### イングレスを使う
+
+##### 最もシンプルな使い方
+
+##### ホスト名を使う
+
+##### パスを使う
+
+##### 清掃
+
+#### 上級イングレスのトピックとゴッチャ
+
+##### 複数のイングレス・コントローラーを動かす
+
+##### 複数のイングレス・オブジェクト
+
+##### イングレスとネームスペース
+
+##### パスの書き換え
+
+##### TLSへのサービス
+
+#### 代替イングレスの実装
+
+#### Ingressの未来
+
+#### 概要
+-->
+
+<h4 id="9レプリカセット">9.レプリカセット</h4>
+<!--
+#### 和解ループ
+
+#### PodとReplicaSetsの関係
+
+#### 既存のコンテナを採用する
+
+#### コンテナを隔離する
+
+#### ReplicaSetsでデザインする
+
+#### レプリカセット仕様
+
+#### Podテンプレート
+
+#### ラベル
+
+#### レプリカセットの作成
+
+#### レプリカセットを検査する
+
+#### PodからReplicaSetを発見する
+
+#### レプリカセットのPodセットを発見する
+
+#### レプリカセットを拡大縮小する
+
+#### kubectl scaleを使ったインペラティブ・スケーリング
+
+#### kubectl applyで宣言的にスケーリングする
+
+#### レプリカセットのオートスケーリング
+
+#### レプリカセットを削除する
+
+#### 概要
+-->
+
+<h4 id="10デプロイ">10.デプロイ</h4>
+<!--
+#### 初めてのデプロイ
+
+#### デプロイの作成
+
+#### デプロイを管理する
+
+#### デプロイを更新する
+
+#### デプロイをスケーリングする
+
+#### コンテナイメージを更新する
+
+#### ロールアウトの歴史
+
+#### デプロイ戦略
+
+#### 戦略を再構築する
+
+#### RollingUpdate戦略
+
+#### サービスの健全性を確保するため、展開を遅らせる
+
+#### デプロイを削除する
+
+#### デプロイを監視する
+
+#### 概要
+-->
+
+</div>
+
+      <footer>
+        <p>
+          Tags: 
+          <a href="/md/tag/書籍">書籍</a> 
+        </p>
+      </footer>
+    </article>
+
+  </main>
+
+  <!-- サイドバー部分 -->
+  <aside id="sidebar">
+    <h2><a href="/md/about/">About</a></h2>
+
+    <!--
+    <h2><a href="/md/categories/">Categories</a></h2>
+    <ul>
+      
+        <li><a href="/md/category/blog"">blog</a></li>
+      
+    </ul>
+    -->
+    
+    <h2><a href="/md/tags/">Tags</a></h2>
+    <ul>
+      
+        <li><a href="/md/tag/fastapi">FastAPI</a></li>
+      
+        <li><a href="/md/tag/nodejs">Nodejs</a></li>
+      
+        <li><a href="/md/tag/ツール">ツール</a></li>
+      
+        <li><a href="/md/tag/mysql">MySQL</a></li>
+      
+        <li><a href="/md/tag/react">React</a></li>
+      
+        <li><a href="/md/tag/開発">開発</a></li>
+      
+        <li><a href="/md/tag/elasticsearch">elasticsearch</a></li>
+      
+        <li><a href="/md/tag/firebase">firebase</a></li>
+      
+        <li><a href="/md/tag/sqlite">sqlite</a></li>
+      
+        <li><a href="/md/tag/k8s">k8s</a></li>
+      
+        <li><a href="/md/tag/書籍">書籍</a></li>
+      
+        <li><a href="/md/tag/aws">AWS</a></li>
+      
+        <li><a href="/md/tag/cdk">CDK</a></li>
+      
+    </ul>
+    <h2><a href="/md/archives/">Archives</a></h2>
+    <ul>
+      
+      
+        <li><a href="/md/2025/05/">2025-05</a></li>
+      
+        <li><a href="/md/2025/03/">2025-03</a></li>
+      
+        <li><a href="/md/2025/02/">2025-02</a></li>
+      
+    </ul>
+  </aside>
+</div>
+
+<footer>
+  <p>&copy; 2025 ツールの忘備録</p>
+</footer>
+
+</body>
+</html>
