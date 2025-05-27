@@ -1,0 +1,367 @@
+---
+layout: post
+title: "Hands-On AWS CDKのリポジトリを読む"
+date: 2025-05-22 12:00:00 +0900
+categories: [blog]
+tags: [CDK, 書籍]
+excerpt: ""
+memo: "/github, /construct, /stacks"
+---
+
+オライリーの`Hands-On AWS CDK`という書籍のGitHubリポジトリのコードを読んだので、気になったことを中心に簡単な感想や要約を書きます。(網羅性はありません)
+
+自分の知る範囲では日本語のCDKの書籍は存在せず、個人的にAWSドキュメントは情報量が多すぎて全て目を通すのは難しく感じるので、この書籍(とリポジトリ)はCDKの基礎を学ぶ上で非常に有効でした。
+
+**目次**
+* ToC
+{:toc}
+
+---
+
+**サイト**
+
+- <a href="https://github.com/hands-on-aws-cdk-book/hands-on-aws-cdk-book-projects/tree/main">GitHub</a>
+- <a href="https://www.oreilly.com/library/view/aws-cdk/9798341640801/">オライリー</a>
+
+treeコマンドで出力してみると以下のような構造になっています。
+```plaintext
+├───.github
+│   └───workflows
+├───infrastructure
+│   ├───bin
+│   ├───lib
+│   │   ├───constructs
+│   │   │   ├───chatbot
+│   │   │   ├───custom-lambda
+│   │   │   ├───custom-s3-bucket
+│   │   │   └───rest-api
+│   │   └───stacks
+│   │       ├───api
+│   │       │   └───lambda
+│   │       ├───auth
+│   │       ├───chatbot
+│   │       ├───data-pipeline
+│   │       ├───hello-cdk
+│   │       │   └───lambda
+│   │       ├───shared-resources
+│   │       └───web
+│   └───test
+```
+
+---
+
+### .githubフォルダ
+
+#### `cdk-orchestrator.yaml`
+
+ルートyamlで他のyamlを呼び出すような構造になっています。
+```yaml
+jobs:
+  project-tools-update:
+    uses: ./.github/workflows/reusable-project-tools-update.yaml
+    with:
+      environment: "dev"
+      ...
+    secrets:
+      ...
+
+  cdk-pre-deploy:
+    uses: ./.github/workflows/reusable-cdk-pre-deploy.yaml
+    ...
+```
+この際、変数だけでなく、Githubに保存した環境変数も渡しています。
+
+#### `reusable-cdk-deploy.yaml`
+
+先ほどのyamlから呼び出されるファイルです。
+```yaml
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+        ...
+    secrets:
+      AWS_GH_ACTION_OIDC_ROLE:
+        required: true
+
+env:
+  environment: ${{ inputs.environment }}
+  directory: ${{ inputs.directory}}
+
+permissions:
+  id-token: write 
+  contents: read
+
+jobs:
+  cdk-deploy:
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: us-east-1
+      environment: ${{ inputs.environment }}
+      directory: ${{ inputs.directory}}
+      ...
+```
+上記のファイルで注目すべき点は以下です。
+- `terraform`などと同じように受け取る変数を制限すること
+- 環境変数を2回定義して上書きしていること
+- `JWTトークン`認証のために`permissions`で読み取り権限を要求していること
+
+また、上記では省略していますが、`cdk synth --context`や`cdk deploy --context`などのコマンドでCDKをデプロイしています。
+
+### `infrastructure/bin/`
+
+#### main.ts
+
+エントリーポイントファイルです。このファイルでは、複数のスタックをインポートし、呼び出しています。
+
+ファイルの先頭ではシェルスクリプトのように使用言語を定義し、ソースマップを呼び出しています。
+```ts
+#!/usr/bin/env node
+import "source-map-support/register";
+```
+
+これは必須のコンテキストが設定されていない場合にエラーを出力する関数です。
+```ts
+function checkRequiredContext(app: cdk.App, key: string): void {
+  const contextValue = app.node.tryGetContext(key);
+  if (!contextValue) {
+    console.error(`Error: Missing required context value for '${key}'.`);
+    process.exit(1);
+  }
+}
+```
+
+こちらでは、共通で使用する環境変数を定義しています。
+```ts
+const appEnv: cdk.Environment = {
+  account: process.env.CDK_DEFAULT_ACCOUNT,
+  region: process.env.CDK_DEFAULT_REGION,
+};
+```
+
+上記で定義した`appEnv`は、スタックに渡すデフォルトのプロップス内に入れています。
+```ts
+/** Default props to be used by all stacks */
+const defaultStackProps: cdk.StackProps = {
+  env: appEnv,
+  description:"",
+  tags: {
+    Environment: deployment,
+    Project: "HomeEnergyCoach",
+  },
+};
+```
+
+上記のデフォルトスタックプロップスは、以下のように拡張して再利用できます。
+```ts
+const chatbotStack = new ChatbotStack(app, `ChatbotStack`, {
+  ...defaultStackProps,
+  calculatedEnergyTable: sharedResourcesStack.calculatedEnergyTable,
+  ...
+});
+```
+
+ファイルの最後では、依存性を追加し、デプロイの安定性を高めています。
+```ts
+dataPipelineStack.addDependency(sharedResourcesStack);
+webStack.addDependency(authStack);
+```
+
+CLIだけでなく、プログラムからテンプレートを作成するようにします。
+```ts
+app.synth();
+```
+
+### infrastructure/lib/constructs
+
+カスタムコンストラクタを作成しています。これらのコンストラクタはスタック内で呼び出されます。呼び出しの流れは`main.ts`→`stacks/xxx.ts`→`constructs/xxx.ts`になります。
+
+#### chatbot
+
+こちらではチャットボットアプリ作成のためのカスタムリソースを作成しています。
+
+##### chatbot-construct.ts
+
+まず、`interface`でコンストラクタが受け取るプロップスを定義します。この際、`dynamodb.Table`などは別のコンストラクタで定義したものを利用しています。
+```ts
+interface ChatbotConstructProps {
+  readonly table: dynamodb.Table;
+  readonly applicationName: string;
+  readonly identityCenterInstanceArn: string;
+  readonly knowledgeBaseBucket: s3.Bucket;
+}
+```
+
+`Construct`クラスを拡張し、独自のコンストラクタを作成しています。先ほど作成した`ChatbotConstructProps`はコンストラクタで受け取ります。
+```ts
+export class ChatbotConstruct extends Construct {
+  public readonly chatbotId: string;
+  public readonly knowledgeBase: s3.Bucket;
+
+  constructor(scope: Construct, id: string, props: ChatbotConstructProps) {
+    super(scope, id);
+
+    // Use the provided knowledge base bucket
+    this.knowledgeBase = props.knowledgeBaseBucket;
+    ...
+```
+
+こちらではカスタムリソースを作成しています。
+`cr`は`import * as cr from "aws-cdk-lib/custom-resources";`のようにインポートしています。
+
+```ts
+    // Create the AWS custom resource for Q Business application
+    const application = new cr.AwsCustomResource(this, "ApplicationResource", {
+      onCreate: {
+        service: "QBusiness",
+        action: "createApplication",
+        parameters: {
+          displayName: props.applicationName,
+          ...
+        }
+        ...
+      }
+      ...
+    });
+```
+
+#### custom-lambda
+
+`Lambda`関数作成簡略化や、ベストプラクティスを準拠するためにカスタム`Lambda`コンストラクタを作成します。
+
+正直`SAM`などを使ったほうが簡潔に書けますが、`Lambda`の定義を`CDK`内で一貫して書けるのはメリットだと思います。
+
+##### custom-lambda-construct.ts
+
+以下のようにプロップスを定義します。
+```ts
+interface CustomLambdaProps {
+  readonly lambdaName?: string;
+  readonly concurrencyLimit?: Integer;
+  readonly timeout?: Duration;
+  readonly runtime: lambda.Runtime;
+  readonly role?: IRole;
+  readonly description?: string;
+  readonly handler: string;
+  readonly code: lambda.Code;
+  readonly layers?: Array<lambda.ILayerVersion>;
+  readonly environment?: Record<string, string>;
+}
+```
+
+カスタム`Lambda`を作成します。この際、`Lambda`と関連性の高いDLQ用の`SQS`もこのコンストラクタの中で定義します。
+```ts
+export class CustomLambdaConstruct extends lambda.Function {
+  ...
+  constructor(scope: Construct, id: string, props: CustomLambdaProps) {
+    // Create a FIFO dead letter queue for failed executions
+    const dlq = new sqs.Queue(scope, `${id}DLQ`, {
+      queueName: `${id}dlq.fifo`,
+      deliveryDelay: Duration.millis(0),
+      contentBasedDeduplication: true,
+      enforceSSL: true,
+      retentionPeriod: Duration.days(14),
+    });
+  ...
+});
+```
+
+以下のように、受け取ったプロップスを親クラスに渡します。
+```ts
+    // Call the parent constructor with the provided props and defaults
+    super(scope, id, {
+      ...props,
+      runtime: props.runtime,
+      code: props.code,
+      handler: props.handler,
+      layers: props.layers,
+      description: props.description,
+      role: props.role,
+      timeout: props.timeout ? props.timeout : Duration.minutes(5),
+      environment: props.environment || undefined,
+      architecture: lambda.Architecture.ARM_64, // Use Graviton2 for better performance and cost
+      deadLetterQueueEnabled: true,
+      deadLetterQueue: dlq,
+      tracing: lambda.Tracing.ACTIVE, // Enable X-Ray tracing
+    }
+  )
+```
+
+上記は以下の特徴を持っています。
+- X-Rayトレーシングがデフォルトで有効
+- パフォーマンス向上とコスト削減のためのARM64アーキテクチャ（Graviton2）
+- 実行失敗時のFIFOデッドレターキュー
+- 設定可能なタイムアウトと同時実行制限
+- 環境変数のサポート
+- Lambdaレイヤーのサポート
+
+最後にセキュリティ準拠のために、`cdk-nag`を使います。
+```ts
+      NagSuppressions.addResourceSuppressions(
+      this,
+      [
+        {
+          id: "AwsSolutions-IAM4",
+          reason: "Lambda execution role has appropriate permissions",
+        },
+        ...
+      ],
+      true
+    );
+```
+
+<!--
+#### custom-s3-bucket
+
+##### custom-s3-bucket-construct.ts
+
+#### rest-api
+
+##### rest-api-construct.ts
+-->
+
+
+### infrastructure/lib/stacks
+<!--
+#### api
+
+##### api-stack.ts
+
+##### lambda/chat/index.ts
+
+##### lambda/get-readings/index.ts
+
+##### lambda/get-symmary/index.ts
+
+#### auth
+
+##### stack-auth.ts
+
+#### chatbot
+
+##### chatbot-stack.ts
+
+#### data-pipeline
+
+##### stack-data-pipeline.ts
+
+##### lambda/lambda-calculate-notify/index.ts
+
+##### lambda/lambda-transform-to-json/index.ts
+
+#### hello-cdk
+
+##### hello-cdk-stack.ts
+
+##### lambda/index.js
+
+#### shared-resources
+
+##### stack-shared-resources.ts
+
+#### web
+
+##### web-stack.ts
+-->

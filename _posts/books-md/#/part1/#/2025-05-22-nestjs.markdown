@@ -1,0 +1,359 @@
+---
+layout: post
+title: "「Scalable Application Development with NestJS」を読む"
+date: 2025-05-22 12:00:00 +0900
+categories: [blog]
+tags: [書籍]
+excerpt: ""
+memo: "12-13,14"
+---
+
+Packt社の`Scalable Application Development with NestJS`という書籍を一部読んだので、気になったことを中心に簡単な感想や要約を書きます。(網羅性はありません)
+
+この書籍は`NestJS`について書かれている数少ない書籍です。自分の知っている範囲内では日本語にそのような書籍はなく、洋書でも殆どありません。(公式ドキュメントは読みやすいです。)また、`NestJS`はDTO、DI、モジュール指向、GraphQLやマイクロサービスとの統合など、多くのことを学べるフレームワークだと思います。この本は`NestJS`について体系的に説明し、実際の開発の流れまで書かれています。
+
+全体にはまだ目を通せていませんが、ケーススタディのパートが面白かったのでまとめてみます。
+
+**目次**
+* ToC
+{:toc}
+
+---
+
+**サイト**
+
+- <a href="https://www.oreilly.com/library/view/scalable-application-development/9781835468609/">オライリー</a>
+
+---
+
+NestJSはTSのフレームワークで、`Angular`や`SpringBoot`を意識して作られています。以下のような特徴があります。
+- OASの自動生成
+- `Angular`のようにcliコマンドでモジュールを作成
+- デコレータを使ったDI
+- `Express`と違い、`GraphQL`、`WebSocket`、`GRPC`もデコレーターで書ける
+
+### 第12章 電子商取引アプリケーション
+
+この章ではECサイトを構築していきます。
+
+#### 電子商取引アプリケーションの要件を理解する
+
+**製品情報サービス**
+- APIではデータ検証が必要
+- しかし、文字列の長さなどの簡易的な検証では不十分
+- 例えば、曖昧な商品説明はユーザーにとって良くない
+    - AIツールと組み合わせることで解決できる
+
+**顧客サービス**
+- 顧客が簡単にサポートに連絡でき、回答を得ることが重要
+
+#### アプリケーションアーキテクチャとデータモデリングの設計
+
+**RESTAPIでも実装の前にドキュメント作成が重要**
+- これはGRPCと同じような開発の進め方
+- HTTPメソッド定義前に、エンドポイントをリスト
+```plaintext
+# products
+    /products
+    /products/{id}
+    /products/{id}/orders
+    /products/{id}/orders/{orderId}
+    /products/{id}/reviews
+    /products/search
+# users
+    ...
+```
+
+**APIではレスポンスの統一が重要**
+```ts
+Class APIResponse {
+    success: boolean,
+    message: string,
+    error?: HttpExcetion,
+    data: any,
+}
+```
+- NestJSでは例外クラスは`HttpException`クラスを継承している
+
+**実際にHTTPメソッドを定義**
+- この段階ではクエリパラメータも使って書く
+    - `GET /products/search?page=1&limit=100&keyword=sample&minPrice=100&maxPrice=500`
+- 論理削除をPOSTで定義する方法を紹介している
+    - 個人的には`DELETE /soft`などのほうが分かりやすいと思う
+- 支払情報を変更するAPIは作成しない
+- 商品レビューはユーザーだけでなく、システム管理者も変更できるようにする必要
+
+API開発の最初の段階では、メソッドは定義せず、リソースだけ考えるという手法はAPIGatewayと同じ方法で、勉強になりました。
+
+#### 製品と注文用のREST APIの実装
+
+- 下の例では、製品エンティティを定義している
+```ts
+@Entity('products')
+export class Product {
+    @PrimaryGeneratedColumn('uuid')
+    id: string;
+    ...
+    @Column('simple-json', {
+        default: {},
+        comment: "product's specs",
+    })
+    specs: Record<string, string>;
+    ...
+}
+```
+- 上記で興味深い点
+    - 自動採番を使わずにUUIDを使用している
+    - RDBだが、JSONでメタデータを保存している
+
+**DTOクラスの作成**
+- `src/products/dto/create-product.dto.ts`などでDTOクラスを作成
+```ts
+export class CreateProductDto {
+    @IsString({
+        message: 'name must be a string',
+    })
+    @Length(5, 25, {
+        message: 'name must be between 5 and 25 characters',
+    })
+    name: string;
+
+    @IsString({
+    message: 'description must be a string',
+    })
+    @Length(25, 255, {
+        message: 'description must be between 25 and 255
+characters',
+    })
+    @Validate(ProductDescription)
+    description: string;
+    ...
+}
+```
+- 上記で興味深い点
+    - `class-validator`ライブラリは便利
+    - 名前は5文字以上、25字以下など制約が厳しい
+        - モバイルなどは画面が小さく、長いと読みにくいため
+    - `ProductDescription`などカスタムバリデーションを作成している
+        - `ProductDescription`では、`GeminiAI`に説明が有効かAPIに尋ねる処理を書いている
+            - 批判的な説明だけでなく、虚偽の説明をDBに入れない目的もある
+    - URLは正規表現チェックだけでなく、有効であるかまで確認
+
+個人的にはDTOにここまで検証ロジックを書くのは、ドメインの流出につながってしまうためよくないと思います。
+
+また、`Zod`などフロントエンドで使用されるライブラリに非同期カスタムバリデーションを実装する方法は知っていましたが、`class-validator`のようなバックエンドでも実装できることは知りませんでした。
+
+**`TypeORM`の設定**
+- 正規表現を使うと、エンティティを監視しやすくなる
+    - `entities: ['/**/*.entity{.ts,.js}']`
+
+**ページネーションの設定**
+- 現在のページ、制限などの情報も提供する必要
+- `PagniationService`クラスなどを作成すると便利
+```ts
+@Injectable()
+export class PaginationService {
+    getPaginationMeta(
+        page: number,
+        limit: number,
+        totalItems: number
+    )
+    ...
+}
+```
+
+ページネーションAPIは一見簡単そうですが、含めるべきフィールドが多かったりと、見た目以上に面倒に感じます。
+
+#### 電子商取引におけるユーザー認証と承認
+
+JWTトークンを使う一般的な認証ガードについて書かれています。
+
+
+### 第13章 SNSプラットフォーム
+
+- この章では、GraphQLとMongoDBを使用する
+- RESTはオーバーフェッチだけでなく、アンダーフェッチも問題
+- SNSでは読み取り、書き込みが多いので、NoSQLが有効
+
+#### ソーシャルネットワーキングのアプリケーション構造の設計
+
+**MongoDBコレクション**
+- インデックスがRDBと同様に重要
+- コレクションの関係は、RDBと同様の参照型の他に埋め込み型もある
+- Usersコレクション
+    - 環境設定をのサブドキュメントを埋め込む
+    - emailインデックス
+- Postsコレクション
+    - コメントやリアクションのサブドキュメント
+    - author, createdAtのインデックス
+- Commentsコレクション
+    - 親投稿、投稿者の2つの参照
+    - post, author, createdAtのインデックス
+
+MongoDBはインデックスの種類が多く、昇順、降順なども考える必要があるのでインデックス設計が難しく感じます。
+
+また、`Firestore`などのドキュメントDBに共通していることですが、ユースケースに応じて、トレードオフを意識しながら参照型と埋め込み型を使い分ける必要がありそうです。
+
+**API設計**
+- クエリは、`getUser`,`getPost`など
+- ミューテーションも同様に列挙
+
+RPCのように`GraphQL`APIを関数のように考えるようにしてから`GraphQL`設計に対する苦手意識が減ったように感じます。
+
+例えば、RESTではページネーションはクエリパラメータを利用しますが、`GraphQL`では以下のように引数として実装する方法が考えられます。
+
+```ts
+// メタデータを含むページネーション用の結果型
+interface PaginationMeta {
+  totalCount: number;      
+  currentPage: number;     
+  totalPages: number;     
+  hasNextPage: boolean;   
+  hasPreviousPage: boolean; 
+}
+
+interface PaginatedResult<T> {
+  data: T[];             
+  meta: PaginationMeta; 
+}
+
+// GraphQLのページネーション関数の引数
+interface PaginationArgs {
+  page: number;      
+  limit: number;         
+  cursor?: string;   
+}
+
+// ページネーションされたデータを取得するGraphQLの関数
+async function getUsers(
+  args: PaginationArgs
+): Promise<PaginatedResult<User>> {
+  ...
+}
+```
+
+#### ユーザー、投稿、インタラクションのためのGraphQL APIの実装
+
+**`MongoDBエンティティ`**
+- `NestJS`ではGraphQLのスキーマは自動生成される
+
+```ts
+@Schema()
+export class User extends Document {
+    @Prop({ required: true, unique: true })
+    username: string;
+    @Prop({ required: true, unique: true })
+    email: string;
+    ...
+}
+```
+- `Mongoose`で、デコレータを使って詳細にフィールドを定義できる
+
+`MongoDB`はスキーマレスですが、一貫性を保つためにアプリ側でスキーマを定義するのがよさそうです。また、`Mongoose`では、RDBのORMのように柔軟にフィールドを定義できることは知りませんでした。
+
+**`GraphQL`のDTO**
+- GraphQLでもDTOを作成します
+    - これを元に、`NestJS`がスキーマファイルを生成します
+    - `src/users/dto/create-user.dto.ts`
+```ts
+@InputType()
+export class CreateUserDto {
+    @Field()
+    username: string;
+    ...
+}
+```
+
+**リゾルバーファイルの生成**
+```ts
+@Resolver(of => User)
+export class UsersResolver {
+  constructor(
+    private readonly usersService: UsersService
+  ) {}
+
+  // ユーザー一覧を取得するクエリ
+  @Query(returns => [User])
+  async users() {
+    return this.usersService.findAll();
+  }
+  ...
+}
+```
+
+#### ユーザー関係とソーシャル機能
+
+#### ソーシャルネットワーキングのコンテキストでリアルタイムの更新と通知を投稿する
+
+- GraphQLのサブスクリプションを使用すれば、リアルタイムに反映できる
+```ts
+const pubSub = new PubSub();
+@Resolver(of => Post)
+export class PostsResolver {
+  constructor(
+    private readonly postsService: PostsService
+  ) {}
+
+  @Mutation(returns => Post)
+  async createPost(
+    @Args('createPostDto') createPostDto: CreatePostDto
+  ) {
+    const newPost = await this.postsService.create(createPostDto);
+    pubSub.publish('postAdded', { postAdded: newPost });
+    return newPost;
+  }
+
+  @Subscription(returns => Post)
+  postAdded() {
+    return pubSub.asyncIterator('postAdded');
+  }
+}
+```
+- 上記ではサブスクリプションリゾルバを追加している
+- また、ポストが追加された際に、そのサブスクリプションを呼び出す処理を書いている
+
+- 上記に対応するスキーマファイルはこういう形になる
+```plaintext
+# ミューテーション型
+type Mutation {
+  createPost(createPostDto: CreatePostInput!): Post!
+}
+
+# サブスクリプション型
+type Subscription {
+  postAdded: Post!
+}
+
+# 入力型（新しいPostを作成するための入力データ）
+input CreatePostInput {
+  title: String!
+  content: String!
+}
+```
+
+- これを`Apollo client`などで呼び出せば、リアルタイム処理を簡単に実装できる
+
+リアルタイムUI反映(タイムラインや通知)を実装する際、色々な方法があると思います。
+- WebSocket
+- GraphQLのサブスクリプション
+- FireStore
+
+このうち、`GraphQL`のサブスクリプションは非常に簡潔に書け、`Firestore`のようにベンダーロックされないので非常に便利に感じました。
+
+ただ、内部的には`WebSocket`を使用しているので、`AppSync`などのマネージドサービスを使わないと、非機能要件を満たすのは難しそうです。
+
+
+### 第14章 ERPシステム
+<!--
+#### 技術要件
+
+#### ERPシステムの要件を理解する
+
+#### ERPシステムのシステムアーキテクチャの設計
+
+#### スケーラビリティとモジュール性を実現するマイクロサービスの実装
+
+#### ERPコンテキストにおけるデータの同期と一貫性
+
+#### 複雑なビジネスプロセスとワークフローの処理
+-->

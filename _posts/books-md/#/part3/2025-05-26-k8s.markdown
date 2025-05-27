@@ -1,0 +1,695 @@
+---
+layout: post
+title: "「Kubernetes：アップ・アンド・ランニング」を読む"
+date: 2025-05-26 12:00:00 +0900
+categories: [blog]
+tags: [書籍]
+excerpt: ""
+memo: "1-4, 5-10"
+---
+
+オライリーの`Kubernetes：アップ・アンド・ランニング`という書籍を途中まで読んだので、気になったことを中心に簡単な感想や要約を書きます。(網羅性はありません)
+
+`k8s`を扱う上で基本的な内容が網羅された書籍になっています。
+
+**目次**
+
+- ToC
+{:toc}
+
+---
+
+**サイト**
+
+- <a href="https://www.oreilly.com/library/view/kubernetes-3/9798341624382/">オライリー</a>
+- <a href="https://github.com/kubernetes-up-and-running/examples">GitHub</a>
+
+---
+
+### 1.はじめに
+<!--
+#### 速度
+
+##### 不変性の価値
+
+##### 宣言的コンフィギュレーション
+
+##### 自己治癒システム
+
+#### サービスとチームの規模を拡大する
+
+##### デカップリング
+
+##### アプリケーションとクラスタのための容易なスケーリング
+
+##### マイクロサービスでは開発チームをスケールさせる
+
+##### 一貫性とスケーリングのための懸念事項の分離
+
+#### インフラを抽象化する
+
+#### 効率性
+
+#### クラウド・ネイティブ・エコシステム
+
+#### 概要
+-->
+
+
+### 2.コンテナの作成と実行
+
+- Open Container InitiativeがOCIイメージ形式で標準化している
+
+#### コンテナイメージ
+
+- ローカルからイメージをビルド
+- コンテナレジストリからイメージをダウンロード
+- イメージは複数のレイヤーで構成されている
+  - 各レイヤーからファイルを追加、削除、変更
+
+**コンテナの設定**
+- ネットワークの設定⽅法
+- 名前空間の分離⽅法
+- リソース制約(cgroup)
+- コンテナインスタンスにどのようなsyscall制限を設定するか
+
+#### Dockerでアプリケーションイメージを構築する
+
+##### ドッカーファイル
+
+- `.dockerignore`ファイルの追加を忘れずに
+```plaintext
+node_modules
+```
+
+##### 画像サイズを最適化する
+
+- イメージの大きさを常に気にする
+- 後続のレイヤーによって削除されたファイルは実際にはイメージに含まれることに注意
+  - ただアクセスできないだけ
+  - プルするたびに、ネットワークを介して送信されてしまう
+- レイヤーを変更するたびに、そのあとのレイヤーもすべて変更される
+  - 前のレイヤーを変更すると、後ろのレイヤーを再構築、プルする必要
+  - `npm install`と`cp server.js .`のどちらを先に書くべきか？
+    - `server.js`が変更された場合を考える
+    - `node`パッケージを後に書くと、`server.js`の変更ごとにプルする必要
+      - 変更される可能性の低いものから書く
+
+##### イメージ・セキュリティー
+
+- 例えば、PWを含んだコンテナを作らない
+- 一個のレイヤーでファイルを削除しても、その前のレイヤーからは削除されない
+- イメージは実行することが目的なので、最小化が重要
+  - 不要なライブラリなど、無駄な脆弱性を残さない
+
+#### 多段階イメージビルド
+
+- 大きいイメージはデプロイが遅くなる
+```dockerfile
+...
+
+FROM alpine
+USER nobody:nobody
+COPY --from=build /go/bin/kuard /kuard
+CMD [ "/kuard" ]
+```
+- ビルドイメージとデプロイイメージで分ける
+- 500MB→20MBまでこの例では削減できた
+  - デプロイ時間の大幅な短縮
+
+マルチステージビルドは有名ですが、ここまでサイズが変わるとは思いませんでした。また、`USER`や`ENV`はあまり使用したことがなかったので意識したいです。
+
+#### リモートレジストリに画像を保存する
+
+- Gitと同様に、Dockerレジストリにも様々な選択肢
+  - セキュリティ、コラボレーション機能で選ぶ
+- プライベート、パブリックリポジトリ
+
+#### コンテナ・ランタイム・インターフェイス
+
+##### Dockerでコンテナを実行する
+
+##### クアード・アプリケーションを探る
+
+##### リソースの使用を制限する
+
+- 内部的には`cgroup`の機能で実装されている
+```bash
+  --memory 200m \
+  --memory-swap 1G \
+  --cpu-shares 1024 \
+```
+
+`docker-compose.yaml`だけでなく、`docker`コマンドでもリソースを制限できるのは知りませんでした。
+
+#### クリーンアップ
+
+- `docker system prune`
+  - 全てのイメージを削除するコマンド
+  - cronジョブで実行する方法もある
+
+#### 概要
+
+
+### 3.Kubernetesクラスタをデプロイする
+
+#### パブリッククラウドプロバイダにKubernetesをインストールする
+
+##### Google Kubernetes EngineでKubernetesをインストールする
+
+##### Azure Kubernetes ServiceでKubernetesをインストールする
+
+##### Amazon Web ServicesにKubernetesをインストールする
+
+- `eksctl create cluster`
+
+#### minikubeを使ってKubernetesをローカルにインストールする
+
+#### DockerでKubernetesを実行する
+
+- 最近は`kind`が人気
+```bash
+ $ kind create cluster --wait 5m
+ $ export KUBECONFIG="$(kind get kubeconfig-path)"
+ $ kubectl cluster-info
+ $ kind delete cluster
+```
+
+#### Kubernetesクライアント
+
+##### クラスタの状態をチェックする
+
+```bash
+$ kubectl get componentstatuses
+```
+
+- `scheduler`と`etcd`サーバーを確認できる
+- `Healthy`となっていることを確認
+
+##### Kubernetesノードをリストアップする
+
+- `kubectl get nodes`→`kubectl describe nodes`の流れ
+  - labels: ARMプロセッサやOS情報
+  - Conditions: 操作の情報
+  - Capacity: 容量
+  - System-info
+  - Non-terminated pods: ポッド情報
+    - kube-dnsなどを確認できる
+
+
+#### クラスターコンポーネント
+
+- `kube-system`名前空間
+
+##### Kubernetesプロキシ
+
+- Daemonsetを使用して実行している
+  - 使用しない場合もある
+  - プロキシがクラスター内の全てのノードに存在する必要
+```bash
+kubectl get daemonSets --namespace=kube-system kube-proxy
+```
+
+##### Kubernetes DNS
+```bash
+kubectl get deployments --namespace=kube-system core-dns
+kubectl get services --namespace=kube-system core-dns
+```
+```plaintext
+ NAME       CLUSTER-IP   EXTERNAL-IP   PORT(S)         AGE
+ core-dns   10.96.0.10   <none>  53/UDP,53/TCP   45d
+```
+- クラスター内のコンテナにログイン後、`/etc/resolv.conf`を確認できる
+
+##### Kubernetes UI
+
+- クラウドプロバイダーなど、多数のGUIがある
+  - オープンソースやvscodeなどもある
+
+
+#### 4.一般的なkubectlコマンド
+
+#### 名前空間
+
+- デフォルトは、`default`名前空間と対話
+- `--all-namespaces`
+  - クラスター内の全てのポッドの一覧表示など
+
+#### コンテクスト
+
+- `$HOME/.kube/config`ファイル
+- `set-context`だけでなく、`use-context`まで必要
+- `set-context`コマンドで、`--users`, `--clusters`フラグの使用
+  - 異なるクラスタ、ユーザでの認証
+
+#### Kubernetes APIオブジェクトを表示する
+
+- k8sリソースはRestFulリソースを提供
+  - kubectlはこのURLにHTTP要求をし、パスに存在するオブジェクトにアクセス
+- `-o wide`: 詳細
+- `-o json | yaml`
+- kubectlの出力でヘッダーを削除することが一般的
+  - `awk`コマンドと組み合わせる
+- オブジェクトから特定のフィールドを抽出
+  - `JSONPath`クエリ言語の使用
+    - 指定されたPodのIPアドレスを抽出して出⼒するコマンド
+```bash
+$ kubectl get pods my-pod -o jsonpath --template={.status.podIP}
+```
+- `--watch`オプション
+
+#### Kubernetesオブジェクトを作成、更新、破棄する
+
+- `--dry-run`: サーバに送信せずターミナル出力
+- `kubectl edit`: 定義を含むエディターが起動
+- `delete -f`, `delete resource name`: 削除
+
+#### オブジェクトにラベルと注釈を付ける
+
+- labelコマンドとannotateコマンド
+- barという名前のPodにcolor=redラベルを追加するコマンド
+  - ` $ kubectl label pods bar color=red`
+- `--overwrite`フラグで上書き
+- `ラベル名-`でラベルの削除
+
+#### デバッグ・コマンド
+
+- Podに複数のコンテナがある場合は`-c`でコンテナを選択
+- `logs`と`exec -it --bash`コマンド
+- bashがない場合は、`kubectl attach -it pod`
+- `kubectl port-forward <pod-name> 8080:80`
+  - ローカルのポート8080:リモートの80
+- `kubectl get events`
+  - `--watch`
+  - 全ての名前空間は`-A`
+- `kubectl top pods`
+
+#### クラスター管理
+
+#### コマンド自動補完
+- `brew install bash-completion`
+- macOSでは`${HOME}/.bash_profile`ファイルに追記
+
+#### クラスターの別の見方
+
+- Rancher DashboardやHeadlampプロジェクトなど
+- `kubectl help`コマンド
+
+
+#### 5.ポッド
+
+#### KubernetesにおけるPod
+
+- 各コンテナは独自のcgroupで実行されるが、いくつかのLinux名前空間を共有
+- 同じPodで実行されるアプリ
+  - 独自のIPアドレスとネットワーク空間を共有する
+
+#### Podを使って考える
+
+- WordPressとMySQLを同じPodに置くのはアンチパターン
+
+#### ポッド・マニフェスト
+
+- 宣言型構成は多くの利点がある
+  - 可読性、レビューのしやすさ、文章化など
+
+##### ポッドを作成する
+
+```bash
+$ kubectl run kuard --generator=run-pod/v1 \
+  --image=gcr.io/kuar-demo/kuard-amd64:blue
+$ kubectl get pods # pending
+$ kubectl delete pods/kuard
+```
+
+コマンドで作成することはあまりないと思いますが、一応オプションなども覚えておきたいです。
+
+##### Podマニフェストの作成
+
+#### ランニングポッド
+
+##### リスト・ポッド
+
+##### ポッド詳細
+
+- ` $ kubectl describe pods kuard`
+  - ラベル、アノテーション、IP、ポート、イメージなどを確認できる
+
+##### Podを削除する
+
+- podはすぐにいは削除されない
+  - デフォルトでは30秒
+
+#### ポッドにアクセスする
+
+##### ログでより多くの情報を得る
+
+##### execを使ってコンテナ内でコマンドを実行する
+
+##### コンテナとの間でファイルをコピーする
+
+- コンテナへのファイルのコピーはアンチパターン
+  - ただし、緊急時には仕方がない
+  - すぐにイメージのビルドを行うべき
+
+#### 正常性確認
+
+- デフォルトでは、メインプロセス軌道を確認するだけ
+
+##### ライブネス・プローブ
+
+```yaml
+      livenessProbe:
+        httpGet:
+          path: /healthy
+          port: 8080
+        initialDelaySeconds: 5
+        timeoutSeconds: 1
+        periodSeconds: 10
+        failureThreshold: 3
+```
+- httpGetプローブの使用
+- コンテナ起動5行後から呼び出される
+- 1秒以内に応答する必要(200-400)
+- 3回連続失敗でコンテナは再起動
+```bash
+kubectl port-forward kuard 8080:8080
+```
+- ブラウザで、http://localhost:8080にアクセス
+  - Liveness Probeを選択
+  - コンテナを再起動できる
+- 実際の再起動の動作はPodの`restartPolicy`で決定される
+  - `Always`, `onFailure`, `Never`
+
+##### レディネスプローブ
+
+- 稼働状態と準備状態を区別する
+  - readinessプローブとliveness プローブを組み合わせる
+
+##### スタートアップ・プローブ
+
+- スロースタートコンテナを管理する代替⽅法
+
+##### 高度なプローブ設定
+
+- プローブを開始するまでの待機時間
+- 真の失敗と⾒なすべき失敗の数
+- 失敗数をリセットするために必要な成功の数など 
+
+##### その他の正常性確認型チェック
+
+- tcpSocketヘルスチェックもサポート
+  - 非HTTPアプリで役立つ
+- execプローブ
+  - スクリプトが0コードを返した場合に成功
+  - カスタムアプリ検証ロジックに役立つ
+
+#### リソース管理
+
+##### リソースの要求最低限必要なリソース
+
+- CPUとメモリを考える
+- CPU半分以上、128メモリ以上のリクエストの例
+```yaml
+resources:
+  requests:
+    cpu: "500m"
+    memory: "128Mi"
+```
+- requestsは最小値であることに注意
+
+k8sでも`docker-compose.yaml`みたいに書けるのは知りませんでした。
+
+##### リソースの使用量を制限する
+```yaml
+      resources:
+        requests:
+          cpu: "500m"
+          memory: "128Mi"
+        limits:
+          cpu: "1000m"
+          memory: "256Mi"
+```
+- 1000m = 1.0CPU
+
+#### ボリュームでデータを永続化する
+
+- Podの削除、再起動でファイルシステムのデータも消える
+  - ステートレスWebアプリでは問題ない
+
+##### Podでボリュームを使用する
+
+- `spec.volumes`, `container.volumeMounts`の編集
+- pod内の異なるコンテナは、異なるマウントパスで同じボリュームをマウントできる
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kuard
+spec:
+  volumes:
+    - name: "kuard-data"
+      hostPath:
+        path: "/var/lib/kuard"
+  containers:
+    - name: kuard
+      image: gcr.io/kuar-demo/kuard-amd64:blue
+      volumeMounts:
+        - mountPath: "/data"
+          name: "kuard-data"
+      ports:
+        ...
+```
+
+##### Podでボリュームを使うさまざまな方法
+
+- 真に永続的なデータの保存
+  - NFS, iSCSIのプロトコル
+  - EBSなど
+
+- NFSサーバの例
+```yaml
+ volumes:
+    - name: "kuard-data"
+      nfs:
+        server: my.nfs.server.local
+        path: "/exports"
+```
+
+#### すべてをまとめる
+
+- 永続ボリューム、レディネスプローブとライブネスプローブ、リソース制限の組み合わせ
+```yaml
+apiVersion: v1
+ kind: Pod
+ metadata:
+  name: kuard
+ spec:
+  volumes:
+    - name: "kuard-data"
+      nfs:
+        server: my.nfs.server.local
+        path: "/exports"
+  containers:
+    - image: gcr.io/kuar-demo/kuard-amd64:blue
+      name: kuard
+      ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+      resources:
+        requests:
+          cpu: "500m"
+          memory: "128Mi"
+        limits:
+          cpu: "1000m"
+          memory: "256Mi"
+      volumeMounts:
+        - mountPath: "/data"
+          name: "kuard-data"
+      livenessProbe:
+        httpGet:
+          path: /healthy
+          port: 8080
+        initialDelaySeconds: 5
+        timeoutSeconds: 1
+        periodSeconds: 10
+        failureThreshold: 3
+      readinessProbe:
+        httpGet:
+          path: /ready
+          port: 8080
+        initialDelaySeconds: 30
+        timeoutSeconds: 1
+        periodSeconds: 10
+        failureThreshold: 3
+```
+
+#### 6.ラベルと注釈
+<!--
+#### ラベル
+
+##### ラベルを貼る
+
+##### ラベルを修正する
+
+##### ラベル・セレクタ
+
+##### APIオブジェクトのラベルセレクタ
+
+##### Kubernetesアーキテクチャにおけるラベル
+
+#### 注釈
+
+#### 清掃
+
+#### 概要
+-->
+
+
+#### 7.サービス検出
+<!--
+#### サービス検出とは何か？
+
+#### サービスオブジェクト
+
+##### サービスDNS
+
+##### レディネス・チェック
+
+#### クラスターの先を見る
+
+#### ロードバランサの統合
+
+#### 詳細
+
+##### エンドポイント
+
+##### マニュアルサービス検出
+
+##### クラスタIP環境変数
+
+#### 他の環境とつながる
+
+##### クラスタ外のリソースに接続する
+
+##### 外部リソースをクラスタ内のサービスに接続する
+
+#### 清掃
+
+#### 概要
+-->
+
+
+#### 8.イングレスを使ったHTTPロードバランサ
+<!--
+#### イングレス仕様とイングレス・コントローラーの比較
+
+#### コンターの設置
+
+##### DNSを設定する
+
+##### ローカルhostsファイルを構成する
+
+#### イングレスを使う
+
+##### 最もシンプルな使い方
+
+##### ホスト名を使う
+
+##### パスを使う
+
+##### 清掃
+
+#### 上級イングレスのトピックとゴッチャ
+
+##### 複数のイングレス・コントローラーを動かす
+
+##### 複数のイングレス・オブジェクト
+
+##### イングレスとネームスペース
+
+##### パスの書き換え
+
+##### TLSへのサービス
+
+#### 代替イングレスの実装
+
+#### Ingressの未来
+
+#### 概要
+-->
+
+
+#### 9.レプリカセット
+<!--
+#### 和解ループ
+
+#### PodとReplicaSetsの関係
+
+#### 既存のコンテナを採用する
+
+#### コンテナを隔離する
+
+#### ReplicaSetsでデザインする
+
+#### レプリカセット仕様
+
+#### Podテンプレート
+
+#### ラベル
+
+#### レプリカセットの作成
+
+#### レプリカセットを検査する
+
+#### PodからReplicaSetを発見する
+
+#### レプリカセットのPodセットを発見する
+
+#### レプリカセットを拡大縮小する
+
+#### kubectl scaleを使ったインペラティブ・スケーリング
+
+#### kubectl applyで宣言的にスケーリングする
+
+#### レプリカセットのオートスケーリング
+
+#### レプリカセットを削除する
+
+#### 概要
+-->
+
+
+#### 10.デプロイ
+<!--
+#### 初めてのデプロイ
+
+#### デプロイの作成
+
+#### デプロイを管理する
+
+#### デプロイを更新する
+
+#### デプロイをスケーリングする
+
+#### コンテナイメージを更新する
+
+#### ロールアウトの歴史
+
+#### デプロイ戦略
+
+#### 戦略を再構築する
+
+#### RollingUpdate戦略
+
+#### サービスの健全性を確保するため、展開を遅らせる
+
+#### デプロイを削除する
+
+#### デプロイを監視する
+
+#### 概要
+-->
+

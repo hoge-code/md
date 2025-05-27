@@ -1,0 +1,777 @@
+---
+layout: post
+title: "「Domain-Driven Design with Golang」を読む"
+date: 2025-05-22 12:00:00 +0900
+categories: [blog]
+tags: [書籍]
+excerpt: ""
+memo: "1-5, 6-8"
+---
+
+オライリーの`Domain-Driven Design with Golang`という書籍を読んだので、気になったことを中心に簡単な感想や要約を書きます。(網羅性はありません)
+
+Goの書籍の場合、マイクロサービスやデブオペが中心となることが多いですが、この本はDDDやクリーンアーキテクチャなど、設計が中心になっています。
+
+**目次**
+* ToC
+{:toc}
+
+---
+
+**サイト**
+
+- <a href="https://www.oreilly.com/library/view/domain-driven-design-with/9781804613450/">オライリー</a>
+
+---
+
+## パート1: ドメイン駆動設計入門
+
+### 第1章 ドメイン駆動設計の簡単な歴史
+<!--
+#### DDD以前の世界
+
+##### では、OOD パターンとは何でしょうか?
+
+#### エリック・エヴァンスとDDD
+
+#### DDDの3つの柱
+
+#### DDDの採用
+
+#### DDD はいつ使用すればよいですか?
+
+#### まとめ
+
+#### さらに読む
+-->
+
+
+### 第2章 ドメイン、ユビキタス言語、境界付きコンテキストの理解
+
+#### 技術要件
+
+#### 舞台設定
+
+- この章では、コーヒー店のネット通販を想定
+    - 3つのサブスクプラン
+    - 登録したユーザーをリードユーザーという
+    - サブスクに登録すると、カスタマーという
+
+- 取り合えずインターフェースを作成してみる
+```go
+// ユーザータイプ
+type UserType int
+
+// サブスクリプションタイプ
+type SubscriptionType int
+
+const (
+	// ユーザータイプの定義
+	unknownUserType UserType = iota
+	lead
+	customer
+	churned
+	lostLead
+)
+
+const (
+	// サブスクリプションタイプの定義
+	unknownSubscriptionType SubscriptionType = iota
+	basic
+	premium
+	exclusive
+)
+
+// ユーザー追加リクエスト
+type UserAddRequest struct {
+	UserType       UserType
+	Email          string
+	SubType        SubscriptionType
+	PaymentDetails PaymentDetails
+}
+
+// ユーザー修正リクエスト
+type UserModifyRequest struct {
+	ID             string
+	UserType       UserType
+	Email          string
+	SubType        SubscriptionType
+	PaymentDetails PaymentDetails
+}
+
+// ユーザー
+type User struct {
+	ID             string
+	PaymentDetails PaymentDetails
+}
+
+// ユーザーマネージャーインターフェース
+type UserManager interface {
+	AddUser(ctx context.Context, request UserAddRequest) (User, error)
+	ModifyUser(ctx context.Context, request UserModifyRequest) (User, error)
+}
+```
+
+#### ドメインとサブドメイン
+
+- この例では、`payments`と`subscriptions`
+    - チームはドメインで分割されることが多い
+    - 更にドメインができると、チームが分割される
+
+#### ユビキタス言語
+
+- customerはチームによって違う意味を持つ場合がある
+- 用語集をドキュメントに管理し、定期的にレビューすることが重要
+- 開発者は定義が正しいか、エッジケースを考える必要
+
+##### ユビキタス言語の利点
+
+- ITプロジェクトが失敗するよくある理由
+    - `got lost in translation`
+- 具体例：顧客ごとに複数のアカウントをサポートしたい
+    - しかし、顧客エンティティが存在しない
+    - アカウントごとに一人のユーザーという仮定
+    - `customer`ではなく`user`が使われていた
+        - ユビキタス言語を使用していれば避けられたかもしれない
+
+- 登録→lead user→サブスク→customerというサンプルコード
+```go
+// リード作成リクエスト
+type LeadRequest struct {
+	email string
+}
+
+// リード
+type Lead struct {
+	id string
+}
+
+// リード作成インターフェース
+type LeadCreator interface {
+	CreateLead(ctx context.Context, request LeadRequest) (Lead, error)
+}
+
+// 顧客
+type Customer struct {
+	leadID string
+	userID string
+}
+
+// リード変換インターフェース
+type LeadConvertor interface {
+	Convert(ctx context.Context, subSelection SubscriptionType) (Customer, error)
+}
+
+// リードを顧客に変換
+func (l Lead) Convert(ctx context.Context, subSelection SubscriptionType) (Customer, error) {
+	// TODO 実装する
+}
+```
+
+- このようにユビキタス言語をコードに反映する
+    - こうすることで、ドメインの用語で会話できるようになる
+
+- 議事録をとることなどがユビキタス言語習得に役立つ
+- その後、用語集に追加
+- 用語集は境界づけられたコンテキストでのみ有効
+    - その用語をプロジェクト全体に適用しようとすると厳格さを失う
+
+#### 境界付けられたコンテキスト
+
+- サブスク、マーケティングにおいて、顧客のモデルが異なる
+    - マッピングを行うことが必要
+    - そのために、以下の3つの方法
+
+##### オープンホストサービス
+
+- HTTPエンドポイントを公開
+
+##### 公開された言語
+
+- OpenAPIなどの手法
+    - これは`gorilla`などもサポート
+
+- open-apiジェネレータの利用
+    - 以下は設定ファイルの例
+
+```plaintext
+package: oapi
+output: ./openapi.gen.go
+generate:
+      models: true
+      client: true
+```
+- クライアントも追加できる
+
+```bash
+go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen@latest
+oapi-codegen --config=config.yml  ./oapi.yaml
+```
+
+OpenAPIで設定ファイルを作成したり、CIで利用する手法は知りませんでした。
+
+生成するコードが雑なことが多いので、個人的にOASのコード生成はあまり好きではありませんが、上手く活用すれば、クライアントだけでなく、サーバ生成も効率化できるかもしれません。
+
+- GRPCの手法
+    - ここでは`buf`が紹介されている
+
+`buf`は知りませんでしたが、コード品質のチェック、依存関係の管理、CICDとの統合など、`protoc`より優れている点が多いらしいです。
+
+##### 腐敗防止層
+
+```go
+// キャンペーン構造体
+type Campaign struct {
+    ID      string   
+    Title   string    
+    Goal    string    
+    EndDate time.Time 
+}
+
+// マーケティングキャンペーンモデル
+type MarketingCampaignModel struct {
+    Id       string `json:"id"` 
+    Metadata struct {
+        Name     string `json:"name"`     
+        Category string `json:"category"` 
+        EndDate  string `json:"endDate"`  
+    } `json:"metadata"`
+}
+
+// MarketingCampaignModelをCampaignに変換するメソッド
+func (m *MarketingCampaignModel) ToCampaign() (*Campaign, error) {
+    ...
+    return &Campaign{
+        ...
+    }, nil
+}
+```
+
+- より複雑なシステムでは、腐敗防止サービスを作成する場合もある
+    - microserviceA→腐敗防止サービス→microserviceBなど
+    - 古いサービスが新しいサービスに移行する場合などに有効
+
+
+### 第3章: エンティティ、値オブジェクト、集計
+
+#### 技術要件
+
+#### エンティティの操作
+
+- IDが必要
+
+##### 適切な識別子を生成する
+
+- UUIDは128ビット
+```go
+import "github.com/google/uuid"
+
+// SomeEntity構造体
+type SomeEntity struct {
+    id uuid.UUID
+}
+
+// 新しいSomeEntityを作成する関数
+func NewSomeEntity() *SomeEntity {
+    id := uuid.New()
+    return &SomeEntity{id: id}
+}
+```
+
+- PostgreSQLなどはUUIDを生成できる
+
+個人的にRDBの`AUTO INCREMENT`を使う場合が多いが、DDDではエンティティでPKを生成し、保存するほうがいい気がします。
+
+##### エンティティを定義する際の警告
+
+- DB設計に任せると、貧血ドメインモデルになる
+- 以下はゲッター、セッターだからのエンティティのリファクタリング後
+```go
+type AuctionRefactored struct {
+	id            int
+	startingPrice money.Money
+	sellerID      int
+	createdAt     time.Time
+	auctionStart  time.Time
+	auctionEnd    time.Time
+}
+
+// オークションの経過時間を取得するメソッド
+func (a *AuctionRefactored) GetAuctionElapsedDuration() time.Duration {
+	return a.auctionEnd.Sub(a.auctionStart) // auctionEnd - auctionStart
+}
+
+// UTCでのオークション終了時間を取得するメソッド
+func (a *AuctionRefactored) GetAuctionEndTimeInUTC() time.Time {
+	return a.auctionEnd
+}
+
+// オークション終了時間を設定するメソッド
+func (a *AuctionRefactored) SetAuctionEnd(auctionEnd time.Time) error {
+	if err := a.validateTimeZone(auctionEnd); err != nil {
+		return err
+	}
+	a.auctionEnd = auctionEnd
+	return nil
+}
+
+// タイムゾーンがUTCかどうかを検証するヘルパーメソッド
+func (a *AuctionRefactored) validateTimeZone(t time.Time) error {
+	tz, _ := t.Zone()
+	if tz != time.UTC.String() {
+		return errors.New("time zone must be UTC")
+	}
+	return nil
+}
+```
+- エンティティがビジネスロジックを持つことが分かりやすい
+- UTCのみを扱うことを示し、エラーで強制
+
+**なぜDBと同じモデルを使用するのはよくないのか?**
+- 初期段階ではあまり問題がない
+- オークションに関するメタデータはドメインモデルに属さないから
+    - 閲覧したユーザー、広告の効果、ユーザーの移動を追跡するトレースID
+
+##### オブジェクトリレーショナルマッピングに関する注意
+
+#### 値オブジェクトの操作
+
+- 良くない例
+```go
+// Point構造体
+type Point struct {
+    x int
+    y int
+}
+
+// NewPointは新しいPointインスタンスを作成する関数
+func NewPoint(x, y int) *Point {
+    return &Point{
+        x: x,
+        y: y,
+    }
+}
+```
+
+- `&`を使用すると、メモリへの参照となるので、同じ値でも等しくなくなる
+
+- 良い例
+```go
+// Point構造体
+type Point struct {
+    x int
+    y int
+}
+
+// NewPointは新しいPointインスタンスを作成する関数（値渡し）
+func NewPoint(x, y int) Point {
+    return Point{
+        x: x,
+        y: y,
+    }
+}
+```
+
+- ポインタを返していない
+- 値オブジェクトではプロパティは小文字にする
+    - 置き換える場合は、他のOOP言語みたいに新しいインスタンスを返却
+
+##### エンティティと値オブジェクトのどちらを使用するかをどのように決定すればよいですか?
+
+- 可能な限り値オブジェクトを利用
+    - 最も安全であるから
+
+#### 集約パターン
+
+- DDDで最も難しく、間違って実装されることが多い
+    - 最悪の場合、不整合が発生
+    - Order, team, walletなど
+
+- トランザクション境界として機能
+    - 注文がキャンセルされると、全ての商品を在庫に戻す
+    - 新しいカードを追加すると、残高が合計残高に反映されるなど
+
+- Wallet Aggregateのサンプル
+```go
+package main
+
+import (
+	...
+)
+
+type WalletItem interface {
+	GetBalance() (money.Money, error)
+}
+
+type Wallet struct {
+	id         uuid.UUID
+	ownerID    uuid.UUID
+	walletItems []WalletItem
+}
+
+// GetWalletBalanceはウォレットの合計残高を取得するメソッド
+func (w Wallet) GetWalletBalance() (money.Money, error) {
+	var bal money.Money
+
+	// 各ウォレットアイテムから残高を取得して合計を算出
+	for _, v := range w.walletItems {
+		itemBal, err := v.GetBalance()
+		if err != nil {
+			return bal, errors.New("failed to get balance")
+		}
+
+		// 残高を加算
+		bal, err = bal.Add(itemBal)
+		if err != nil {
+			return bal, errors.New("failed to increment balance")
+		}
+	}
+
+	return bal, nil
+}
+```
+
+##### 集約の発見
+
+##### 集約の設計
+
+- 可能な限り小さく保つべき
+    - スケーラビリティの向上
+    - トランザクションが成功する可能性の向上
+
+- 例えば、以下は不適切
+```go
+type Order struct {
+	items          []item       
+	taxAmount      money.Money
+	discount       money.Money 
+	paymentCardID  uuid.UUID   
+	customerID     uuid.UUID    
+	marketingOptIn bool          
+}
+```
+- オプトイン、オプトアウトは注文と関係ないから
+
+##### 単一の境界付きコンテキストを超えた集約
+
+- 境界づけられたコンテキストが変更される場合
+- atomic性と最終的な一貫性のトレードオフを考える
+
+
+### 第4章: ファクトリー、リポジトリ、サービスの探索
+
+- サービス
+    - ドメイン、アプリ、インフラサービスがある
+
+#### 技術要件
+
+#### ファクトリーパターンの紹介
+
+- ファクトリはカプセル化も提供
+- 誰かが営業時間外に予約を作成しようとした場合のサンプル
+```go
+// Booking構造体は、予約情報を保持
+type Booking struct {
+	id            uuid.UUID
+	from          time.Time
+	to            time.Time
+	hairDresserID uuid.UUID
+}
+
+// CreateBookingは新しい予約を作成する関数
+func CreateBooking(from, to time.Time, hairDresserID uuid.UUID) (*Booking, error) {
+	// 営業終了時刻（例: 17:00pm）を設定
+	closingTime, _ := time.Parse(time.Kitchen, "5:00PM")
+	
+	// 予約時間が営業時間外か確認
+	if from.After(closingTime) {
+		return nil, errors.New("no appointments after closing time")
+	}
+
+	// 予約を作成して返す
+	return &Booking{
+		id:            uuid.New(),           // 新しい予約IDを生成
+		from:          from,                 // 予約開始時刻
+		to:            to,                   // 予約終了時刻
+		hairDresserID: hairDresserID,       // 美容師IDは引数から取得
+	}, nil
+}
+```
+
+- 上記では、UUID生成と検証をファクトリ内で記述
+
+##### エンティティファクトリー
+
+- ファクトリ関数がIDを生成するか、パラメータとして渡すか
+    - ファクトリが生成するのが一般的
+
+#### Golangでリポジトリパターンを実装する
+
+#### サービスを理解する
+
+- 3種類のサービスがある
+
+##### ドメインサービス
+
+- 値オブジェクト、エンティティに書きづらい処理
+    - 一つのドメインオブジェクトを別のに変換
+    - 2つのドメインオブジェクトを利用して計算
+
+- 良くない例
+```go
+type ShoppingCart struct {
+    ID          int
+    Products    []Product   
+    IsFull      bool
+    MaxCartSize int
+ }
+
+func (s *ShoppingCart) AddToCart(p Product) bool {
+    if s.IsFull{
+        ...
+    }
+    if p.CanBeBought() {
+        ...
+    }
+    ...
+}
+```
+
+- 上記の実装中に別のエンティティを参照し、関係ないロジックを追加している
+- リファクタリング後
+```go
+// CheckoutServiceは、カート内の商品に関連する処理を行うサービス
+type CheckoutService struct {
+	shoppingCart *ShoppingCart
+}
+
+// NewCheckoutServiceは、新しいCheckoutServiceを作成するコンストラクタ
+func NewCheckoutService(shoppingCart *ShoppingCart) *CheckoutService {
+	return &CheckoutService{shoppingCart: shoppingCart}
+}
+
+// AddProductToBasketは、ショッピングカートに商品を追加するメソッド
+func (c *CheckoutService) AddProductToBasket(p *Product) error {
+	// カートが満杯の場合は追加できない
+	if c.shoppingCart.IsFull {
+		return errors.New("cannot add to cart, it's full")
+	}
+
+	// 商品が購入可能であればカートに追加
+	if p.CanBeBought() {
+		c.shoppingCart.Products = append(c.shoppingCart.Products, *p)
+	}
+
+	// カートが満杯かどうかチェックし、満杯の場合はIsFullをtrueに設定
+	if len(c.shoppingCart.Products) >= c.shoppingCart.MaxCartSize {
+		c.shoppingCart.IsFull = true
+	}
+
+	return nil
+}
+```
+- 複数のエンティティにまたがるロジックを書く
+    - より多くのエンティティを書く可能性
+        - 例：割引、配送エンティティ
+    - 拡張性が上がる
+
+##### アプリケーションサービス
+
+- この層では書きすぎてはいけない
+    - 調整のみで、殆どのロジックは下の層に書くべき
+
+```go
+// BookingDomainServiceは、予約の作成を担当するインターフェース
+type BookingDomainService interface {
+	CreateBooking(ctx context.Context, booking Booking) error
+}
+
+// BookingAppServiceは、予約に関するアプリケーション層のサービス
+type BookingAppService struct {
+	bookingRepo          BookingRepository
+	bookingDomainService BookingDomainService
+}
+
+...
+
+// CreateBookingは、新しい予約を作成するためのメソッド
+func (b *BookingAppService) CreateBooking(ctx context.Context, booking Booking) error {
+    u, ok := ctx.Value(accountCtxKey).(*chapter2.Customer)
+    ...
+	// 予約をドメインサービスを使って作成
+	err := b.bookingDomainService.CreateBooking(ctx, booking)
+    ...
+	b.bookingRepo.Save(ctx, booking)
+    ...
+	return nil
+}
+```
+
+ここでは、インフラサービスも簡単に追加でき、下の例では注文後のメール送信も簡単に追加できる。
+```go
+type BookingAppService struct {
+   bookingRepo          BookingRepository
+   bookingDomainService BookingDomainService
+   emailService         EmailSender
+ }
+```
+
+
+## パート2: Golangを使った実践的なドメイン駆動設計
+
+### 第5章: モノリシックアプリケーションへのドメイン駆動設計の適用
+
+#### 技術要件
+
+#### モノリシック アプリケーションとはどういう意味でしょうか?
+
+#### 舞台設定
+
+- 10杯コーヒーを買えば1杯ただで飲める
+- 毎月無制限のコーヒーを飲めるサブスク
+- 割引
+
+- 以下のユビキタス言語を特定
+	- Coffee lovers: 顧客
+	- CoffeeBux: ロイヤルティプログラム
+	- Tinu, medium massive: サイズ
+
+- 次のドメインを特定
+	- 店、商品、忠義、予約
+
+#### CoffeeCoシステムを使い始める
+
+- product.goは値オブジェクトか？
+	- 不変か？値だけで他のオブジェクトと比較できるか？
+	- とりあえず値オブジェクトが無難
+
+```go
+type Product struct {
+   ItemName  string
+   BasePrice money.Money
+ }
+
+type Store struct {
+   ID              uuid.UUID
+   Location        string
+   ProductsForSale []coffeeco.Product
+ }
+
+type Purchase struct {
+   id                 uuid.UUID
+   Store              store.Store
+   ProductsToPurchase []coffeeco.Product
+   total              money.Money
+   PaymentMeans       payment.Means
+   timeOfPurchase     time.Time
+   CardToken          *string
+ }
+```
+- 上記の`Purchase`はエンティティ
+- また、`CardToken`は任意なのでアドレスにしている
+
+```go
+type CoffeeBux struct {
+   ID                                    uuid.UUID
+   store                                 store.Store
+   coffeeLover                           coffeeco.CoffeeLover
+   FreeDrinksAvailable                   int
+   RemainingDrinkPurchasesUntilFreeDrink int
+ }
+```
+
+個人的に値オブジェクトかどうか考える際に、不変かどうかは分かりづらいので、値を比較できるどうかで考えると分かりやすく感じました。
+
+##### 製品リポジトリの実装
+
+##### 支払い処理のためのインフラストラクチャサービスの追加
+
+##### CoffeeBuxでお支払い
+
+p18
+
+##### 店舗固有の割引を追加する
+
+##### サービスの拡張
+
+#### まとめ
+
+#### さらに読む
+
+
+### 第6章: DDDを使用したマイクロサービスの構築
+<!--
+#### 技術要件
+
+#### マイクロサービスとはどういう意味でしょうか?
+
+##### マイクロサービスの利点は何ですか?
+
+##### マイクロサービスの欠点は何ですか?
+
+#### 私の会社はマイクロサービスを導入すべきでしょうか?
+
+#### 舞台設定（再び）
+
+#### 推奨システムの構築
+
+#### 腐敗防止層の再検討
+
+#### オープンホストサービス経由でサービスを公開する
+
+#### まとめ
+-->
+
+
+### 第7章 分散システムのためのDDD
+<!--
+#### 技術要件
+
+#### 分散システムとは何ですか?
+
+##### CAP定理とデータベース
+
+#### 分散システムパターン
+
+##### CQRS
+
+##### EDA
+
+#### 失敗への対処
+
+##### 2相コミット（2PC）
+
+##### サガパターン
+
+#### メッセージ バスとは何ですか?
+
+##### カフカ
+
+##### ラビットMQ
+
+##### NATS
+
+#### まとめ
+
+#### さらに読む
+-->
+
+
+### 第8章: TDD、BDD、DDD
+<!--
+#### 技術要件
+
+#### TDD
+
+##### テストを追加する
+
+##### 今書いたテストを実行すると失敗するはずです（そして、それは予想通りです）。
+
+##### テストに合格するためにできるだけ少ないコードを記述する
+
+##### リファクタリング
+
+#### 二分脊椎
+
+#### まとめ
+-->
