@@ -3,7 +3,7 @@ layout: post
 title: "「Acing the System Design」を読む"
 date: 2025-05-22 12:00:00 +0900
 categories: [blog]
-tags: [書籍]
+tags: [書籍, 設計]
 excerpt: ""
 memo: "1-6"
 ---

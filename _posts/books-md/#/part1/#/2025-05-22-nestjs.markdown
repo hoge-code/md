@@ -3,14 +3,18 @@ layout: post
 title: "「Scalable Application Development with NestJS」を読む"
 date: 2025-05-22 12:00:00 +0900
 categories: [blog]
-tags: [書籍]
-excerpt: ""
+tags: [書籍, Nodejs]
+excerpt: "NestJS"
 memo: "12-13,14"
 ---
 
 Packt社の`Scalable Application Development with NestJS`という書籍を一部読んだので、気になったことを中心に簡単な感想や要約を書きます。(網羅性はありません)
 
-この書籍は`NestJS`について書かれている数少ない書籍です。自分の知っている範囲内では日本語にそのような書籍はなく、洋書でも殆どありません。(公式ドキュメントは読みやすいです。)また、`NestJS`はDTO、DI、モジュール指向、GraphQLやマイクロサービスとの統合など、多くのことを学べるフレームワークだと思います。この本は`NestJS`について体系的に説明し、実際の開発の流れまで書かれています。
+この書籍は`NestJS`について書かれている数少ない書籍です。自分の知っている範囲内では日本語にそのような書籍はなく、洋書でも殆どありません。(公式ドキュメントは読みやすいです。)
+
+また、`NestJS`はDTO、DI、モジュール指向、GraphQLやマイクロサービスとの統合など、多くのことを学べるフレームワークだと思います。
+
+この本は`NestJS`について体系的に説明し、実際の開発の流れまで書かれています。
 
 全体にはまだ目を通せていませんが、ケーススタディのパートが面白かったのでまとめてみます。
 
@@ -52,6 +56,7 @@ NestJSはTSのフレームワークで、`Angular`や`SpringBoot`を意識して
 **RESTAPIでも実装の前にドキュメント作成が重要**
 - これはGRPCと同じような開発の進め方
 - HTTPメソッド定義前に、エンドポイントをリスト
+
 ```plaintext
 # products
     /products
@@ -65,6 +70,7 @@ NestJSはTSのフレームワークで、`Angular`や`SpringBoot`を意識して
 ```
 
 **APIではレスポンスの統一が重要**
+
 ```ts
 Class APIResponse {
     success: boolean,
@@ -88,6 +94,7 @@ API開発の最初の段階では、メソッドは定義せず、リソース�
 #### 製品と注文用のREST APIの実装
 
 - 下の例では、製品エンティティを定義している
+
 ```ts
 @Entity('products')
 export class Product {
@@ -108,6 +115,7 @@ export class Product {
 
 **DTOクラスの作成**
 - `src/products/dto/create-product.dto.ts`などでDTOクラスを作成
+
 ```ts
 export class CreateProductDto {
     @IsString({
@@ -150,6 +158,7 @@ characters',
 **ページネーションの設定**
 - 現在のページ、制限などの情報も提供する必要
 - `PagniationService`クラスなどを作成すると便利
+
 ```ts
 @Injectable()
 export class PaginationService {
@@ -255,6 +264,7 @@ export class User extends Document {
 - GraphQLでもDTOを作成します
     - これを元に、`NestJS`がスキーマファイルを生成します
     - `src/users/dto/create-user.dto.ts`
+
 ```ts
 @InputType()
 export class CreateUserDto {
@@ -265,6 +275,7 @@ export class CreateUserDto {
 ```
 
 **リゾルバーファイルの生成**
+
 ```ts
 @Resolver(of => User)
 export class UsersResolver {
@@ -286,6 +297,7 @@ export class UsersResolver {
 #### ソーシャルネットワーキングのコンテキストでリアルタイムの更新と通知を投稿する
 
 - GraphQLのサブスクリプションを使用すれば、リアルタイムに反映できる
+
 ```ts
 const pubSub = new PubSub();
 @Resolver(of => Post)
@@ -313,6 +325,7 @@ export class PostsResolver {
 - また、ポストが追加された際に、そのサブスクリプションを呼び出す処理を書いている
 
 - 上記に対応するスキーマファイルはこういう形になる
+
 ```plaintext
 # ミューテーション型
 type Mutation {

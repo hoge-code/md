@@ -3,8 +3,8 @@ layout: post
 title: "「AWS上のシステム設計」を読む"
 date: 2025-05-22 12:00:00 +0900
 categories: [blog]
-tags: [書籍, AWS]
-excerpt: ""
+tags: [書籍, 設計, AWS]
+excerpt: "AWS"
 memo: "4,5,12,14, 15-21"
 ---
 
@@ -616,6 +616,7 @@ Redlockは各言語でライブラリが提供されています。初期化時�
     - DynamoDBではclientToken機能がある
 
 ClientTokenはトランザクションの再試行を防ぐ仕組みで、以下のように使うらしいです。
+
 ```python
 try:
     response = dynamodb.transact_write_items(

@@ -117,6 +117,6 @@ Hi username! You've successfully authenticated, but GitHub does not provide shel
 
 ### 結論
 
-- `git@github.com` のユーザー名は **常に `git`** で、GitHubでのユーザー名は関係ありません。
+- `git@github.com` のユーザー名は 常に `git` で、GitHubでのユーザー名は関係ありません。
 - SSH接続時には、`ssh-agent` の設定が重要です。SSHキーが正しく登録されているか確認します。
 - 初期のブランチ名の設定に注意します。

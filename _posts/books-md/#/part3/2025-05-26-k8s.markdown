@@ -3,8 +3,8 @@ layout: post
 title: "「Kubernetes：アップ・アンド・ランニング」を読む"
 date: 2025-05-26 12:00:00 +0900
 categories: [blog]
-tags: [書籍]
-excerpt: ""
+tags: [書籍, k8s]
+excerpt: "k8s"
 memo: "1-4, 5-10"
 ---
 
@@ -78,6 +78,7 @@ memo: "1-4, 5-10"
 ##### ドッカーファイル
 
 - `.dockerignore`ファイルの追加を忘れずに
+
 ```plaintext
 node_modules
 ```
@@ -105,6 +106,7 @@ node_modules
 #### 多段階イメージビルド
 
 - 大きいイメージはデプロイが遅くなる
+
 ```dockerfile
 ...
 
@@ -134,6 +136,7 @@ CMD [ "/kuard" ]
 ##### リソースの使用を制限する
 
 - 内部的には`cgroup`の機能で実装されている
+
 ```bash
   --memory 200m \
   --memory-swap 1G \
@@ -168,6 +171,7 @@ CMD [ "/kuard" ]
 #### DockerでKubernetesを実行する
 
 - 最近は`kind`が人気
+
 ```bash
  $ kind create cluster --wait 5m
  $ export KUBECONFIG="$(kind get kubeconfig-path)"
@@ -206,15 +210,18 @@ $ kubectl get componentstatuses
 - Daemonsetを使用して実行している
   - 使用しない場合もある
   - プロキシがクラスター内の全てのノードに存在する必要
+
 ```bash
 kubectl get daemonSets --namespace=kube-system kube-proxy
 ```
 
 ##### Kubernetes DNS
+
 ```bash
 kubectl get deployments --namespace=kube-system core-dns
 kubectl get services --namespace=kube-system core-dns
 ```
+
 ```plaintext
  NAME       CLUSTER-IP   EXTERNAL-IP   PORT(S)         AGE
  core-dns   10.96.0.10   <none>  53/UDP,53/TCP   45d
@@ -227,7 +234,7 @@ kubectl get services --namespace=kube-system core-dns
   - オープンソースやvscodeなどもある
 
 
-#### 4.一般的なkubectlコマンド
+### 4.一般的なkubectlコマンド
 
 #### 名前空間
 
@@ -253,6 +260,7 @@ kubectl get services --namespace=kube-system core-dns
 - オブジェクトから特定のフィールドを抽出
   - `JSONPath`クエリ言語の使用
     - 指定されたPodのIPアドレスを抽出して出⼒するコマンド
+
 ```bash
 $ kubectl get pods my-pod -o jsonpath --template={.status.podIP}
 ```
@@ -268,7 +276,7 @@ $ kubectl get pods my-pod -o jsonpath --template={.status.podIP}
 
 - labelコマンドとannotateコマンド
 - barという名前のPodにcolor=redラベルを追加するコマンド
-  - ` $ kubectl label pods bar color=red`
+  - `kubectl label pods bar color=red`
 - `--overwrite`フラグで上書き
 - `ラベル名-`でラベルの削除
 
@@ -296,7 +304,7 @@ $ kubectl get pods my-pod -o jsonpath --template={.status.podIP}
 - `kubectl help`コマンド
 
 
-#### 5.ポッド
+### 5.ポッド
 
 #### KubernetesにおけるPod
 
@@ -332,7 +340,7 @@ $ kubectl delete pods/kuard
 
 ##### ポッド詳細
 
-- ` $ kubectl describe pods kuard`
+- `kubectl describe pods kuard`
   - ラベル、アノテーション、IP、ポート、イメージなどを確認できる
 
 ##### Podを削除する
@@ -354,7 +362,7 @@ $ kubectl delete pods/kuard
 
 #### 正常性確認
 
-- デフォルトでは、メインプロセス軌道を確認するだけ
+- デフォルトでは、メインプロセス起動を確認するだけ
 
 ##### ライブネス・プローブ
 
@@ -372,6 +380,7 @@ $ kubectl delete pods/kuard
 - コンテナ起動5行後から呼び出される
 - 1秒以内に応答する必要(200-400)
 - 3回連続失敗でコンテナは再起動
+
 ```bash
 kubectl port-forward kuard 8080:8080
 ```
@@ -410,6 +419,7 @@ kubectl port-forward kuard 8080:8080
 
 - CPUとメモリを考える
 - CPU半分以上、128メモリ以上のリクエストの例
+
 ```yaml
 resources:
   requests:
@@ -421,6 +431,7 @@ resources:
 k8sでも`docker-compose.yaml`みたいに書けるのは知りませんでした。
 
 ##### リソースの使用量を制限する
+
 ```yaml
       resources:
         requests:
@@ -469,6 +480,7 @@ spec:
   - EBSなど
 
 - NFSサーバの例
+
 ```yaml
  volumes:
     - name: "kuard-data"
@@ -480,6 +492,7 @@ spec:
 #### すべてをまとめる
 
 - 永続ボリューム、レディネスプローブとライブネスプローブ、リソース制限の組み合わせ
+
 ```yaml
 apiVersion: v1
  kind: Pod
@@ -526,7 +539,7 @@ apiVersion: v1
         failureThreshold: 3
 ```
 
-#### 6.ラベルと注釈
+### 6.ラベルと注釈
 <!--
 #### ラベル
 
@@ -548,7 +561,7 @@ apiVersion: v1
 -->
 
 
-#### 7.サービス検出
+### 7.サービス検出
 <!--
 #### サービス検出とは何か？
 
@@ -582,7 +595,7 @@ apiVersion: v1
 -->
 
 
-#### 8.イングレスを使ったHTTPロードバランサ
+### 8.イングレスを使ったHTTPロードバランサ
 <!--
 #### イングレス仕様とイングレス・コントローラーの比較
 
@@ -622,7 +635,7 @@ apiVersion: v1
 -->
 
 
-#### 9.レプリカセット
+### 9.レプリカセット
 <!--
 #### 和解ループ
 
@@ -662,7 +675,7 @@ apiVersion: v1
 -->
 
 
-#### 10.デプロイ
+### 10.デプロイ
 <!--
 #### 初めてのデプロイ
 

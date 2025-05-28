@@ -3,8 +3,8 @@ layout: post
 title: "「Get Your Hands Dirty on Clean Architecture」を読む"
 date: 2025-05-22 12:00:00 +0900
 categories: [blog]
-tags: [書籍]
-excerpt: ""
+tags: [書籍, 設計, Go]
+excerpt: "Go"
 memo: "4-6, 7-15"
 ---
 
@@ -138,6 +138,7 @@ adapter
             - UpdateAccountStatePort
 - common
 ```
+
 **フォルダ構造の解説**
 - `adapter`パッケージ
     - `web`と`persistence`アダプター
@@ -419,6 +420,7 @@ func validateSendMoneyCommand(command *SendMoneyCommand) error {
     - そこで、ユースケースごとに入力モデルを分ける
 
 言語によって実装は異なりますが、ベースとなる型を拡張することでDRYを実現できます。FastAPIなどで特に一般的な手法です。Goでは例えば以下のように実装できます。
+
 ```go
 type UpdateAccountCommand struct {
 	AccountDetails

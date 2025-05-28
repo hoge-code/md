@@ -3,8 +3,8 @@ layout: post
 title: "「Terraformクックブック」を読む"
 date: 2025-05-22 12:00:00 +0900
 categories: [blog]
-tags: [書籍]
-excerpt: ""
+tags: [書籍, Terraform]
+excerpt: "Terraform"
 memo: "1-4, 5-10"
 ---
 
@@ -62,6 +62,7 @@ memo: "1-4, 5-10"
 - VPC を作成する場合など、自分で一から作るのは面倒
 - パブリックモジュールを使えば簡単に設定できる
 - 下の例では、CIDR, AZ, サブネット、NATゲートウェイなどを設定
+
 ```hcl
 module "vpc" {
     source = "terraform-aws-modules/vpc/aws"
@@ -83,6 +84,7 @@ module "vpc" {
 - デバッグのために、tfの状態をHCLで変更できる
 - 本番環境では使ってはいけない
 - 下の例は現在のtfの状態をロードするコマンド
+
 ```bash
 terraform console
 state.<module-name>.<resourcename>.<attribute-name> 
@@ -91,6 +93,7 @@ state.<module-name>.<resourcename>.<attribute-name>
 #### 1.7.HashiCorp Cloud Platform Terraformを使う
 - 他にS3, Azure Blob, Cloud Storage, Consul, ローカルに保存できる
 - 組織名とワークスペース名を指定する必要
+
 ```hcl
 terraform {
     cloud {
@@ -102,6 +105,7 @@ terraform {
     }
 }
 ```
+
 ```bash
 terraform init -backend-config="token=<HCP Terraform API token>"
 ```
@@ -115,6 +119,7 @@ terraform init -backend-config="token=<HCP Terraform API token>"
 
 - 下の例では5.0以上、6.0未満
 - 破壊的変更を防ぐ可能性があるので、5.1.0など具体的なほうが良い
+
 ```hcl
 provider "aws" {
     version = "~> 5.0"
@@ -128,6 +133,7 @@ provider "aws" {
 
 - `github_branch_protection`リソースを使ってブランチ保護規則を設定
 - 下の例では、CICDを通過しないとマージされない
+
 ```hcl
 resource "github_branch_protection" "main" {
     repository = github_repository.terraform_repo.name
@@ -142,6 +148,7 @@ resource "github_branch_protection" "main" {
 #### 1.11.TerraformでDockerコンテナをデプロイする
 
 - コンテナ、イメージ、ネットワークを定義できる
+
 ```hcl
 provider "docker" {}
 
@@ -168,6 +175,7 @@ resource "docker_container" "example" {
 #### 1.14.一貫した経験のための一貫したコード
 
 - `required_version`を使う
+
 ```hcl
 terraform {
      required_version = ">= 1.0.0"
@@ -186,6 +194,7 @@ terraform {
 #### 2.2.Terraformコンソールによる迅速な実験
 
 - nodejsやpythonのようなREPL
+
 ```bash
 terraform console
 
@@ -205,6 +214,7 @@ terraform console
 - `tfsec`コマンドをダウンロード
 - tfファイルにコメントを追加して、特定のチェックを無視できる
 - これはなるべく使用せず、使用する場合は文書化する
+
 ```hcl
 #tfsec:ignore:aws-iam-no-policy-wildcards resource "aws_iam_policy" "example" 
 ```
@@ -242,6 +252,7 @@ resource "aws_instance" "example" {
 - OPAを使用してポリシーアズコード検証を実装
 - インフラをポリシーとして定義
 - OPAポリシーは定期的に最新基準に応じて変更する
+
 ```plaintext
 # terraform.rego
 
@@ -259,6 +270,7 @@ $ terraform show -json tfplan > tfplan.json
 $ opa eval --data terraform.rego --input tfplan.json "data.terraform.deny"
 ```
 - CI/CDに組み込む
+
 ```yaml
 - name: OPA Evaluation
   run: |
@@ -273,6 +285,7 @@ $ opa eval --data terraform.rego --input tfplan.json "data.terraform.deny"
 
 - ドキュメントを自動生成できる
 - 下の例では、現在のディレクトリを指定して出力
+
 ```bash
 $ terraform-docs markdown ./ > README.md
 $ terraform-docs asciidoc table ./ > docs.adoc
@@ -290,6 +303,7 @@ $ terraform-docs asciidoc table ./ > docs.adoc
 #### 2.9.プロバイダのバージョンアップに Dependabot を使用する
 
 - `Dependabot`はtfにも対応しており、プロバイダを自動更新できる
+
 ```yaml
 # .github/dependabot.yml
 version: 2
@@ -316,6 +330,7 @@ updates:
 
 - 空白などは予期せぬ動作を起こす可能性
     - `chomp`や`trimspace`関数
+
 ```hcl
 locals {
     clean_user_input = trimspace(var.user_input)
@@ -341,6 +356,7 @@ locals {
 #### 3.3.正規表現を使う
 
 - `regex`か`regexall`のreplace正規表現関数をサポート
+
 ```hcl
 locals {
     masked_input = replace(var.user_input, 
@@ -354,6 +370,7 @@ locals {
 #### 3.4.高度な文字列操作
 
 - ネストされた`replace`関数や`format`関数
+
 ```hcl
 locals {
     processed_input = replace(
@@ -369,6 +386,7 @@ locals {
 ```
 
 - 複雑な場合は`format`関数と組み合わせる
+
 ```hcl
 locals {
     complex_transformation = format(
@@ -434,6 +452,7 @@ locals {
 - パスは相対パス
 - 外部ファイルの変更を自動検知しない
     - `replaceflag`や`terraform taint`を利用
+
 ```hcl
 locals {
     config_contents = {
@@ -446,6 +465,7 @@ locals {
 #### 3.9.レンダリングテンプレート
 
 - 変数入力の基づいて設定ファイルやスクリプトを生成
+
 ```hcl
 data "template_file" "bash_script" { 
 　  template = <<-EOF
@@ -476,6 +496,7 @@ variable "environment" {
  }
 ```
 - 複数のバリエーションを使うこともできる
+
 ```hcl
 variable "vpc_cidr" {
     type        = string
@@ -547,6 +568,7 @@ resource "aws_security_group" "example" {
 
 - オプションプロパティを持つ例
     - `can`, `try`を使ってデフォルト値を与えている
+
 ```plaintext
 cidr_blocks = optional(list(string))
 ...
@@ -591,12 +613,14 @@ resource "aws_instance" "example" {
   depends_on = [aws_iam_role.example]
 }
 ```
+
 #### 3.13.悪い入力に対する良いエラーメッセージ
 
 #### 3.14.Terraformステート間でデータをコンシューマする
 
 - 他のtfステートのリソースや出⼒を参照する必要がある場合
 - `terraform_remote_state`データソースを使⽤
+
 ```hcl
 data "terraform_remote_state" "network" {
   backend = "s3"
@@ -617,6 +641,7 @@ resource "aws_subnet" "example" {
 - ステートのロックも確認
 
 - 出力しない場合に備えて、リモートアクセスは`try`を検討
+
 ```plaintext
 vpc_id = try(data.terraform_remote_state.network.outputs.vpc_id, null)
 ```
@@ -638,6 +663,7 @@ vpc_id = try(data.terraform_remote_state.network.outputs.vpc_id, null)
 - EKSは内部的にEC2やASGを使っていることが分かる
 
 - 暗号化のために、KMSの設定
+
 ```hcl
 # kms.tf
 resource "aws_kms_key" "eks" {
@@ -731,12 +757,14 @@ provider "aws" {
 ```
 - 認証を行うには資格情報を提供
     - `./terraformrc`ファイルの資格情報ブロックを使う
+
 ```hcl
 credentials "app.terraform.io" {
     token = "your-api-token"
 }
 ```
 - 別の資格情報ファイルを指すように環境変数をTERRAFORM_CONFIGにセット
+
 ```bash
 export TERRAFORM_CONFIG=/path/to/terraform.rc
 ```
@@ -746,6 +774,7 @@ export TERRAFORM_CONFIG=/path/to/terraform.rc
 
 - main.tf, variables.tf, outputs.tfファイルの作成
 - 別のファイルで呼び出す
+
 ```hcl
  module "ec2_instance" {
   source        = "./my_module"
@@ -810,6 +839,7 @@ output "repository_url" {
 #### 4.8.Consul KVによるダイナミックコンフィギュレーション
 
 - 異なるステート間で依存関係を広げる必要がある場合など
+
 ```hcl
 # Configure the Consul provider
  provider "consul" {

@@ -3,8 +3,8 @@ layout: post
 title: "自動補完のローカルと全文検索の比較"
 date: 2025-05-04 12:00:00 +0900
 categories: [blog]
-tags: [elasticsearch, React]
-excerpt: "elasticsearch, fuse.js"
+tags: [Elasticsearch, React]
+excerpt: "Elasticsearch, Fuse.js"
 ---
 
 検索機能などで使われるオートコンプリートをクライアント側のJSONファイルと、リモートの全文検索を実装する方法を比較して考えてみます。

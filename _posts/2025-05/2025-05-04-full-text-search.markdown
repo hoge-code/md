@@ -3,8 +3,8 @@ layout: post
 title: "主要DBで全文検索を試してみる"
 date: 2025-05-04 12:00:00 +0900
 categories: [blog]
-tags: [elasticsearch, MySQL, sqlite]
-excerpt: "elasticsearch, MySQL, sqlite"
+tags: [Elasticsearch, MySQL, sqlite]
+excerpt: "Elasticsearch, MySQL, sqlite"
 ---
 
 最近は全文検索について学習しているので主要DBごとの全文検索の特徴を簡単にまとめてみます。

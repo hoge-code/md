@@ -3,8 +3,8 @@ layout: post
 title: "「gRPC Microservices in Go」を読む"
 date: 2025-05-22 12:00:00 +0900
 categories: [blog]
-tags: [書籍]
-excerpt: ""
+tags: [書籍, 設計, Go]
+excerpt: "Go, GRPC"
 memo: "1-5, 6-9"
 ---
 
@@ -243,6 +243,7 @@ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 ##### 3.2.2 プロトコルバッファコンパイラの使用
 
 - protocコマンドで生成
+
 ```proto
 syntax = “proto3”;
 option go_package=" GitHub/huseyinbabal/microservices/order";
@@ -583,7 +584,7 @@ type Adapter struct {
 - 上記の`payment`は、`go get`で依存関係を追加したので`Order`サービスから利用できる
 
 ```go
-func NewAdapter(paymentServiceUrl string) (\*Adapter, error) {
+func NewAdapter(paymentServiceUrl string) (*Adapter, error) {
     var opts []grpc.DialOption 
     opts = append(opts,grpc.WithTransportCredentials(insecure.NewCredentials())) 
     conn, err := grpc.Dial(paymentServiceUrl, opts...) 
@@ -636,6 +637,7 @@ func main() {
 ##### 5.3.2 エラーコードとメッセージを返す
 
 - 以下のようにしてエラーを作成する
+
 ```go
 err = status.Errorf(
     codes.InvalidArgument,
@@ -680,6 +682,7 @@ func (a Application) PlaceOrder(order domain.Order) (domain.Order, error) {
 - マイクロサービスはエラーの集約も重要
     - 複数のダウンストリームサーバがあることが多いから 
 - 以下のようにして、複数のエラーを扱う
+
 ```go
  paymentErr := a.payment.Charge(&order)
  if paymentErr != nil {
