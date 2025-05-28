@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://hoge-code.github.io/md/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hoge-code.github.io/md/" rel="alternate" type="text/html" /><updated>2025-05-27T23:49:30+00:00</updated><id>https://hoge-code.github.io/md/feed.xml</id><title type="html">ツールの忘備録</title><subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle><entry><title type="html">「Kubernetes：アップ・アンド・ランニング」を読む</title><link href="https://hoge-code.github.io/md/posts/2025-05-26-k8s" rel="alternate" type="text/html" title="「Kubernetes：アップ・アンド・ランニング」を読む" /><published>2025-05-26T03:00:00+00:00</published><updated>2025-05-26T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/k8s</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-26-k8s"><![CDATA[<p>オライリーの<code class="language-plaintext highlighter-rouge">Kubernetes：アップ・アンド・ランニング</code>という書籍を途中まで読んだので、気になったことを中心に簡単な感想や要約を書きます。(網羅性はありません)</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://hoge-code.github.io/md/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hoge-code.github.io/md/" rel="alternate" type="text/html" /><updated>2025-05-28T02:51:50+00:00</updated><id>https://hoge-code.github.io/md/feed.xml</id><title type="html">ツールの忘備録</title><subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle><entry><title type="html">「Kubernetes：アップ・アンド・ランニング」を読む</title><link href="https://hoge-code.github.io/md/posts/2025-05-26-k8s" rel="alternate" type="text/html" title="「Kubernetes：アップ・アンド・ランニング」を読む" /><published>2025-05-26T03:00:00+00:00</published><updated>2025-05-26T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/k8s</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-26-k8s"><![CDATA[<p>オライリーの<code class="language-plaintext highlighter-rouge">Kubernetes：アップ・アンド・ランニング</code>という書籍を途中まで読んだので、気になったことを中心に簡単な感想や要約を書きます。(網羅性はありません)</p>
 
 <p><code class="language-plaintext highlighter-rouge">k8s</code>を扱う上で基本的な内容が網羅された書籍になっています。</p>
 
@@ -8,6 +8,13 @@
   <li><a href="#1はじめに" id="markdown-toc-1はじめに">1.はじめに</a></li>
   <li><a href="#2コンテナの作成と実行" id="markdown-toc-2コンテナの作成と実行">2.コンテナの作成と実行</a></li>
   <li><a href="#3kubernetesクラスタをデプロイする" id="markdown-toc-3kubernetesクラスタをデプロイする">3.Kubernetesクラスタをデプロイする</a></li>
+  <li><a href="#4一般的なkubectlコマンド" id="markdown-toc-4一般的なkubectlコマンド">4.一般的なkubectlコマンド</a></li>
+  <li><a href="#5ポッド" id="markdown-toc-5ポッド">5.ポッド</a></li>
+  <li><a href="#6ラベルと注釈" id="markdown-toc-6ラベルと注釈">6.ラベルと注釈</a></li>
+  <li><a href="#7サービス検出" id="markdown-toc-7サービス検出">7.サービス検出</a></li>
+  <li><a href="#8イングレスを使ったhttpロードバランサ" id="markdown-toc-8イングレスを使ったhttpロードバランサ">8.イングレスを使ったHTTPロードバランサ</a></li>
+  <li><a href="#9レプリカセット" id="markdown-toc-9レプリカセット">9.レプリカセット</a></li>
+  <li><a href="#10デプロイ" id="markdown-toc-10デプロイ">10.デプロイ</a></li>
 </ul>
 
 <hr />
@@ -81,11 +88,11 @@
 <h5 id="ドッカーファイル">ドッカーファイル</h5>
 
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">.dockerignore</code>ファイルの追加を忘れずに
-    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>node_modules
-</code></pre></div>    </div>
-  </li>
+  <li><code class="language-plaintext highlighter-rouge">.dockerignore</code>ファイルの追加を忘れずに</li>
 </ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>node_modules
+</code></pre></div></div>
 
 <h5 id="画像サイズを最適化する">画像サイズを最適化する</h5>
 
@@ -129,40 +136,53 @@
 <h4 id="多段階イメージビルド">多段階イメージビルド</h4>
 
 <ul>
-  <li>大きいイメージはデプロイが遅くなる
-```dockerfile
-…</li>
+  <li>大きいイメージはデプロイが遅くなる</li>
 </ul>
 
-<p>FROM alpine
-USER nobody:nobody
-COPY –from=build /go/bin/kuard /kuard
-CMD [ “/kuard” ]</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>- ビルドイメージとデプロイイメージで分ける
-- 500MB→20MBまでこの例では削減できた
-  - デプロイ時間の大幅な短縮
+<div class="language-dockerfile highlighter-rouge"><div class="highlight"><pre class="highlight"><code>...
 
-マルチステージビルドは有名ですが、ここまでサイズが変わるとは思いませんでした。また、`USER`や`ENV`はあまり使用したことがなかったので意識したいです。
+<span class="k">FROM</span><span class="s"> alpine</span>
+<span class="k">USER</span><span class="s"> nobody:nobody</span>
+<span class="k">COPY</span><span class="s"> --from=build /go/bin/kuard /kuard</span>
+<span class="k">CMD</span><span class="s"> [ "/kuard" ]</span>
+</code></pre></div></div>
+<ul>
+  <li>ビルドイメージとデプロイイメージで分ける</li>
+  <li>500MB→20MBまでこの例では削減できた
+    <ul>
+      <li>デプロイ時間の大幅な短縮</li>
+    </ul>
+  </li>
+</ul>
 
-#### リモートレジストリに画像を保存する
+<p>マルチステージビルドは有名ですが、ここまでサイズが変わるとは思いませんでした。また、<code class="language-plaintext highlighter-rouge">USER</code>や<code class="language-plaintext highlighter-rouge">ENV</code>はあまり使用したことがなかったので意識したいです。</p>
 
-- Gitと同様に、Dockerレジストリにも様々な選択肢
-  - セキュリティ、コラボレーション機能で選ぶ
-- プライベート、パブリックリポジトリ
+<h4 id="リモートレジストリに画像を保存する">リモートレジストリに画像を保存する</h4>
 
-#### コンテナ・ランタイム・インターフェイス
+<ul>
+  <li>Gitと同様に、Dockerレジストリにも様々な選択肢
+    <ul>
+      <li>セキュリティ、コラボレーション機能で選ぶ</li>
+    </ul>
+  </li>
+  <li>プライベート、パブリックリポジトリ</li>
+</ul>
 
-##### Dockerでコンテナを実行する
+<h4 id="コンテナランタイムインターフェイス">コンテナ・ランタイム・インターフェイス</h4>
 
-##### クアード・アプリケーションを探る
+<h5 id="dockerでコンテナを実行する">Dockerでコンテナを実行する</h5>
 
-##### リソースの使用を制限する
+<h5 id="クアードアプリケーションを探る">クアード・アプリケーションを探る</h5>
 
-- 内部的には`cgroup`の機能で実装されている
-```bash
-  --memory 200m \
-  --memory-swap 1G \
-  --cpu-shares 1024 \
+<h5 id="リソースの使用を制限する">リソースの使用を制限する</h5>
+
+<ul>
+  <li>内部的には<code class="language-plaintext highlighter-rouge">cgroup</code>の機能で実装されている</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nt">--memory</span> 200m <span class="se">\</span>
+  <span class="nt">--memory-swap</span> 1G <span class="se">\</span>
+  <span class="nt">--cpu-shares</span> 1024 <span class="se">\</span>
 </code></pre></div></div>
 
 <p><code class="language-plaintext highlighter-rouge">docker-compose.yaml</code>だけでなく、<code class="language-plaintext highlighter-rouge">docker</code>コマンドでもリソースを制限できるのは知りませんでした。</p>
@@ -199,14 +219,14 @@ CMD [ “/kuard” ]</p>
 <h4 id="dockerでkubernetesを実行する">DockerでKubernetesを実行する</h4>
 
 <ul>
-  <li>最近は<code class="language-plaintext highlighter-rouge">kind</code>が人気
-    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="nv">$ </span>kind create cluster <span class="nt">--wait</span> 5m
+  <li>最近は<code class="language-plaintext highlighter-rouge">kind</code>が人気</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="nv">$ </span>kind create cluster <span class="nt">--wait</span> 5m
  <span class="nv">$ </span><span class="nb">export </span><span class="nv">KUBECONFIG</span><span class="o">=</span><span class="s2">"</span><span class="si">$(</span>kind get kubeconfig-path<span class="si">)</span><span class="s2">"</span>
  <span class="nv">$ </span>kubectl cluster-info
  <span class="nv">$ </span>kind delete cluster
-</code></pre></div>    </div>
-  </li>
-</ul>
+</code></pre></div></div>
 
 <h4 id="kubernetesクライアント">Kubernetesクライアント</h4>
 
@@ -250,18 +270,20 @@ CMD [ “/kuard” ]</p>
   <li>Daemonsetを使用して実行している
     <ul>
       <li>使用しない場合もある</li>
-      <li>プロキシがクラスター内の全てのノードに存在する必要
-        <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl get daemonSets <span class="nt">--namespace</span><span class="o">=</span>kube-system kube-proxy
-</code></pre></div>        </div>
-      </li>
+      <li>プロキシがクラスター内の全てのノードに存在する必要</li>
     </ul>
   </li>
 </ul>
 
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl get daemonSets <span class="nt">--namespace</span><span class="o">=</span>kube-system kube-proxy
+</code></pre></div></div>
+
 <h5 id="kubernetes-dns">Kubernetes DNS</h5>
+
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl get deployments <span class="nt">--namespace</span><span class="o">=</span>kube-system core-dns
 kubectl get services <span class="nt">--namespace</span><span class="o">=</span>kube-system core-dns
 </code></pre></div></div>
+
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> NAME       CLUSTER-IP   EXTERNAL-IP   PORT(S)         AGE
  core-dns   10.96.0.10   &lt;none&gt;  53/UDP,53/TCP   45d
 </code></pre></div></div>
@@ -279,7 +301,7 @@ kubectl get services <span class="nt">--namespace</span><span class="o">=</span>
   </li>
 </ul>
 
-<h4 id="4一般的なkubectlコマンド">4.一般的なkubectlコマンド</h4>
+<h3 id="4一般的なkubectlコマンド">4.一般的なkubectlコマンド</h3>
 
 <h4 id="名前空間">名前空間</h4>
 
@@ -323,14 +345,16 @@ kubectl get services <span class="nt">--namespace</span><span class="o">=</span>
     <ul>
       <li><code class="language-plaintext highlighter-rouge">JSONPath</code>クエリ言語の使用
         <ul>
-          <li>指定されたPodのIPアドレスを抽出して出⼒するコマンド
-            <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>kubectl get pods my-pod <span class="nt">-o</span> jsonpath <span class="nt">--template</span><span class="o">={</span>.status.podIP<span class="o">}</span>
-</code></pre></div>            </div>
-          </li>
+          <li>指定されたPodのIPアドレスを抽出して出⼒するコマンド</li>
         </ul>
       </li>
     </ul>
   </li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>kubectl get pods my-pod <span class="nt">-o</span> jsonpath <span class="nt">--template</span><span class="o">={</span>.status.podIP<span class="o">}</span>
+</code></pre></div></div>
+<ul>
   <li><code class="language-plaintext highlighter-rouge">--watch</code>オプション</li>
 </ul>
 
@@ -348,7 +372,7 @@ kubectl get services <span class="nt">--namespace</span><span class="o">=</span>
   <li>labelコマンドとannotateコマンド</li>
   <li>barという名前のPodにcolor=redラベルを追加するコマンド
     <ul>
-      <li>` $ kubectl label pods bar color=red`</li>
+      <li><code class="language-plaintext highlighter-rouge">kubectl label pods bar color=red</code></li>
     </ul>
   </li>
   <li><code class="language-plaintext highlighter-rouge">--overwrite</code>フラグで上書き</li>
@@ -390,7 +414,7 @@ kubectl get services <span class="nt">--namespace</span><span class="o">=</span>
   <li><code class="language-plaintext highlighter-rouge">kubectl help</code>コマンド</li>
 </ul>
 
-<h4 id="5ポッド">5.ポッド</h4>
+<h3 id="5ポッド">5.ポッド</h3>
 
 <h4 id="kubernetesにおけるpod">KubernetesにおけるPod</h4>
 
@@ -438,7 +462,7 @@ kubectl get services <span class="nt">--namespace</span><span class="o">=</span>
 <h5 id="ポッド詳細">ポッド詳細</h5>
 
 <ul>
-  <li>` $ kubectl describe pods kuard`
+  <li><code class="language-plaintext highlighter-rouge">kubectl describe pods kuard</code>
     <ul>
       <li>ラベル、アノテーション、IP、ポート、イメージなどを確認できる</li>
     </ul>
@@ -475,7 +499,7 @@ kubectl get services <span class="nt">--namespace</span><span class="o">=</span>
 <h4 id="正常性確認">正常性確認</h4>
 
 <ul>
-  <li>デフォルトでは、メインプロセス軌道を確認するだけ</li>
+  <li>デフォルトでは、メインプロセス起動を確認するだけ</li>
 </ul>
 
 <h5 id="ライブネスプローブ">ライブネス・プローブ</h5>
@@ -493,10 +517,12 @@ kubectl get services <span class="nt">--namespace</span><span class="o">=</span>
   <li>httpGetプローブの使用</li>
   <li>コンテナ起動5行後から呼び出される</li>
   <li>1秒以内に応答する必要(200-400)</li>
-  <li>3回連続失敗でコンテナは再起動
-    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl port-forward kuard 8080:8080
-</code></pre></div>    </div>
-  </li>
+  <li>3回連続失敗でコンテナは再起動</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl port-forward kuard 8080:8080
+</code></pre></div></div>
+<ul>
   <li>ブラウザで、http://localhost:8080にアクセス
     <ul>
       <li>Liveness Probeを選択</li>
@@ -556,19 +582,22 @@ kubectl get services <span class="nt">--namespace</span><span class="o">=</span>
 
 <ul>
   <li>CPUとメモリを考える</li>
-  <li>CPU半分以上、128メモリ以上のリクエストの例
-    <div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">resources</span><span class="pi">:</span>
-<span class="na">requests</span><span class="pi">:</span>
-  <span class="na">cpu</span><span class="pi">:</span> <span class="s2">"</span><span class="s">500m"</span>
-  <span class="na">memory</span><span class="pi">:</span> <span class="s2">"</span><span class="s">128Mi"</span>
-</code></pre></div>    </div>
-  </li>
+  <li>CPU半分以上、128メモリ以上のリクエストの例</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">resources</span><span class="pi">:</span>
+  <span class="na">requests</span><span class="pi">:</span>
+    <span class="na">cpu</span><span class="pi">:</span> <span class="s2">"</span><span class="s">500m"</span>
+    <span class="na">memory</span><span class="pi">:</span> <span class="s2">"</span><span class="s">128Mi"</span>
+</code></pre></div></div>
+<ul>
   <li>requestsは最小値であることに注意</li>
 </ul>
 
 <p>k8sでも<code class="language-plaintext highlighter-rouge">docker-compose.yaml</code>みたいに書けるのは知りませんでした。</p>
 
 <h5 id="リソースの使用量を制限する">リソースの使用量を制限する</h5>
+
 <div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      <span class="na">resources</span><span class="pi">:</span>
         <span class="na">requests</span><span class="pi">:</span>
           <span class="na">cpu</span><span class="pi">:</span> <span class="s2">"</span><span class="s">500m"</span>
@@ -626,77 +655,68 @@ kubectl get services <span class="nt">--namespace</span><span class="o">=</span>
       <li>EBSなど</li>
     </ul>
   </li>
-  <li>NFSサーバの例
-```yaml
- volumes:
-    <ul>
-      <li>name: “kuard-data”
-nfs:
-  server: my.nfs.server.local
-  path: “/exports”
-```</li>
-    </ul>
-  </li>
+  <li>NFSサーバの例</li>
 </ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="na">volumes</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s2">"</span><span class="s">kuard-data"</span>
+      <span class="na">nfs</span><span class="pi">:</span>
+        <span class="na">server</span><span class="pi">:</span> <span class="s">my.nfs.server.local</span>
+        <span class="na">path</span><span class="pi">:</span> <span class="s2">"</span><span class="s">/exports"</span>
+</code></pre></div></div>
 
 <h4 id="すべてをまとめる">すべてをまとめる</h4>
 
 <ul>
-  <li>永続ボリューム、レディネスプローブとライブネスプローブ、リソース制限の組み合わせ
-```yaml
-apiVersion: v1
- kind: Pod
- metadata:
-name: kuard
- spec:
-volumes:
-    <ul>
-      <li>name: “kuard-data”
-nfs:
-  server: my.nfs.server.local
-  path: “/exports”
-containers:</li>
-      <li>image: gcr.io/kuar-demo/kuard-amd64:blue
-name: kuard
-ports:
-        <ul>
-          <li>containerPort: 8080
-name: http
-protocol: TCP
-resources:
-  requests:
-cpu: “500m”
-memory: “128Mi”
-  limits:
-cpu: “1000m”
-memory: “256Mi”
-volumeMounts:</li>
-          <li>mountPath: “/data”
-name: “kuard-data”
-livenessProbe:
-  httpGet:
-path: /healthy
-port: 8080
-  initialDelaySeconds: 5
-  timeoutSeconds: 1
-  periodSeconds: 10
-  failureThreshold: 3
-readinessProbe:
-  httpGet:
-path: /ready
-port: 8080
-  initialDelaySeconds: 30
-  timeoutSeconds: 1
-  periodSeconds: 10
-  failureThreshold: 3
-```</li>
-        </ul>
-      </li>
-    </ul>
-  </li>
+  <li>永続ボリューム、レディネスプローブとライブネスプローブ、リソース制限の組み合わせ</li>
 </ul>
 
-<h4 id="6ラベルと注釈">6.ラベルと注釈</h4>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">apiVersion</span><span class="pi">:</span> <span class="s">v1</span>
+ <span class="s">kind</span><span class="err">:</span> <span class="s">Pod</span>
+ <span class="s">metadata</span><span class="err">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">kuard</span>
+ <span class="na">spec</span><span class="pi">:</span>
+  <span class="na">volumes</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s2">"</span><span class="s">kuard-data"</span>
+      <span class="na">nfs</span><span class="pi">:</span>
+        <span class="na">server</span><span class="pi">:</span> <span class="s">my.nfs.server.local</span>
+        <span class="na">path</span><span class="pi">:</span> <span class="s2">"</span><span class="s">/exports"</span>
+  <span class="na">containers</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">image</span><span class="pi">:</span> <span class="s">gcr.io/kuar-demo/kuard-amd64:blue</span>
+      <span class="na">name</span><span class="pi">:</span> <span class="s">kuard</span>
+      <span class="na">ports</span><span class="pi">:</span>
+        <span class="pi">-</span> <span class="na">containerPort</span><span class="pi">:</span> <span class="m">8080</span>
+          <span class="na">name</span><span class="pi">:</span> <span class="s">http</span>
+          <span class="na">protocol</span><span class="pi">:</span> <span class="s">TCP</span>
+      <span class="na">resources</span><span class="pi">:</span>
+        <span class="na">requests</span><span class="pi">:</span>
+          <span class="na">cpu</span><span class="pi">:</span> <span class="s2">"</span><span class="s">500m"</span>
+          <span class="na">memory</span><span class="pi">:</span> <span class="s2">"</span><span class="s">128Mi"</span>
+        <span class="na">limits</span><span class="pi">:</span>
+          <span class="na">cpu</span><span class="pi">:</span> <span class="s2">"</span><span class="s">1000m"</span>
+          <span class="na">memory</span><span class="pi">:</span> <span class="s2">"</span><span class="s">256Mi"</span>
+      <span class="na">volumeMounts</span><span class="pi">:</span>
+        <span class="pi">-</span> <span class="na">mountPath</span><span class="pi">:</span> <span class="s2">"</span><span class="s">/data"</span>
+          <span class="na">name</span><span class="pi">:</span> <span class="s2">"</span><span class="s">kuard-data"</span>
+      <span class="na">livenessProbe</span><span class="pi">:</span>
+        <span class="na">httpGet</span><span class="pi">:</span>
+          <span class="na">path</span><span class="pi">:</span> <span class="s">/healthy</span>
+          <span class="na">port</span><span class="pi">:</span> <span class="m">8080</span>
+        <span class="na">initialDelaySeconds</span><span class="pi">:</span> <span class="m">5</span>
+        <span class="na">timeoutSeconds</span><span class="pi">:</span> <span class="m">1</span>
+        <span class="na">periodSeconds</span><span class="pi">:</span> <span class="m">10</span>
+        <span class="na">failureThreshold</span><span class="pi">:</span> <span class="m">3</span>
+      <span class="na">readinessProbe</span><span class="pi">:</span>
+        <span class="na">httpGet</span><span class="pi">:</span>
+          <span class="na">path</span><span class="pi">:</span> <span class="s">/ready</span>
+          <span class="na">port</span><span class="pi">:</span> <span class="m">8080</span>
+        <span class="na">initialDelaySeconds</span><span class="pi">:</span> <span class="m">30</span>
+        <span class="na">timeoutSeconds</span><span class="pi">:</span> <span class="m">1</span>
+        <span class="na">periodSeconds</span><span class="pi">:</span> <span class="m">10</span>
+        <span class="na">failureThreshold</span><span class="pi">:</span> <span class="m">3</span>
+</code></pre></div></div>
+
+<h3 id="6ラベルと注釈">6.ラベルと注釈</h3>
 <!--
 #### ラベル
 
@@ -717,7 +737,7 @@ port: 8080
 #### 概要
 -->
 
-<h4 id="7サービス検出">7.サービス検出</h4>
+<h3 id="7サービス検出">7.サービス検出</h3>
 <!--
 #### サービス検出とは何か？
 
@@ -750,7 +770,7 @@ port: 8080
 #### 概要
 -->
 
-<h4 id="8イングレスを使ったhttpロードバランサ">8.イングレスを使ったHTTPロードバランサ</h4>
+<h3 id="8イングレスを使ったhttpロードバランサ">8.イングレスを使ったHTTPロードバランサ</h3>
 <!--
 #### イングレス仕様とイングレス・コントローラーの比較
 
@@ -789,7 +809,7 @@ port: 8080
 #### 概要
 -->
 
-<h4 id="9レプリカセット">9.レプリカセット</h4>
+<h3 id="9レプリカセット">9.レプリカセット</h3>
 <!--
 #### 和解ループ
 
@@ -828,7 +848,7 @@ port: 8080
 #### 概要
 -->
 
-<h4 id="10デプロイ">10.デプロイ</h4>
+<h3 id="10デプロイ">10.デプロイ</h3>
 <!--
 #### 初めてのデプロイ
 
@@ -857,9 +877,13 @@ port: 8080
 #### デプロイを監視する
 
 #### 概要
--->]]></content><author><name></name></author><category term="blog" /><category term="書籍" /></entry><entry><title type="html">「Scalable Application Development with NestJS」を読む</title><link href="https://hoge-code.github.io/md/posts/2025-05-22-nestjs" rel="alternate" type="text/html" title="「Scalable Application Development with NestJS」を読む" /><published>2025-05-22T03:00:00+00:00</published><updated>2025-05-22T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/nestjs</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-22-nestjs"><![CDATA[<p>Packt社の<code class="language-plaintext highlighter-rouge">Scalable Application Development with NestJS</code>という書籍を一部読んだので、気になったことを中心に簡単な感想や要約を書きます。(網羅性はありません)</p>
+-->]]></content><author><name></name></author><category term="blog" /><category term="書籍" /><category term="k8s" /><summary type="html"><![CDATA[k8s]]></summary></entry><entry><title type="html">「Scalable Application Development with NestJS」を読む</title><link href="https://hoge-code.github.io/md/posts/2025-05-22-nestjs" rel="alternate" type="text/html" title="「Scalable Application Development with NestJS」を読む" /><published>2025-05-22T03:00:00+00:00</published><updated>2025-05-22T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/nestjs</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-22-nestjs"><![CDATA[<p>Packt社の<code class="language-plaintext highlighter-rouge">Scalable Application Development with NestJS</code>という書籍を一部読んだので、気になったことを中心に簡単な感想や要約を書きます。(網羅性はありません)</p>
 
-<p>この書籍は<code class="language-plaintext highlighter-rouge">NestJS</code>について書かれている数少ない書籍です。自分の知っている範囲内では日本語にそのような書籍はなく、洋書でも殆どありません。(公式ドキュメントは読みやすいです。)また、<code class="language-plaintext highlighter-rouge">NestJS</code>はDTO、DI、モジュール指向、GraphQLやマイクロサービスとの統合など、多くのことを学べるフレームワークだと思います。この本は<code class="language-plaintext highlighter-rouge">NestJS</code>について体系的に説明し、実際の開発の流れまで書かれています。</p>
+<p>この書籍は<code class="language-plaintext highlighter-rouge">NestJS</code>について書かれている数少ない書籍です。自分の知っている範囲内では日本語にそのような書籍はなく、洋書でも殆どありません。(公式ドキュメントは読みやすいです。)</p>
+
+<p>また、<code class="language-plaintext highlighter-rouge">NestJS</code>はDTO、DI、モジュール指向、GraphQLやマイクロサービスとの統合など、多くのことを学べるフレームワークだと思います。</p>
+
+<p>この本は<code class="language-plaintext highlighter-rouge">NestJS</code>について体系的に説明し、実際の開発の流れまで書かれています。</p>
 
 <p>全体にはまだ目を通せていませんが、ケーススタディのパートが面白かったのでまとめてみます。</p>
 
@@ -867,12 +891,7 @@ port: 8080
 <ul id="markdown-toc">
   <li><a href="#第12章-電子商取引アプリケーション" id="markdown-toc-第12章-電子商取引アプリケーション">第12章 電子商取引アプリケーション</a></li>
   <li><a href="#第13章-snsプラットフォーム" id="markdown-toc-第13章-snsプラットフォーム">第13章 SNSプラットフォーム</a></li>
-  <li><a href="#ミューテーション型" id="markdown-toc-ミューテーション型">ミューテーション型</a></li>
-  <li><a href="#サブスクリプション型" id="markdown-toc-サブスクリプション型">サブスクリプション型</a></li>
-  <li><a href="#入力型新しいpostを作成するための入力データ" id="markdown-toc-入力型新しいpostを作成するための入力データ">入力型（新しいPostを作成するための入力データ）</a>    <ul>
-      <li><a href="#第14章-erpシステム" id="markdown-toc-第14章-erpシステム">第14章 ERPシステム</a></li>
-    </ul>
-  </li>
+  <li><a href="#第14章-erpシステム" id="markdown-toc-第14章-erpシステム">第14章 ERPシステム</a></li>
 </ul>
 
 <hr />
@@ -920,21 +939,22 @@ port: 8080
 <p><strong>RESTAPIでも実装の前にドキュメント作成が重要</strong></p>
 <ul>
   <li>これはGRPCと同じような開発の進め方</li>
-  <li>HTTPメソッド定義前に、エンドポイントをリスト
-    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># products
-  /products
-  /products/{id}
-  /products/{id}/orders
-  /products/{id}/orders/{orderId}
-  /products/{id}/reviews
-  /products/search
-# users
-  ...
-</code></pre></div>    </div>
-  </li>
+  <li>HTTPメソッド定義前に、エンドポイントをリスト</li>
 </ul>
 
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># products
+    /products
+    /products/{id}
+    /products/{id}/orders
+    /products/{id}/orders/{orderId}
+    /products/{id}/reviews
+    /products/search
+# users
+    ...
+</code></pre></div></div>
+
 <p><strong>APIではレスポンスの統一が重要</strong></p>
+
 <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">Class</span> <span class="nx">APIResponse</span> <span class="p">{</span>
     <span class="nl">success</span><span class="p">:</span> <span class="nx">boolean</span><span class="p">,</span>
     <span class="nx">message</span><span class="p">:</span> <span class="kr">string</span><span class="p">,</span>
@@ -967,21 +987,23 @@ port: 8080
 <h4 id="製品と注文用のrest-apiの実装">製品と注文用のREST APIの実装</h4>
 
 <ul>
-  <li>下の例では、製品エンティティを定義している
-    <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">@</span><span class="nd">Entity</span><span class="p">(</span><span class="dl">'</span><span class="s1">products</span><span class="dl">'</span><span class="p">)</span>
+  <li>下の例では、製品エンティティを定義している</li>
+</ul>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">@</span><span class="nd">Entity</span><span class="p">(</span><span class="dl">'</span><span class="s1">products</span><span class="dl">'</span><span class="p">)</span>
 <span class="k">export</span> <span class="kd">class</span> <span class="nc">Product</span> <span class="p">{</span>
-  <span class="p">@</span><span class="nd">PrimaryGeneratedColumn</span><span class="p">(</span><span class="dl">'</span><span class="s1">uuid</span><span class="dl">'</span><span class="p">)</span>
-  <span class="nx">id</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
-  <span class="p">...</span>
-  <span class="p">@</span><span class="nd">Column</span><span class="p">(</span><span class="dl">'</span><span class="s1">simple-json</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span>
-      <span class="na">default</span><span class="p">:</span> <span class="p">{},</span>
-      <span class="na">comment</span><span class="p">:</span> <span class="dl">"</span><span class="s2">product's specs</span><span class="dl">"</span><span class="p">,</span>
-  <span class="p">})</span>
-  <span class="nx">specs</span><span class="p">:</span> <span class="nb">Record</span><span class="o">&lt;</span><span class="kr">string</span><span class="p">,</span> <span class="kr">string</span><span class="o">&gt;</span><span class="p">;</span>
-  <span class="p">...</span>
+    <span class="p">@</span><span class="nd">PrimaryGeneratedColumn</span><span class="p">(</span><span class="dl">'</span><span class="s1">uuid</span><span class="dl">'</span><span class="p">)</span>
+    <span class="nx">id</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+    <span class="p">...</span>
+    <span class="p">@</span><span class="nd">Column</span><span class="p">(</span><span class="dl">'</span><span class="s1">simple-json</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span>
+        <span class="na">default</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="na">comment</span><span class="p">:</span> <span class="dl">"</span><span class="s2">product's specs</span><span class="dl">"</span><span class="p">,</span>
+    <span class="p">})</span>
+    <span class="nx">specs</span><span class="p">:</span> <span class="nb">Record</span><span class="o">&lt;</span><span class="kr">string</span><span class="p">,</span> <span class="kr">string</span><span class="o">&gt;</span><span class="p">;</span>
+    <span class="p">...</span>
 <span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
+</code></pre></div></div>
+<ul>
   <li>上記で興味深い点
     <ul>
       <li>自動採番を使わずにUUIDを使用している</li>
@@ -992,29 +1014,31 @@ port: 8080
 
 <p><strong>DTOクラスの作成</strong></p>
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">src/products/dto/create-product.dto.ts</code>などでDTOクラスを作成
-    <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">class</span> <span class="nc">CreateProductDto</span> <span class="p">{</span>
-  <span class="p">@</span><span class="nd">IsString</span><span class="p">({</span>
-      <span class="na">message</span><span class="p">:</span> <span class="dl">'</span><span class="s1">name must be a string</span><span class="dl">'</span><span class="p">,</span>
-  <span class="p">})</span>
-  <span class="p">@</span><span class="nd">Length</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="p">{</span>
-      <span class="na">message</span><span class="p">:</span> <span class="dl">'</span><span class="s1">name must be between 5 and 25 characters</span><span class="dl">'</span><span class="p">,</span>
-  <span class="p">})</span>
-  <span class="nx">name</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+  <li><code class="language-plaintext highlighter-rouge">src/products/dto/create-product.dto.ts</code>などでDTOクラスを作成</li>
+</ul>
 
-  <span class="p">@</span><span class="nd">IsString</span><span class="p">({</span>
-  <span class="na">message</span><span class="p">:</span> <span class="dl">'</span><span class="s1">description must be a string</span><span class="dl">'</span><span class="p">,</span>
-  <span class="p">})</span>
-  <span class="p">@</span><span class="nd">Length</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="p">{</span>
-      <span class="na">message</span><span class="p">:</span> <span class="dl">'</span><span class="s1">description must be between 25 and 255
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">class</span> <span class="nc">CreateProductDto</span> <span class="p">{</span>
+    <span class="p">@</span><span class="nd">IsString</span><span class="p">({</span>
+        <span class="na">message</span><span class="p">:</span> <span class="dl">'</span><span class="s1">name must be a string</span><span class="dl">'</span><span class="p">,</span>
+    <span class="p">})</span>
+    <span class="p">@</span><span class="nd">Length</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="p">{</span>
+        <span class="na">message</span><span class="p">:</span> <span class="dl">'</span><span class="s1">name must be between 5 and 25 characters</span><span class="dl">'</span><span class="p">,</span>
+    <span class="p">})</span>
+    <span class="nx">name</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+
+    <span class="p">@</span><span class="nd">IsString</span><span class="p">({</span>
+    <span class="na">message</span><span class="p">:</span> <span class="dl">'</span><span class="s1">description must be a string</span><span class="dl">'</span><span class="p">,</span>
+    <span class="p">})</span>
+    <span class="p">@</span><span class="nd">Length</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="p">{</span>
+        <span class="na">message</span><span class="p">:</span> <span class="dl">'</span><span class="s1">description must be between 25 and 255
 characters</span><span class="dl">'</span><span class="p">,</span>
-  <span class="p">})</span>
-  <span class="p">@</span><span class="nd">Validate</span><span class="p">(</span><span class="nx">ProductDescription</span><span class="p">)</span>
-  <span class="nx">description</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
-  <span class="p">...</span>
+    <span class="p">})</span>
+    <span class="p">@</span><span class="nd">Validate</span><span class="p">(</span><span class="nx">ProductDescription</span><span class="p">)</span>
+    <span class="nx">description</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+    <span class="p">...</span>
 <span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
+</code></pre></div></div>
+<ul>
   <li>上記で興味深い点
     <ul>
       <li><code class="language-plaintext highlighter-rouge">class-validator</code>ライブラリは便利</li>
@@ -1053,19 +1077,19 @@ characters</span><span class="dl">'</span><span class="p">,</span>
 <p><strong>ページネーションの設定</strong></p>
 <ul>
   <li>現在のページ、制限などの情報も提供する必要</li>
-  <li><code class="language-plaintext highlighter-rouge">PagniationService</code>クラスなどを作成すると便利
-    <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">@</span><span class="nd">Injectable</span><span class="p">()</span>
-<span class="k">export</span> <span class="kd">class</span> <span class="nc">PaginationService</span> <span class="p">{</span>
-  <span class="nf">getPaginationMeta</span><span class="p">(</span>
-      <span class="nx">page</span><span class="p">:</span> <span class="kr">number</span><span class="p">,</span>
-      <span class="nx">limit</span><span class="p">:</span> <span class="kr">number</span><span class="p">,</span>
-      <span class="nx">totalItems</span><span class="p">:</span> <span class="kr">number</span>
-  <span class="p">)</span>
-  <span class="p">...</span>
-<span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
+  <li><code class="language-plaintext highlighter-rouge">PagniationService</code>クラスなどを作成すると便利</li>
 </ul>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">@</span><span class="nd">Injectable</span><span class="p">()</span>
+<span class="k">export</span> <span class="kd">class</span> <span class="nc">PaginationService</span> <span class="p">{</span>
+    <span class="nf">getPaginationMeta</span><span class="p">(</span>
+        <span class="nx">page</span><span class="p">:</span> <span class="kr">number</span><span class="p">,</span>
+        <span class="nx">limit</span><span class="p">:</span> <span class="kr">number</span><span class="p">,</span>
+        <span class="nx">totalItems</span><span class="p">:</span> <span class="kr">number</span>
+    <span class="p">)</span>
+    <span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div></div>
 
 <p>ページネーションAPIは一見簡単そうですが、含めるべきフィールドが多かったりと、見た目以上に面倒に感じます。</p>
 
@@ -1177,20 +1201,21 @@ characters</span><span class="dl">'</span><span class="p">,</span>
   <li>GraphQLでもDTOを作成します
     <ul>
       <li>これを元に、<code class="language-plaintext highlighter-rouge">NestJS</code>がスキーマファイルを生成します</li>
-      <li><code class="language-plaintext highlighter-rouge">src/users/dto/create-user.dto.ts</code>
-        <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">@</span><span class="nd">InputType</span><span class="p">()</span>
-<span class="k">export</span> <span class="kd">class</span> <span class="nc">CreateUserDto</span> <span class="p">{</span>
-  <span class="p">@</span><span class="nd">Field</span><span class="p">()</span>
-  <span class="nx">username</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
-  <span class="p">...</span>
-<span class="p">}</span>
-</code></pre></div>        </div>
-      </li>
+      <li><code class="language-plaintext highlighter-rouge">src/users/dto/create-user.dto.ts</code></li>
     </ul>
   </li>
 </ul>
 
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">@</span><span class="nd">InputType</span><span class="p">()</span>
+<span class="k">export</span> <span class="kd">class</span> <span class="nc">CreateUserDto</span> <span class="p">{</span>
+    <span class="p">@</span><span class="nd">Field</span><span class="p">()</span>
+    <span class="nx">username</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+    <span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
 <p><strong>リゾルバーファイルの生成</strong></p>
+
 <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">@</span><span class="nd">Resolver</span><span class="p">(</span><span class="k">of</span> <span class="o">=&gt;</span> <span class="nx">User</span><span class="p">)</span>
 <span class="k">export</span> <span class="kd">class</span> <span class="nc">UsersResolver</span> <span class="p">{</span>
   <span class="nf">constructor</span><span class="p">(</span>
@@ -1211,54 +1236,55 @@ characters</span><span class="dl">'</span><span class="p">,</span>
 <h4 id="ソーシャルネットワーキングのコンテキストでリアルタイムの更新と通知を投稿する">ソーシャルネットワーキングのコンテキストでリアルタイムの更新と通知を投稿する</h4>
 
 <ul>
-  <li>GraphQLのサブスクリプションを使用すれば、リアルタイムに反映できる
-    <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">pubSub</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">PubSub</span><span class="p">();</span>
+  <li>GraphQLのサブスクリプションを使用すれば、リアルタイムに反映できる</li>
+</ul>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">pubSub</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">PubSub</span><span class="p">();</span>
 <span class="p">@</span><span class="nd">Resolver</span><span class="p">(</span><span class="k">of</span> <span class="o">=&gt;</span> <span class="nx">Post</span><span class="p">)</span>
 <span class="k">export</span> <span class="kd">class</span> <span class="nc">PostsResolver</span> <span class="p">{</span>
-<span class="nf">constructor</span><span class="p">(</span>
-  <span class="k">private</span> <span class="k">readonly</span> <span class="nx">postsService</span><span class="p">:</span> <span class="nx">PostsService</span>
-<span class="p">)</span> <span class="p">{}</span>
+  <span class="nf">constructor</span><span class="p">(</span>
+    <span class="k">private</span> <span class="k">readonly</span> <span class="nx">postsService</span><span class="p">:</span> <span class="nx">PostsService</span>
+  <span class="p">)</span> <span class="p">{}</span>
 
-<span class="p">@</span><span class="nd">Mutation</span><span class="p">(</span><span class="nx">returns</span> <span class="o">=&gt;</span> <span class="nx">Post</span><span class="p">)</span>
-<span class="k">async</span> <span class="nf">createPost</span><span class="p">(</span>
-  <span class="p">@</span><span class="nd">Args</span><span class="p">(</span><span class="dl">'</span><span class="s1">createPostDto</span><span class="dl">'</span><span class="p">)</span> <span class="nx">createPostDto</span><span class="p">:</span> <span class="nx">CreatePostDto</span>
-<span class="p">)</span> <span class="p">{</span>
-  <span class="kd">const</span> <span class="nx">newPost</span> <span class="o">=</span> <span class="k">await</span> <span class="k">this</span><span class="p">.</span><span class="nx">postsService</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span><span class="nx">createPostDto</span><span class="p">);</span>
-  <span class="nx">pubSub</span><span class="p">.</span><span class="nf">publish</span><span class="p">(</span><span class="dl">'</span><span class="s1">postAdded</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span> <span class="na">postAdded</span><span class="p">:</span> <span class="nx">newPost</span> <span class="p">});</span>
-  <span class="k">return</span> <span class="nx">newPost</span><span class="p">;</span>
-<span class="p">}</span>
+  <span class="p">@</span><span class="nd">Mutation</span><span class="p">(</span><span class="nx">returns</span> <span class="o">=&gt;</span> <span class="nx">Post</span><span class="p">)</span>
+  <span class="k">async</span> <span class="nf">createPost</span><span class="p">(</span>
+    <span class="p">@</span><span class="nd">Args</span><span class="p">(</span><span class="dl">'</span><span class="s1">createPostDto</span><span class="dl">'</span><span class="p">)</span> <span class="nx">createPostDto</span><span class="p">:</span> <span class="nx">CreatePostDto</span>
+  <span class="p">)</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">newPost</span> <span class="o">=</span> <span class="k">await</span> <span class="k">this</span><span class="p">.</span><span class="nx">postsService</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span><span class="nx">createPostDto</span><span class="p">);</span>
+    <span class="nx">pubSub</span><span class="p">.</span><span class="nf">publish</span><span class="p">(</span><span class="dl">'</span><span class="s1">postAdded</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span> <span class="na">postAdded</span><span class="p">:</span> <span class="nx">newPost</span> <span class="p">});</span>
+    <span class="k">return</span> <span class="nx">newPost</span><span class="p">;</span>
+  <span class="p">}</span>
 
-<span class="p">@</span><span class="nd">Subscription</span><span class="p">(</span><span class="nx">returns</span> <span class="o">=&gt;</span> <span class="nx">Post</span><span class="p">)</span>
-<span class="nf">postAdded</span><span class="p">()</span> <span class="p">{</span>
-  <span class="k">return</span> <span class="nx">pubSub</span><span class="p">.</span><span class="nf">asyncIterator</span><span class="p">(</span><span class="dl">'</span><span class="s1">postAdded</span><span class="dl">'</span><span class="p">);</span>
+  <span class="p">@</span><span class="nd">Subscription</span><span class="p">(</span><span class="nx">returns</span> <span class="o">=&gt;</span> <span class="nx">Post</span><span class="p">)</span>
+  <span class="nf">postAdded</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">pubSub</span><span class="p">.</span><span class="nf">asyncIterator</span><span class="p">(</span><span class="dl">'</span><span class="s1">postAdded</span><span class="dl">'</span><span class="p">);</span>
+  <span class="p">}</span>
 <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
+</code></pre></div></div>
+<ul>
   <li>上記ではサブスクリプションリゾルバを追加している</li>
   <li>
     <p>また、ポストが追加された際に、そのサブスクリプションを呼び出す処理を書いている</p>
   </li>
-  <li>上記に対応するスキーマファイルはこういう形になる
-```plaintext
-    <h1 id="ミューテーション型">ミューテーション型</h1>
-    <p>type Mutation {
-createPost(createPostDto: CreatePostInput!): Post!
-}</p>
-  </li>
+  <li>上記に対応するスキーマファイルはこういう形になる</li>
 </ul>
 
-<h1 id="サブスクリプション型">サブスクリプション型</h1>
-<p>type Subscription {
-  postAdded: Post!
-}</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># ミューテーション型
+type Mutation {
+  createPost(createPostDto: CreatePostInput!): Post!
+}
 
-<h1 id="入力型新しいpostを作成するための入力データ">入力型（新しいPostを作成するための入力データ）</h1>
-<p>input CreatePostInput {
+# サブスクリプション型
+type Subscription {
+  postAdded: Post!
+}
+
+# 入力型（新しいPostを作成するための入力データ）
+input CreatePostInput {
   title: String!
   content: String!
 }
-```</p>
+</code></pre></div></div>
 
 <ul>
   <li>これを<code class="language-plaintext highlighter-rouge">Apollo client</code>などで呼び出せば、リアルタイム処理を簡単に実装できる</li>
@@ -1288,7 +1314,7 @@ createPost(createPostDto: CreatePostInput!): Post!
 #### ERPコンテキストにおけるデータの同期と一貫性
 
 #### 複雑なビジネスプロセスとワークフローの処理
--->]]></content><author><name></name></author><category term="blog" /><category term="書籍" /></entry><entry><title type="html">「AWS上のシステム設計」を読む</title><link href="https://hoge-code.github.io/md/posts/2025-05-22-aws-system" rel="alternate" type="text/html" title="「AWS上のシステム設計」を読む" /><published>2025-05-22T03:00:00+00:00</published><updated>2025-05-22T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/aws-system</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-22-aws-system"><![CDATA[<p>オライリーの<code class="language-plaintext highlighter-rouge">AWS上のシステム設計</code>という書籍を読んだので、気になったことを中心に簡単な感想や要約を書きます。(網羅性はありません)</p>
+-->]]></content><author><name></name></author><category term="blog" /><category term="書籍" /><category term="Nodejs" /><summary type="html"><![CDATA[NestJS]]></summary></entry><entry><title type="html">「AWS上のシステム設計」を読む</title><link href="https://hoge-code.github.io/md/posts/2025-05-22-aws-system" rel="alternate" type="text/html" title="「AWS上のシステム設計」を読む" /><published>2025-05-22T03:00:00+00:00</published><updated>2025-05-22T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/aws-system</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-22-aws-system"><![CDATA[<p>オライリーの<code class="language-plaintext highlighter-rouge">AWS上のシステム設計</code>という書籍を読んだので、気になったことを中心に簡単な感想や要約を書きます。(網羅性はありません)</p>
 
 <p>この本は大きく３部に分かれていて、第一部ではクラウドでのシステム設計について、第二部ではAWSサービスについて、そして第三部ではケーススタディについて書かれています。</p>
 
@@ -2282,6 +2308,7 @@ createPost(createPostDto: CreatePostInput!): Post!
 </ul>
 
 <p>ClientTokenはトランザクションの再試行を防ぐ仕組みで、以下のように使うらしいです。</p>
+
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">try</span><span class="p">:</span>
     <span class="n">response</span> <span class="o">=</span> <span class="n">dynamodb</span><span class="p">.</span><span class="nf">transact_write_items</span><span class="p">(</span>
         <span class="n">TransactItems</span><span class="o">=</span><span class="n">transaction_items</span><span class="p">,</span>
@@ -2393,7 +2420,7 @@ createPost(createPostDto: CreatePostInput!): Post!
 ##### 数百万人、そしてそれ以上へのスケーリング
 
 ##### デイ・エヌ・アーキテクチャー
--->]]></content><author><name></name></author><category term="blog" /><category term="書籍" /><category term="AWS" /></entry><entry><title type="html">「Acing the System Design」を読む</title><link href="https://hoge-code.github.io/md/posts/2025-05-22-system-design" rel="alternate" type="text/html" title="「Acing the System Design」を読む" /><published>2025-05-22T03:00:00+00:00</published><updated>2025-05-22T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/system-design</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-22-system-design"><![CDATA[<p>オライリーの<code class="language-plaintext highlighter-rouge">Acing the System Design</code>という書籍を途中まで読んだので、気になったことを中心に簡単な感想や要約を書きます。(網羅性はありません)</p>
+-->]]></content><author><name></name></author><category term="blog" /><category term="書籍" /><category term="設計" /><category term="AWS" /><summary type="html"><![CDATA[AWS]]></summary></entry><entry><title type="html">「Acing the System Design」を読む</title><link href="https://hoge-code.github.io/md/posts/2025-05-22-system-design" rel="alternate" type="text/html" title="「Acing the System Design」を読む" /><published>2025-05-22T03:00:00+00:00</published><updated>2025-05-22T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/system-design</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-22-system-design"><![CDATA[<p>オライリーの<code class="language-plaintext highlighter-rouge">Acing the System Design</code>という書籍を途中まで読んだので、気になったことを中心に簡単な感想や要約を書きます。(網羅性はありません)</p>
 
 <p>この本は「システム設計面接」という名前ですが、面接要素は一部で、システム設計について体系的に書かれており、非常に参考になりました。</p>
 
@@ -2751,9 +2778,11 @@ createPost(createPostDto: CreatePostInput!): Post!
 ##### 6.7.6 比較
 
 #### まとめ
--->]]></content><author><name></name></author><category term="blog" /><category term="書籍" /></entry><entry><title type="html">Hands-On AWS CDKのリポジトリを読む</title><link href="https://hoge-code.github.io/md/posts/2025-05-22-cdk-repo" rel="alternate" type="text/html" title="Hands-On AWS CDKのリポジトリを読む" /><published>2025-05-22T03:00:00+00:00</published><updated>2025-05-22T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/cdk-repo</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-22-cdk-repo"><![CDATA[<p>オライリーの<code class="language-plaintext highlighter-rouge">Hands-On AWS CDK</code>という書籍のGitHubリポジトリのコードを読んだので、気になったことを中心に簡単な感想や要約を書きます。(網羅性はありません)</p>
+-->]]></content><author><name></name></author><category term="blog" /><category term="書籍" /><category term="設計" /></entry><entry><title type="html">Hands-On AWS CDKのリポジトリを読む</title><link href="https://hoge-code.github.io/md/posts/2025-05-22-cdk-repo" rel="alternate" type="text/html" title="Hands-On AWS CDKのリポジトリを読む" /><published>2025-05-22T03:00:00+00:00</published><updated>2025-05-22T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/cdk-repo</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-22-cdk-repo"><![CDATA[<p>オライリーの<code class="language-plaintext highlighter-rouge">Hands-On AWS CDK</code>という書籍のGitHubリポジトリのコードを読んだので、気になったことを中心に簡単な感想や要約を書きます。(網羅性はありません)</p>
 
 <p>自分の知る範囲では日本語のCDKの書籍は存在せず、個人的にAWSドキュメントは情報量が多すぎて全て目を通すのは難しく感じるので、この書籍(とリポジトリ)はCDKの基礎を学ぶ上で非常に有効でした。</p>
+
+<p>画像は全て同書からの引用です。</p>
 
 <p><strong>目次</strong></p>
 <ul id="markdown-toc">
@@ -2772,7 +2801,12 @@ createPost(createPostDto: CreatePostInput!): Post!
   <li><a href="https://www.oreilly.com/library/view/aws-cdk/9798341640801/">オライリー</a></li>
 </ul>
 
+<hr />
+
+<p><strong>フォルダ構造</strong></p>
+
 <p>treeコマンドで出力してみると以下のような構造になっています。</p>
+
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>├───.github
 │   └───workflows
 ├───infrastructure
@@ -2803,6 +2837,7 @@ createPost(createPostDto: CreatePostInput!): Post!
 <h4 id="cdk-orchestratoryaml"><code class="language-plaintext highlighter-rouge">cdk-orchestrator.yaml</code></h4>
 
 <p>ルートyamlで他のyamlを呼び出すような構造になっています。</p>
+
 <div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">jobs</span><span class="pi">:</span>
   <span class="na">project-tools-update</span><span class="pi">:</span>
     <span class="na">uses</span><span class="pi">:</span> <span class="s">./.github/workflows/reusable-project-tools-update.yaml</span>
@@ -2821,6 +2856,7 @@ createPost(createPostDto: CreatePostInput!): Post!
 <h4 id="reusable-cdk-deployyaml"><code class="language-plaintext highlighter-rouge">reusable-cdk-deploy.yaml</code></h4>
 
 <p>先ほどのyamlから呼び出されるファイルです。</p>
+
 <div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">on</span><span class="pi">:</span>
   <span class="na">workflow_call</span><span class="pi">:</span>
     <span class="na">inputs</span><span class="pi">:</span>
@@ -2865,11 +2901,13 @@ createPost(createPostDto: CreatePostInput!): Post!
 <p>エントリーポイントファイルです。このファイルでは、複数のスタックをインポートし、呼び出しています。</p>
 
 <p>ファイルの先頭ではシェルスクリプトのように使用言語を定義し、ソースマップを呼び出しています。</p>
+
 <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#!/usr/bin/env node
 </span><span class="k">import</span> <span class="dl">"</span><span class="s2">source-map-support/register</span><span class="dl">"</span><span class="p">;</span>
 </code></pre></div></div>
 
 <p>これは必須のコンテキストが設定されていない場合にエラーを出力する関数です。</p>
+
 <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nf">checkRequiredContext</span><span class="p">(</span><span class="nx">app</span><span class="p">:</span> <span class="nx">cdk</span><span class="p">.</span><span class="nx">App</span><span class="p">,</span> <span class="nx">key</span><span class="p">:</span> <span class="kr">string</span><span class="p">):</span> <span class="k">void</span> <span class="p">{</span>
   <span class="kd">const</span> <span class="nx">contextValue</span> <span class="o">=</span> <span class="nx">app</span><span class="p">.</span><span class="nx">node</span><span class="p">.</span><span class="nf">tryGetContext</span><span class="p">(</span><span class="nx">key</span><span class="p">);</span>
   <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">contextValue</span><span class="p">)</span> <span class="p">{</span>
@@ -2880,6 +2918,7 @@ createPost(createPostDto: CreatePostInput!): Post!
 </code></pre></div></div>
 
 <p>こちらでは、共通で使用する環境変数を定義しています。</p>
+
 <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">appEnv</span><span class="p">:</span> <span class="nx">cdk</span><span class="p">.</span><span class="nx">Environment</span> <span class="o">=</span> <span class="p">{</span>
   <span class="na">account</span><span class="p">:</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">CDK_DEFAULT_ACCOUNT</span><span class="p">,</span>
   <span class="na">region</span><span class="p">:</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">CDK_DEFAULT_REGION</span><span class="p">,</span>
@@ -2887,6 +2926,7 @@ createPost(createPostDto: CreatePostInput!): Post!
 </code></pre></div></div>
 
 <p>上記で定義した<code class="language-plaintext highlighter-rouge">appEnv</code>は、スタックに渡すデフォルトのプロップス内に入れています。</p>
+
 <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/** Default props to be used by all stacks */</span>
 <span class="kd">const</span> <span class="nx">defaultStackProps</span><span class="p">:</span> <span class="nx">cdk</span><span class="p">.</span><span class="nx">StackProps</span> <span class="o">=</span> <span class="p">{</span>
   <span class="na">env</span><span class="p">:</span> <span class="nx">appEnv</span><span class="p">,</span>
@@ -2899,6 +2939,7 @@ createPost(createPostDto: CreatePostInput!): Post!
 </code></pre></div></div>
 
 <p>上記のデフォルトスタックプロップスは、以下のように拡張して再利用できます。</p>
+
 <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">chatbotStack</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ChatbotStack</span><span class="p">(</span><span class="nx">app</span><span class="p">,</span> <span class="s2">`ChatbotStack`</span><span class="p">,</span> <span class="p">{</span>
   <span class="p">...</span><span class="nx">defaultStackProps</span><span class="p">,</span>
   <span class="na">calculatedEnergyTable</span><span class="p">:</span> <span class="nx">sharedResourcesStack</span><span class="p">.</span><span class="nx">calculatedEnergyTable</span><span class="p">,</span>
@@ -2907,11 +2948,13 @@ createPost(createPostDto: CreatePostInput!): Post!
 </code></pre></div></div>
 
 <p>ファイルの最後では、依存性を追加し、デプロイの安定性を高めています。</p>
+
 <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">dataPipelineStack</span><span class="p">.</span><span class="nf">addDependency</span><span class="p">(</span><span class="nx">sharedResourcesStack</span><span class="p">);</span>
 <span class="nx">webStack</span><span class="p">.</span><span class="nf">addDependency</span><span class="p">(</span><span class="nx">authStack</span><span class="p">);</span>
 </code></pre></div></div>
 
 <p>CLIだけでなく、プログラムからテンプレートを作成するようにします。</p>
+
 <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">app</span><span class="p">.</span><span class="nf">synth</span><span class="p">();</span>
 </code></pre></div></div>
 
@@ -2926,6 +2969,7 @@ createPost(createPostDto: CreatePostInput!): Post!
 <h5 id="chatbot-constructts">chatbot-construct.ts</h5>
 
 <p>まず、<code class="language-plaintext highlighter-rouge">interface</code>でコンストラクタが受け取るプロップスを定義します。この際、<code class="language-plaintext highlighter-rouge">dynamodb.Table</code>などは別のコンストラクタで定義したものを利用しています。</p>
+
 <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">interface</span> <span class="nx">ChatbotConstructProps</span> <span class="p">{</span>
   <span class="k">readonly</span> <span class="nx">table</span><span class="p">:</span> <span class="nx">dynamodb</span><span class="p">.</span><span class="nx">Table</span><span class="p">;</span>
   <span class="k">readonly</span> <span class="nx">applicationName</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
@@ -2935,6 +2979,7 @@ createPost(createPostDto: CreatePostInput!): Post!
 </code></pre></div></div>
 
 <p><code class="language-plaintext highlighter-rouge">Construct</code>クラスを拡張し、独自のコンストラクタを作成しています。先ほど作成した<code class="language-plaintext highlighter-rouge">ChatbotConstructProps</code>はコンストラクタで受け取ります。</p>
+
 <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">class</span> <span class="nc">ChatbotConstruct</span> <span class="kd">extends</span> <span class="nc">Construct</span> <span class="p">{</span>
   <span class="k">public</span> <span class="k">readonly</span> <span class="nx">chatbotId</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
   <span class="k">public</span> <span class="k">readonly</span> <span class="nx">knowledgeBase</span><span class="p">:</span> <span class="nx">s3</span><span class="p">.</span><span class="nx">Bucket</span><span class="p">;</span>
@@ -2974,6 +3019,7 @@ createPost(createPostDto: CreatePostInput!): Post!
 <h5 id="custom-lambda-constructts">custom-lambda-construct.ts</h5>
 
 <p>以下のようにプロップスを定義します。</p>
+
 <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">interface</span> <span class="nx">CustomLambdaProps</span> <span class="p">{</span>
   <span class="k">readonly</span> <span class="nx">lambdaName</span><span class="p">?:</span> <span class="kr">string</span><span class="p">;</span>
   <span class="k">readonly</span> <span class="nx">concurrencyLimit</span><span class="p">?:</span> <span class="nx">Integer</span><span class="p">;</span>
@@ -2989,6 +3035,7 @@ createPost(createPostDto: CreatePostInput!): Post!
 </code></pre></div></div>
 
 <p>カスタム<code class="language-plaintext highlighter-rouge">Lambda</code>を作成します。この際、<code class="language-plaintext highlighter-rouge">Lambda</code>と関連性の高いDLQ用の<code class="language-plaintext highlighter-rouge">SQS</code>もこのコンストラクタの中で定義します。</p>
+
 <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">class</span> <span class="nc">CustomLambdaConstruct</span> <span class="kd">extends</span> <span class="nc">lambda</span><span class="p">.</span><span class="nb">Function</span> <span class="p">{</span>
   <span class="p">...</span>
   <span class="nf">constructor</span><span class="p">(</span><span class="nx">scope</span><span class="p">:</span> <span class="nx">Construct</span><span class="p">,</span> <span class="nx">id</span><span class="p">:</span> <span class="kr">string</span><span class="p">,</span> <span class="nx">props</span><span class="p">:</span> <span class="nx">CustomLambdaProps</span><span class="p">)</span> <span class="p">{</span>
@@ -3005,6 +3052,7 @@ createPost(createPostDto: CreatePostInput!): Post!
 </code></pre></div></div>
 
 <p>以下のように、受け取ったプロップスを親クラスに渡します。</p>
+
 <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="c1">// Call the parent constructor with the provided props and defaults</span>
     <span class="k">super</span><span class="p">(</span><span class="nx">scope</span><span class="p">,</span> <span class="nx">id</span><span class="p">,</span> <span class="p">{</span>
       <span class="p">...</span><span class="nx">props</span><span class="p">,</span>
@@ -3035,6 +3083,7 @@ createPost(createPostDto: CreatePostInput!): Post!
 </ul>
 
 <p>最後にセキュリティ準拠のために、<code class="language-plaintext highlighter-rouge">cdk-nag</code>を使います。</p>
+
 <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      <span class="nx">NagSuppressions</span><span class="p">.</span><span class="nf">addResourceSuppressions</span><span class="p">(</span>
       <span class="k">this</span><span class="p">,</span>
       <span class="p">[</span>
@@ -3099,7 +3148,7 @@ createPost(createPostDto: CreatePostInput!): Post!
 #### web
 
 ##### web-stack.ts
--->]]></content><author><name></name></author><category term="blog" /><category term="CDK" /><category term="書籍" /></entry><entry><title type="html">「gRPC Microservices in Go」を読む</title><link href="https://hoge-code.github.io/md/posts/2025-05-22-grpc-micro" rel="alternate" type="text/html" title="「gRPC Microservices in Go」を読む" /><published>2025-05-22T03:00:00+00:00</published><updated>2025-05-22T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/grpc-micro</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-22-grpc-micro"><![CDATA[<p>Manning 出版の<code class="language-plaintext highlighter-rouge">gRPC Microservices in Go</code>という書籍を読んだので、気になったことを中心に簡単な感想や要約を書きます。(網羅性はありません)</p>
+-->]]></content><author><name></name></author><category term="blog" /><category term="書籍" /><category term="AWS" /><category term="CDK" /><summary type="html"><![CDATA[CDK]]></summary></entry><entry><title type="html">「gRPC Microservices in Go」を読む</title><link href="https://hoge-code.github.io/md/posts/2025-05-22-grpc-micro" rel="alternate" type="text/html" title="「gRPC Microservices in Go」を読む" /><published>2025-05-22T03:00:00+00:00</published><updated>2025-05-22T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/grpc-micro</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-22-grpc-micro"><![CDATA[<p>Manning 出版の<code class="language-plaintext highlighter-rouge">gRPC Microservices in Go</code>という書籍を読んだので、気になったことを中心に簡単な感想や要約を書きます。(網羅性はありません)</p>
 
 <p>この書籍はGRPC、クリーンアーキテクチャ、マイクロサービスで必要となるレジリエンスのGoでの実装方法、k8sや<code class="language-plaintext highlighter-rouge">Opentelemetory</code>などのデブオペ技術について基礎的な内容が網羅されています。</p>
 
@@ -3439,12 +3488,15 @@ go <span class="nb">install </span>google.golang.org/grpc/cmd/protoc-gen-go-grpc
 <h5 id="322-プロトコルバッファコンパイラの使用">3.2.2 プロトコルバッファコンパイラの使用</h5>
 
 <ul>
-  <li>protocコマンドで生成
-    <div class="language-proto highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">syntax</span> <span class="o">=</span> <span class="err">“</span><span class="n">proto3</span><span class="err">”</span><span class="p">;</span>
+  <li>protocコマンドで生成</li>
+</ul>
+
+<div class="language-proto highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">syntax</span> <span class="o">=</span> <span class="err">“</span><span class="n">proto3</span><span class="err">”</span><span class="p">;</span>
 <span class="k">option</span> <span class="na">go_package</span><span class="o">=</span><span class="s">" GitHub/huseyinbabal/microservices/order"</span><span class="p">;</span>
 <span class="o">...</span>
-</code></pre></div>    </div>
-  </li>
+</code></pre></div></div>
+
+<ul>
   <li><code class="language-plaintext highlighter-rouge">option</code>はパッケージ名</li>
 </ul>
 
@@ -3838,7 +3890,7 @@ go get <span class="nt">-u</span> github.com/huseyinbabal/microservices-proto/go
   <li>上記の<code class="language-plaintext highlighter-rouge">payment</code>は、<code class="language-plaintext highlighter-rouge">go get</code>で依存関係を追加したので<code class="language-plaintext highlighter-rouge">Order</code>サービスから利用できる</li>
 </ul>
 
-<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">func</span> <span class="n">NewAdapter</span><span class="p">(</span><span class="n">paymentServiceUrl</span> <span class="kt">string</span><span class="p">)</span> <span class="p">(</span><span class="err">\</span><span class="o">*</span><span class="n">Adapter</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">func</span> <span class="n">NewAdapter</span><span class="p">(</span><span class="n">paymentServiceUrl</span> <span class="kt">string</span><span class="p">)</span> <span class="p">(</span><span class="o">*</span><span class="n">Adapter</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">var</span> <span class="n">opts</span> <span class="p">[]</span><span class="n">grpc</span><span class="o">.</span><span class="n">DialOption</span> 
     <span class="n">opts</span> <span class="o">=</span> <span class="nb">append</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span><span class="n">grpc</span><span class="o">.</span><span class="n">WithTransportCredentials</span><span class="p">(</span><span class="n">insecure</span><span class="o">.</span><span class="n">NewCredentials</span><span class="p">()))</span> 
     <span class="n">conn</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">grpc</span><span class="o">.</span><span class="n">Dial</span><span class="p">(</span><span class="n">paymentServiceUrl</span><span class="p">,</span> <span class="n">opts</span><span class="o">...</span><span class="p">)</span> 
@@ -3900,12 +3952,14 @@ go get <span class="nt">-u</span> github.com/huseyinbabal/microservices-proto/go
 <h5 id="532-エラーコードとメッセージを返す">5.3.2 エラーコードとメッセージを返す</h5>
 
 <ul>
-  <li>以下のようにしてエラーを作成する
-    <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">err</span> <span class="o">=</span> <span class="n">status</span><span class="o">.</span><span class="n">Errorf</span><span class="p">(</span>
-  <span class="n">codes</span><span class="o">.</span><span class="n">InvalidArgument</span><span class="p">,</span>
-  <span class="n">fmt</span><span class="o">.</span><span class="n">Sprintf</span><span class="p">(</span><span class="s">"failed to charge user: %d"</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">UserId</span><span class="p">))</span>
-</code></pre></div>    </div>
-  </li>
+  <li>以下のようにしてエラーを作成する</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">err</span> <span class="o">=</span> <span class="n">status</span><span class="o">.</span><span class="n">Errorf</span><span class="p">(</span>
+    <span class="n">codes</span><span class="o">.</span><span class="n">InvalidArgument</span><span class="p">,</span>
+    <span class="n">fmt</span><span class="o">.</span><span class="n">Sprintf</span><span class="p">(</span><span class="s">"failed to charge user: %d"</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">UserId</span><span class="p">))</span>
+</code></pre></div></div>
+<ul>
   <li><code class="language-plaintext highlighter-rouge">status</code>ライブラリ、<code class="language-plaintext highlighter-rouge">codes</code>ライブラリを使用</li>
 </ul>
 
@@ -3950,23 +4004,23 @@ go get <span class="nt">-u</span> github.com/huseyinbabal/microservices-proto/go
       <li>複数のダウンストリームサーバがあることが多いから</li>
     </ul>
   </li>
-  <li>以下のようにして、複数のエラーを扱う
-    <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="n">paymentErr</span> <span class="o">:=</span> <span class="n">a</span><span class="o">.</span><span class="n">payment</span><span class="o">.</span><span class="n">Charge</span><span class="p">(</span><span class="o">&amp;</span><span class="n">order</span><span class="p">)</span>
- <span class="k">if</span> <span class="n">paymentErr</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
-  <span class="n">st</span> <span class="o">:=</span> <span class="n">status</span><span class="o">.</span><span class="n">Convert</span><span class="p">(</span><span class="n">paymentErr</span><span class="p">)</span> 
-  <span class="k">var</span> <span class="n">allErrors</span> <span class="p">[]</span><span class="kt">string</span> 
-      <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">detail</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">st</span><span class="o">.</span><span class="n">Details</span><span class="p">(</span>
-          <span class="k">switch</span> <span class="n">t</span> <span class="o">:=</span> <span class="n">detail</span><span class="o">.</span><span class="p">(</span><span class="k">type</span><span class="p">)</span> <span class="p">{</span>
-          <span class="k">case</span> <span class="o">*</span><span class="n">errdetails</span><span class="o">.</span><span class="n">BadRequest</span><span class="o">:</span> 
-              <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">violation</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">t</span><span class="o">.</span><span class="n">GetFieldViolations</span><span class="p">()</span> <span class="p">{</span>
-                  <span class="n">allErrors</span> <span class="o">=</span> <span class="nb">append</span><span class="p">(</span><span class="n">allErrors</span><span class="p">,</span> <span class="n">violation</span><span class="o">.</span><span class="n">Description</span><span class="p">)</span>
-               <span class="p">}</span>
-          <span class="p">}</span>
-          <span class="o">...</span>
- <span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
+  <li>以下のようにして、複数のエラーを扱う</li>
 </ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="n">paymentErr</span> <span class="o">:=</span> <span class="n">a</span><span class="o">.</span><span class="n">payment</span><span class="o">.</span><span class="n">Charge</span><span class="p">(</span><span class="o">&amp;</span><span class="n">order</span><span class="p">)</span>
+ <span class="k">if</span> <span class="n">paymentErr</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+    <span class="n">st</span> <span class="o">:=</span> <span class="n">status</span><span class="o">.</span><span class="n">Convert</span><span class="p">(</span><span class="n">paymentErr</span><span class="p">)</span> 
+    <span class="k">var</span> <span class="n">allErrors</span> <span class="p">[]</span><span class="kt">string</span> 
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">detail</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">st</span><span class="o">.</span><span class="n">Details</span><span class="p">(</span>
+            <span class="k">switch</span> <span class="n">t</span> <span class="o">:=</span> <span class="n">detail</span><span class="o">.</span><span class="p">(</span><span class="k">type</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">case</span> <span class="o">*</span><span class="n">errdetails</span><span class="o">.</span><span class="n">BadRequest</span><span class="o">:</span> 
+                <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">violation</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">t</span><span class="o">.</span><span class="n">GetFieldViolations</span><span class="p">()</span> <span class="p">{</span>
+                    <span class="n">allErrors</span> <span class="o">=</span> <span class="nb">append</span><span class="p">(</span><span class="n">allErrors</span><span class="p">,</span> <span class="n">violation</span><span class="o">.</span><span class="n">Description</span><span class="p">)</span>
+                 <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="o">...</span>
+ <span class="p">}</span>
+</code></pre></div></div>
 
 <h5 id="535-支払いサービスの実行">5.3.5 支払いサービスの実行</h5>
 
@@ -4138,7 +4192,7 @@ go get <span class="nt">-u</span> github.com/huseyinbabal/microservices-proto/go
 ##### 9.3.10 ログダッシュボードとしての Kibana
 
 #### まとめ
--->]]></content><author><name></name></author><category term="blog" /><category term="書籍" /></entry><entry><title type="html">「Terraformクックブック」を読む</title><link href="https://hoge-code.github.io/md/posts/2025-05-22-tf-cook-copy" rel="alternate" type="text/html" title="「Terraformクックブック」を読む" /><published>2025-05-22T03:00:00+00:00</published><updated>2025-05-22T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/tf-cook%20copy</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-22-tf-cook-copy"><![CDATA[<p>オライリーの<code class="language-plaintext highlighter-rouge">Terraformクックブック</code>という書籍を読んだので、気になったことを中心に簡単な感想や要約を書きます。(網羅性はありません)</p>
+-->]]></content><author><name></name></author><category term="blog" /><category term="書籍" /><category term="設計" /><category term="Go" /><summary type="html"><![CDATA[Go, GRPC]]></summary></entry><entry><title type="html">「Terraformクックブック」を読む</title><link href="https://hoge-code.github.io/md/posts/2025-05-22-tf-cook-copy" rel="alternate" type="text/html" title="「Terraformクックブック」を読む" /><published>2025-05-22T03:00:00+00:00</published><updated>2025-05-22T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/tf-cook%20copy</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-22-tf-cook-copy"><![CDATA[<p>オライリーの<code class="language-plaintext highlighter-rouge">Terraformクックブック</code>という書籍を読んだので、気になったことを中心に簡単な感想や要約を書きます。(網羅性はありません)</p>
 
 <p><code class="language-plaintext highlighter-rouge">Terraform</code>を扱う上で基本的な内容が網羅された書籍になっています。</p>
 
@@ -4147,22 +4201,14 @@ go get <span class="nt">-u</span> github.com/huseyinbabal/microservices-proto/go
 <ul id="markdown-toc">
   <li><a href="#1terraform-を使い始める" id="markdown-toc-1terraform-を使い始める">1.Terraform を使い始める</a></li>
   <li><a href="#2terraformの基本" id="markdown-toc-2terraformの基本">2.Terraformの基本</a></li>
-  <li><a href="#terraformrego" id="markdown-toc-terraformrego">terraform.rego</a></li>
-  <li><a href="#define-a-policy-to-restrict-allowed-ec2-instance-types" id="markdown-toc-define-a-policy-to-restrict-allowed-ec2-instance-types">Define a policy to restrict allowed EC2 instance types</a></li>
-  <li><a href="#githubdependabotyml" id="markdown-toc-githubdependabotyml">.github/dependabot.yml</a>    <ul>
-      <li><a href="#3terraform構文パターン" id="markdown-toc-3terraform構文パターン">3.Terraform構文パターン</a></li>
-      <li><a href="#4terraformモジュールとプロバイダー" id="markdown-toc-4terraformモジュールとプロバイダー">4.Terraformモジュールとプロバイダー</a></li>
-    </ul>
-  </li>
-  <li><a href="#configure-the-consul-provider" id="markdown-toc-configure-the-consul-provider">Configure the Consul provider</a>    <ul>
-      <li><a href="#5terraformによるコンテナ管理" id="markdown-toc-5terraformによるコンテナ管理">5.Terraformによるコンテナ管理</a></li>
-      <li><a href="#6hcp-terraformとterraform-enterprise" id="markdown-toc-6hcp-terraformとterraform-enterprise">6.HCP TerraformとTerraform Enterprise</a></li>
-      <li><a href="#7terraformでシークレットを消費し管理する" id="markdown-toc-7terraformでシークレットを消費し管理する">7.Terraformでシークレットを消費し管理する</a></li>
-      <li><a href="#8terraformによる構成管理" id="markdown-toc-8terraformによる構成管理">8.Terraformによる構成管理</a></li>
-      <li><a href="#9高度なterraformテクニック" id="markdown-toc-9高度なterraformテクニック">9.高度なTerraformテクニック</a></li>
-      <li><a href="#10実際の使用例" id="markdown-toc-10実際の使用例">10.実際の使用例</a></li>
-    </ul>
-  </li>
+  <li><a href="#3terraform構文パターン" id="markdown-toc-3terraform構文パターン">3.Terraform構文パターン</a></li>
+  <li><a href="#4terraformモジュールとプロバイダー" id="markdown-toc-4terraformモジュールとプロバイダー">4.Terraformモジュールとプロバイダー</a></li>
+  <li><a href="#5terraformによるコンテナ管理" id="markdown-toc-5terraformによるコンテナ管理">5.Terraformによるコンテナ管理</a></li>
+  <li><a href="#6hcp-terraformとterraform-enterprise" id="markdown-toc-6hcp-terraformとterraform-enterprise">6.HCP TerraformとTerraform Enterprise</a></li>
+  <li><a href="#7terraformでシークレットを消費し管理する" id="markdown-toc-7terraformでシークレットを消費し管理する">7.Terraformでシークレットを消費し管理する</a></li>
+  <li><a href="#8terraformによる構成管理" id="markdown-toc-8terraformによる構成管理">8.Terraformによる構成管理</a></li>
+  <li><a href="#9高度なterraformテクニック" id="markdown-toc-9高度なterraformテクニック">9.高度なTerraformテクニック</a></li>
+  <li><a href="#10実際の使用例" id="markdown-toc-10実際の使用例">10.実際の使用例</a></li>
 </ul>
 
 <hr />
@@ -4225,54 +4271,55 @@ go get <span class="nt">-u</span> github.com/huseyinbabal/microservices-proto/go
 <ul>
   <li>VPC を作成する場合など、自分で一から作るのは面倒</li>
   <li>パブリックモジュールを使えば簡単に設定できる</li>
-  <li>下の例では、CIDR, AZ, サブネット、NATゲートウェイなどを設定
-    <div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">module</span> <span class="s2">"vpc"</span> <span class="p">{</span>
-  <span class="nx">source</span> <span class="o">=</span> <span class="s2">"terraform-aws-modules/vpc/aws"</span>
-  <span class="p">...</span>
-  <span class="nx">cidr</span> <span class="o">=</span> <span class="s2">"10.0.0.0/16"</span>
-  <span class="nx">azs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"us-west-2a"</span><span class="p">,</span> <span class="s2">"us-west-2b"</span><span class="p">,</span> <span class="s2">"us-west-2c"</span><span class="p">]</span>
-  <span class="nx">private_subnets</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"10.0.1.0/24"</span><span class="p">,</span> <span class="s2">"10.0.2.0/24"</span><span class="p">,</span> <span class="s2">"10.0.3.0/24"</span><span class="p">]</span>
-  <span class="nx">public_subnets</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"10.0.101.0/24"</span><span class="p">,</span> <span class="s2">"10.0.102.0/24"</span><span class="p">,</span> <span class="s2">"10.0.103.0/24"</span><span class="p">]</span>
-  <span class="nx">enable_nat_gateway</span> <span class="o">=</span> <span class="kc">true</span>
-  <span class="nx">tags</span> <span class="o">=</span> <span class="p">{</span>
-      <span class="nx">Terraform</span> <span class="o">=</span> <span class="s2">"true"</span>
-      <span class="nx">Environment</span> <span class="o">=</span> <span class="s2">"dev"</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
+  <li>下の例では、CIDR, AZ, サブネット、NATゲートウェイなどを設定</li>
 </ul>
+
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">module</span> <span class="s2">"vpc"</span> <span class="p">{</span>
+    <span class="nx">source</span> <span class="o">=</span> <span class="s2">"terraform-aws-modules/vpc/aws"</span>
+    <span class="p">...</span>
+    <span class="nx">cidr</span> <span class="o">=</span> <span class="s2">"10.0.0.0/16"</span>
+    <span class="nx">azs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"us-west-2a"</span><span class="p">,</span> <span class="s2">"us-west-2b"</span><span class="p">,</span> <span class="s2">"us-west-2c"</span><span class="p">]</span>
+    <span class="nx">private_subnets</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"10.0.1.0/24"</span><span class="p">,</span> <span class="s2">"10.0.2.0/24"</span><span class="p">,</span> <span class="s2">"10.0.3.0/24"</span><span class="p">]</span>
+    <span class="nx">public_subnets</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"10.0.101.0/24"</span><span class="p">,</span> <span class="s2">"10.0.102.0/24"</span><span class="p">,</span> <span class="s2">"10.0.103.0/24"</span><span class="p">]</span>
+    <span class="nx">enable_nat_gateway</span> <span class="o">=</span> <span class="kc">true</span>
+    <span class="nx">tags</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="nx">Terraform</span> <span class="o">=</span> <span class="s2">"true"</span>
+        <span class="nx">Environment</span> <span class="o">=</span> <span class="s2">"dev"</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
 
 <h4 id="16terraformコンソールでterraformの状態を変更する">1.6.terraformコンソールでTerraformの状態を変更する</h4>
 
 <ul>
   <li>デバッグのために、tfの状態をHCLで変更できる</li>
   <li>本番環境では使ってはいけない</li>
-  <li>下の例は現在のtfの状態をロードするコマンド
-    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>terraform console
-state.&lt;module-name&gt;.&lt;resourcename&gt;.&lt;attribute-name&gt; 
-</code></pre></div>    </div>
-  </li>
+  <li>下の例は現在のtfの状態をロードするコマンド</li>
 </ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>terraform console
+state.&lt;module-name&gt;.&lt;resourcename&gt;.&lt;attribute-name&gt; 
+</code></pre></div></div>
 
 <h4 id="17hashicorp-cloud-platform-terraformを使う">1.7.HashiCorp Cloud Platform Terraformを使う</h4>
 <ul>
   <li>他にS3, Azure Blob, Cloud Storage, Consul, ローカルに保存できる</li>
-  <li>組織名とワークスペース名を指定する必要
-    <div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">terraform</span> <span class="p">{</span>
-  <span class="nx">cloud</span> <span class="p">{</span>
-  <span class="nx">organization</span> <span class="o">=</span> <span class="s2">"&lt;your-organization-name&gt;"</span>
-
-  <span class="nx">workspaces</span> <span class="p">{</span>
-      <span class="nx">name</span> <span class="o">=</span> <span class="s2">"&lt;your-workspace-name&gt;"</span>
-      <span class="p">}</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>    </div>
-    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>terraform init <span class="nt">-backend-config</span><span class="o">=</span><span class="s2">"token=&lt;HCP Terraform API token&gt;"</span>
-</code></pre></div>    </div>
-  </li>
+  <li>組織名とワークスペース名を指定する必要</li>
 </ul>
+
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">terraform</span> <span class="p">{</span>
+    <span class="nx">cloud</span> <span class="p">{</span>
+    <span class="nx">organization</span> <span class="o">=</span> <span class="s2">"&lt;your-organization-name&gt;"</span>
+
+    <span class="nx">workspaces</span> <span class="p">{</span>
+        <span class="nx">name</span> <span class="o">=</span> <span class="s2">"&lt;your-workspace-name&gt;"</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>terraform init <span class="nt">-backend-config</span><span class="o">=</span><span class="s2">"token=&lt;HCP Terraform API token&gt;"</span>
+</code></pre></div></div>
 
 <h4 id="18visual-studio-codeでterraformを使う">1.8.Visual Studio CodeでTerraformを使う</h4>
 
@@ -4285,13 +4332,15 @@ state.&lt;module-name&gt;.&lt;resourcename&gt;.&lt;attribute-name&gt;
 
 <ul>
   <li>下の例では5.0以上、6.0未満</li>
-  <li>破壊的変更を防ぐ可能性があるので、5.1.0など具体的なほうが良い
-    <div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">provider</span> <span class="s2">"aws"</span> <span class="p">{</span>
-  <span class="nx">version</span> <span class="o">=</span> <span class="s2">"~&gt; 5.0"</span>
-  <span class="nx">region</span> <span class="o">=</span> <span class="s2">"us-west-2"</span>
+  <li>破壊的変更を防ぐ可能性があるので、5.1.0など具体的なほうが良い</li>
+</ul>
+
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">provider</span> <span class="s2">"aws"</span> <span class="p">{</span>
+    <span class="nx">version</span> <span class="o">=</span> <span class="s2">"~&gt; 5.0"</span>
+    <span class="nx">region</span> <span class="o">=</span> <span class="s2">"us-west-2"</span>
 <span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
+</code></pre></div></div>
+<ul>
   <li>ロックファイル(<code class="language-plaintext highlighter-rouge">.terraform.lock.hcl</code>)でバージョンを記録できる</li>
   <li><code class="language-plaintext highlighter-rouge">terraform init- upgrade</code>で範囲内でアップロードできる</li>
 </ul>
@@ -4300,54 +4349,61 @@ state.&lt;module-name&gt;.&lt;resourcename&gt;.&lt;attribute-name&gt;
 
 <ul>
   <li><code class="language-plaintext highlighter-rouge">github_branch_protection</code>リソースを使ってブランチ保護規則を設定</li>
-  <li>下の例では、CICDを通過しないとマージされない
-    <div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">resource</span> <span class="s2">"github_branch_protection"</span> <span class="s2">"main"</span> <span class="p">{</span>
-  <span class="nx">repository</span> <span class="o">=</span> <span class="nx">github_repository</span><span class="p">.</span><span class="nx">terraform_repo</span><span class="p">.</span><span class="nx">name</span>
-  <span class="p">...</span>
-  <span class="nx">required_status_checks</span> <span class="p">{</span>
-      <span class="nx">strict</span> <span class="o">=</span> <span class="kc">true</span>
-      <span class="nx">contexts</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"ci/terraform-run"</span><span class="p">]</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
+  <li>下の例では、CICDを通過しないとマージされない</li>
 </ul>
+
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">resource</span> <span class="s2">"github_branch_protection"</span> <span class="s2">"main"</span> <span class="p">{</span>
+    <span class="nx">repository</span> <span class="o">=</span> <span class="nx">github_repository</span><span class="p">.</span><span class="nx">terraform_repo</span><span class="p">.</span><span class="nx">name</span>
+    <span class="p">...</span>
+    <span class="nx">required_status_checks</span> <span class="p">{</span>
+        <span class="nx">strict</span> <span class="o">=</span> <span class="kc">true</span>
+        <span class="nx">contexts</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"ci/terraform-run"</span><span class="p">]</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
 
 <h4 id="111terraformでdockerコンテナをデプロイする">1.11.TerraformでDockerコンテナをデプロイする</h4>
 
 <ul>
-  <li>コンテナ、イメージ、ネットワークを定義できる
-```hcl
-provider “docker” {}</li>
+  <li>コンテナ、イメージ、ネットワークを定義できる</li>
 </ul>
 
-<p>resource “docker_container” “example” {
-    image = “nginx”
-    …
-}</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
-#### 1.12.Terraformをアップグレードする：0.xから1.xへ、そしてその先へ
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">provider</span> <span class="s2">"docker"</span> <span class="p">{}</span>
 
-- リストアに備えて、状態ファイルのバックアップを作成
-- レガシーでは、v0.12→v0.12.31→v0.13のように少しずつアップグレードしていた
-- 以前は徹底的なレビューが必要だった
-- v1.xxでは後方互換性に対処
+<span class="nx">resource</span> <span class="s2">"docker_container"</span> <span class="s2">"example"</span> <span class="p">{</span>
+    <span class="nx">image</span> <span class="o">=</span> <span class="s2">"nginx"</span>
+    <span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div></div>
 
-#### 1.13.Terraform変数を使う
+<h4 id="112terraformをアップグレードする0xから1xへそしてその先へ">1.12.Terraformをアップグレードする：0.xから1.xへ、そしてその先へ</h4>
 
-- varaiableで定義
-- `terraform apply -var region=us-east-1`のように上書きできる
-- モジュール化では入力と出力を設定して抽象化
-- 変数のスコープに注意し、グローバル変数は避ける
+<ul>
+  <li>リストアに備えて、状態ファイルのバックアップを作成</li>
+  <li>レガシーでは、v0.12→v0.12.31→v0.13のように少しずつアップグレードしていた</li>
+  <li>以前は徹底的なレビューが必要だった</li>
+  <li>v1.xxでは後方互換性に対処</li>
+</ul>
 
-#### 1.14.一貫した経験のための一貫したコード
+<h4 id="113terraform変数を使う">1.13.Terraform変数を使う</h4>
 
-- `required_version`を使う
-```hcl
-terraform {
-     required_version = "&gt;= 1.0.0"
-     ...
-  }
+<ul>
+  <li>varaiableで定義</li>
+  <li><code class="language-plaintext highlighter-rouge">terraform apply -var region=us-east-1</code>のように上書きできる</li>
+  <li>モジュール化では入力と出力を設定して抽象化</li>
+  <li>変数のスコープに注意し、グローバル変数は避ける</li>
+</ul>
+
+<h4 id="114一貫した経験のための一貫したコード">1.14.一貫した経験のための一貫したコード</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">required_version</code>を使う</li>
+</ul>
+
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">terraform</span> <span class="p">{</span>
+     <span class="nx">required_version</span> <span class="o">=</span> <span class="s2">"&gt;= 1.0.0"</span>
+     <span class="p">...</span>
+  <span class="p">}</span>
 </code></pre></div></div>
 
 <h3 id="2terraformの基本">2.Terraformの基本</h3>
@@ -4362,16 +4418,14 @@ terraform {
 <h4 id="22terraformコンソールによる迅速な実験">2.2.Terraformコンソールによる迅速な実験</h4>
 
 <ul>
-  <li>nodejsやpythonのようなREPL
-```bash
-terraform console</li>
+  <li>nodejsやpythonのようなREPL</li>
 </ul>
 
-<blockquote>
-  <p>lookup({a=”foo”, b=”bar”}, “a”, “default”)
-“foo”
-```</p>
-</blockquote>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>terraform console
+
+<span class="o">&gt;</span> lookup<span class="o">({</span><span class="nv">a</span><span class="o">=</span><span class="s2">"foo"</span>, <span class="nv">b</span><span class="o">=</span><span class="s2">"bar"</span><span class="o">}</span>, <span class="s2">"a"</span>, <span class="s2">"default"</span><span class="o">)</span>
+<span class="s2">"foo"</span>
+</code></pre></div></div>
 
 <h4 id="23tflintでコード品質を向上させる">2.3.TFLintでコード品質を向上させる</h4>
 
@@ -4387,10 +4441,12 @@ terraform console</li>
 <ul>
   <li><code class="language-plaintext highlighter-rouge">tfsec</code>コマンドをダウンロード</li>
   <li>tfファイルにコメントを追加して、特定のチェックを無視できる</li>
-  <li>これはなるべく使用せず、使用する場合は文書化する
-    <div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#tfsec:ignore:aws-iam-no-policy-wildcards resource "aws_iam_policy" "example" </span>
-</code></pre></div>    </div>
-  </li>
+  <li>これはなるべく使用せず、使用する場合は文書化する</li>
+</ul>
+
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#tfsec:ignore:aws-iam-no-policy-wildcards resource "aws_iam_policy" "example" </span>
+</code></pre></div></div>
+<ul>
   <li><code class="language-plaintext highlighter-rouge">.tfsec.yml</code>ファイルで設定を構成できる</li>
 </ul>
 
@@ -4427,46 +4483,47 @@ terraform console</li>
 <ul>
   <li>OPAを使用してポリシーアズコード検証を実装</li>
   <li>インフラをポリシーとして定義</li>
-  <li>OPAポリシーは定期的に最新基準に応じて変更する
-```plaintext
-    <h1 id="terraformrego">terraform.rego</h1>
-  </li>
+  <li>OPAポリシーは定期的に最新基準に応じて変更する</li>
 </ul>
 
-<p>package terraform</p>
-<h1 id="define-a-policy-to-restrict-allowed-ec2-instance-types">Define a policy to restrict allowed EC2 instance types</h1>
-<p>deny[“Instance type must be t2.micro or t2.small”] {
-    …
-}</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
-```bash
-$ terraform init
-$ terraform plan -out=tfplan
-$ terraform show -json tfplan &gt; tfplan.json
-$ opa eval --data terraform.rego --input tfplan.json "data.terraform.deny"
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># terraform.rego
+
+package terraform
+# Define a policy to restrict allowed EC2 instance types
+deny["Instance type must be t2.micro or t2.small"] {
+    ...
+}
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>terraform init
+<span class="nv">$ </span>terraform plan <span class="nt">-out</span><span class="o">=</span>tfplan
+<span class="nv">$ </span>terraform show <span class="nt">-json</span> tfplan <span class="o">&gt;</span> tfplan.json
+<span class="nv">$ </span>opa <span class="nb">eval</span> <span class="nt">--data</span> terraform.rego <span class="nt">--input</span> tfplan.json <span class="s2">"data.terraform.deny"</span>
 </code></pre></div></div>
 <ul>
-  <li>CI/CDに組み込む
-```yaml</li>
-  <li>name: OPA Evaluation
-run: |
-  terraform show -json tfplan &gt; tfplan.json
-  violations=$(opa eval –data terraform.rego –input tfplan.json “data.terraform.deny”)
-  if [ -n “$violations” ]; then
-      …
-  fi
-```</li>
+  <li>CI/CDに組み込む</li>
 </ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">OPA Evaluation</span>
+  <span class="na">run</span><span class="pi">:</span> <span class="pi">|</span>
+    <span class="s">terraform show -json tfplan &gt; tfplan.json</span>
+    <span class="s">violations=$(opa eval --data terraform.rego --input tfplan.json "data.terraform.deny")</span>
+    <span class="s">if [ -n "$violations" ]; then</span>
+        <span class="s">...</span>
+    <span class="s">fi</span>
+</code></pre></div></div>
 
 <h4 id="27terraform-docsでコードをドキュメント化する">2.7.Terraform-docsでコードをドキュメント化する</h4>
 
 <ul>
   <li>ドキュメントを自動生成できる</li>
-  <li>下の例では、現在のディレクトリを指定して出力
-    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>terraform-docs markdown ./ <span class="o">&gt;</span> README.md
+  <li>下の例では、現在のディレクトリを指定して出力</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>terraform-docs markdown ./ <span class="o">&gt;</span> README.md
 <span class="nv">$ </span>terraform-docs asciidoc table ./ <span class="o">&gt;</span> docs.adoc
-</code></pre></div>    </div>
-  </li>
+</code></pre></div></div>
+<ul>
   <li>md, json, yaml, htmlなどに変換できる</li>
   <li>ascii記法にも対応している</li>
   <li><code class="language-plaintext highlighter-rouge">.terraformdocs.yml</code>で設定</li>
@@ -4483,15 +4540,16 @@ run: |
 <h4 id="29プロバイダのバージョンアップに-dependabot-を使用する">2.9.プロバイダのバージョンアップに Dependabot を使用する</h4>
 
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">Dependabot</code>はtfにも対応しており、プロバイダを自動更新できる
-```yaml
-    <h1 id="githubdependabotyml">.github/dependabot.yml</h1>
-    <p>version: 2
-updates:</p>
-  </li>
-  <li>package-ecosystem: “terraform”
-…
-```</li>
+  <li><code class="language-plaintext highlighter-rouge">Dependabot</code>はtfにも対応しており、プロバイダを自動更新できる</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># .github/dependabot.yml</span>
+<span class="na">version</span><span class="pi">:</span> <span class="m">2</span>
+<span class="na">updates</span><span class="pi">:</span>
+ <span class="pi">-</span> <span class="na">package-ecosystem</span><span class="pi">:</span> <span class="s2">"</span><span class="s">terraform"</span>
+   <span class="s">...</span>
+</code></pre></div></div>
+<ul>
   <li>PRは必ずレビュー、変更に対して検証や自動テスト、破壊的変更を考慮</li>
   <li>プロバイダーの定期的アップデートはセキュリティのため非常に重要</li>
   <li>本番環境へのアップロード前は必ず十分なテストを行う</li>
@@ -4516,74 +4574,79 @@ updates:</p>
 <ul>
   <li>空白などは予期せぬ動作を起こす可能性
     <ul>
-      <li><code class="language-plaintext highlighter-rouge">chomp</code>や<code class="language-plaintext highlighter-rouge">trimspace</code>関数
-```hcl
-locals {
-  clean_user_input = trimspace(var.user_input)
- }</li>
+      <li><code class="language-plaintext highlighter-rouge">chomp</code>や<code class="language-plaintext highlighter-rouge">trimspace</code>関数</li>
     </ul>
   </li>
 </ul>
 
-<p>output “clean_user_input” {
-    value = local.clean_user_input
- }</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
-#### 3.2.接頭辞と接尾辞を削除する
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">locals</span> <span class="p">{</span>
+    <span class="nx">clean_user_input</span> <span class="o">=</span> <span class="nx">trimspace</span><span class="p">(</span><span class="nx">var</span><span class="p">.</span><span class="nx">user_input</span><span class="p">)</span>
+ <span class="p">}</span>
 
-```hcl
-locals {
-    prefix = "prefix_"
-    suffix = "_suffix"
+<span class="nx">output</span> <span class="s2">"clean_user_input"</span> <span class="p">{</span>
+    <span class="nx">value</span> <span class="o">=</span> <span class="nx">local</span><span class="p">.</span><span class="nx">clean_user_input</span>
+ <span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="32接頭辞と接尾辞を削除する">3.2.接頭辞と接尾辞を削除する</h4>
+
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">locals</span> <span class="p">{</span>
+    <span class="nx">prefix</span> <span class="o">=</span> <span class="s2">"prefix_"</span>
+    <span class="nx">suffix</span> <span class="o">=</span> <span class="s2">"_suffix"</span>
   
-    without_prefix   = trimprefix(var.user_input, local.prefix)
-    clean_user_input = trimsuffix(local.without_prefix, local.suffix)
- }
+    <span class="nx">without_prefix</span>   <span class="o">=</span> <span class="nx">trimprefix</span><span class="p">(</span><span class="nx">var</span><span class="p">.</span><span class="nx">user_input</span><span class="p">,</span> <span class="nx">local</span><span class="p">.</span><span class="nx">prefix</span><span class="p">)</span>
+    <span class="nx">clean_user_input</span> <span class="o">=</span> <span class="nx">trimsuffix</span><span class="p">(</span><span class="nx">local</span><span class="p">.</span><span class="nx">without_prefix</span><span class="p">,</span> <span class="nx">local</span><span class="p">.</span><span class="nx">suffix</span><span class="p">)</span>
+ <span class="p">}</span>
 </code></pre></div></div>
 
 <h4 id="33正規表現を使う">3.3.正規表現を使う</h4>
 
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">regex</code>か<code class="language-plaintext highlighter-rouge">regexall</code>のreplace正規表現関数をサポート
-    <div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">locals</span> <span class="p">{</span>
-  <span class="nx">masked_input</span> <span class="o">=</span> <span class="nx">replace</span><span class="p">(</span><span class="nx">var</span><span class="p">.</span><span class="nx">user_input</span><span class="p">,</span> 
-      <span class="nx">regex</span><span class="p">(</span><span class="s2">"</span><span class="err">\\</span><span class="s2">d{3}-</span><span class="err">\\</span><span class="s2">d{2}-(</span><span class="err">\\</span><span class="s2">d{4})"</span><span class="p">,</span> <span class="nx">var</span><span class="p">.</span><span class="nx">user_input</span><span class="p">),</span>
-      <span class="s2">"XXX-XX-$1"</span>
-<span class="p">)</span>
+  <li><code class="language-plaintext highlighter-rouge">regex</code>か<code class="language-plaintext highlighter-rouge">regexall</code>のreplace正規表現関数をサポート</li>
+</ul>
+
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">locals</span> <span class="p">{</span>
+    <span class="nx">masked_input</span> <span class="o">=</span> <span class="nx">replace</span><span class="p">(</span><span class="nx">var</span><span class="p">.</span><span class="nx">user_input</span><span class="p">,</span> 
+        <span class="nx">regex</span><span class="p">(</span><span class="s2">"</span><span class="err">\\</span><span class="s2">d{3}-</span><span class="err">\\</span><span class="s2">d{2}-(</span><span class="err">\\</span><span class="s2">d{4})"</span><span class="p">,</span> <span class="nx">var</span><span class="p">.</span><span class="nx">user_input</span><span class="p">),</span>
+        <span class="s2">"XXX-XX-$1"</span>
+  <span class="p">)</span>
  <span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
+</code></pre></div></div>
+<ul>
   <li>使いすぎると可読性が落ちることに注意</li>
 </ul>
 
 <h4 id="34高度な文字列操作">3.4.高度な文字列操作</h4>
 
 <ul>
-  <li>ネストされた<code class="language-plaintext highlighter-rouge">replace</code>関数や<code class="language-plaintext highlighter-rouge">format</code>関数
-    <div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">locals</span> <span class="p">{</span>
-  <span class="nx">processed_input</span> <span class="o">=</span> <span class="nx">replace</span><span class="p">(</span>
-      <span class="nx">replace</span><span class="p">(</span>
-      <span class="nx">upper</span><span class="p">(</span><span class="nx">var</span><span class="p">.</span><span class="nx">user_input</span><span class="p">),</span>
-      <span class="s2">"WORLD"</span><span class="p">,</span>
-      <span class="s2">"TERRAFORM"</span>
-      <span class="p">),</span>
-      <span class="s2">"!"</span><span class="p">,</span>
-      <span class="s2">"!!!"</span>
-  <span class="p">)</span>
- <span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
-  <li>複雑な場合は<code class="language-plaintext highlighter-rouge">format</code>関数と組み合わせる
-    <div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">locals</span> <span class="p">{</span>
-  <span class="nx">complex_transformation</span> <span class="o">=</span> <span class="nx">format</span><span class="p">(</span>
-      <span class="s2">"%s: %s"</span><span class="p">,</span>
-      <span class="nx">upper</span><span class="p">(</span><span class="nx">replace</span><span class="p">(</span><span class="nx">var</span><span class="p">.</span><span class="nx">user_input</span><span class="p">,</span> <span class="s2">"hello"</span><span class="p">,</span> <span class="s2">"greetings"</span><span class="p">)),</span>
-      <span class="nx">replace</span><span class="p">(</span><span class="nx">var</span><span class="p">.</span><span class="nx">user_input</span><span class="p">,</span> <span class="s2">"</span><span class="err">\\</span><span class="s2">d+"</span><span class="p">,</span> <span class="s2">"NumbersRemoved"</span><span class="p">)</span>
-  <span class="p">)</span>
-<span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
+  <li>ネストされた<code class="language-plaintext highlighter-rouge">replace</code>関数や<code class="language-plaintext highlighter-rouge">format</code>関数</li>
 </ul>
+
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">locals</span> <span class="p">{</span>
+    <span class="nx">processed_input</span> <span class="o">=</span> <span class="nx">replace</span><span class="p">(</span>
+        <span class="nx">replace</span><span class="p">(</span>
+        <span class="nx">upper</span><span class="p">(</span><span class="nx">var</span><span class="p">.</span><span class="nx">user_input</span><span class="p">),</span>
+        <span class="s2">"WORLD"</span><span class="p">,</span>
+        <span class="s2">"TERRAFORM"</span>
+        <span class="p">),</span>
+        <span class="s2">"!"</span><span class="p">,</span>
+        <span class="s2">"!!!"</span>
+    <span class="p">)</span>
+ <span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>複雑な場合は<code class="language-plaintext highlighter-rouge">format</code>関数と組み合わせる</li>
+</ul>
+
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">locals</span> <span class="p">{</span>
+    <span class="nx">complex_transformation</span> <span class="o">=</span> <span class="nx">format</span><span class="p">(</span>
+        <span class="s2">"%s: %s"</span><span class="p">,</span>
+        <span class="nx">upper</span><span class="p">(</span><span class="nx">replace</span><span class="p">(</span><span class="nx">var</span><span class="p">.</span><span class="nx">user_input</span><span class="p">,</span> <span class="s2">"hello"</span><span class="p">,</span> <span class="s2">"greetings"</span><span class="p">)),</span>
+        <span class="nx">replace</span><span class="p">(</span><span class="nx">var</span><span class="p">.</span><span class="nx">user_input</span><span class="p">,</span> <span class="s2">"</span><span class="err">\\</span><span class="s2">d+"</span><span class="p">,</span> <span class="s2">"NumbersRemoved"</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
 
 <h4 id="35大文字と小文字を区別する文字列を扱う-titleupperlowerを使う">3.5.大文字と小文字を区別する文字列を扱う title、upper、lowerを使う</h4>
 
@@ -4644,70 +4707,73 @@ locals {
   <li>パスは相対パス</li>
   <li>外部ファイルの変更を自動検知しない
     <ul>
-      <li><code class="language-plaintext highlighter-rouge">replaceflag</code>や<code class="language-plaintext highlighter-rouge">terraform taint</code>を利用
-        <div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">locals</span> <span class="p">{</span>
-  <span class="nx">config_contents</span> <span class="o">=</span> <span class="p">{</span>
-  <span class="nx">for</span> <span class="nx">path</span> <span class="nx">in</span> <span class="nx">var</span><span class="p">.</span><span class="nx">config_files</span> <span class="o">:</span>
-  <span class="nx">path</span> <span class="o">=&gt;</span> <span class="nx">fileexists</span><span class="p">(</span><span class="nx">path</span><span class="p">)</span> <span class="o">?</span> <span class="nx">file</span><span class="p">(</span><span class="nx">path</span><span class="p">)</span> <span class="o">:</span> <span class="s2">"File not found: ${path}"</span>
-<span class="p">}</span>
- <span class="p">}</span>
-</code></pre></div>        </div>
-      </li>
+      <li><code class="language-plaintext highlighter-rouge">replaceflag</code>や<code class="language-plaintext highlighter-rouge">terraform taint</code>を利用</li>
     </ul>
   </li>
 </ul>
 
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">locals</span> <span class="p">{</span>
+    <span class="nx">config_contents</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="nx">for</span> <span class="nx">path</span> <span class="nx">in</span> <span class="nx">var</span><span class="p">.</span><span class="nx">config_files</span> <span class="o">:</span>
+        <span class="nx">path</span> <span class="o">=&gt;</span> <span class="nx">fileexists</span><span class="p">(</span><span class="nx">path</span><span class="p">)</span> <span class="o">?</span> <span class="nx">file</span><span class="p">(</span><span class="nx">path</span><span class="p">)</span> <span class="o">:</span> <span class="s2">"File not found: ${path}"</span>
+  <span class="p">}</span>
+ <span class="p">}</span>
+</code></pre></div></div>
+
 <h4 id="39レンダリングテンプレート">3.9.レンダリングテンプレート</h4>
 
 <ul>
-  <li>変数入力の基づいて設定ファイルやスクリプトを生成
-```hcl
-data “template_file” “bash_script” { 
-　  template = «-EOF
-          #!/bin/bash
-          echo “Hello, ${user_name}”
-          EOF
-  vars = {
-    user_name = var.user_name
-  }
-}</li>
+  <li>変数入力の基づいて設定ファイルやスクリプトを生成</li>
 </ul>
 
-<p>output “rendered_script” {
-    description = “Rendered bash script”
-    value       = data.template_file.bash_script.rendered
-}</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
-#### 3.10.入力文字列の検証
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">data</span> <span class="s2">"template_file"</span> <span class="s2">"bash_script"</span> <span class="p">{</span> 
+<span class="err">　</span>  <span class="nx">template</span> <span class="o">=</span> <span class="o">&lt;&lt;-</span><span class="nx">EOF</span>
+            <span class="c1">#!/bin/bash</span>
+            <span class="nx">echo</span> <span class="s2">"Hello, ${user_name}"</span>
+            <span class="nx">EOF</span>
+    <span class="nx">vars</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="nx">user_name</span> <span class="o">=</span> <span class="nx">var</span><span class="p">.</span><span class="nx">user_name</span>
+    <span class="p">}</span>
+<span class="p">}</span>
 
-```hcl
-variable "environment" {
-    type        = string
-    ...
-    validation {
-        condition     = contains(["dev", "staging", "prod"], var.environment)
-        error_message = "The environment must be dev, staging, or prod."
-  }
- }
+<span class="nx">output</span> <span class="s2">"rendered_script"</span> <span class="p">{</span>
+    <span class="nx">description</span> <span class="o">=</span> <span class="s2">"Rendered bash script"</span>
+    <span class="nx">value</span>       <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">template_file</span><span class="p">.</span><span class="nx">bash_script</span><span class="p">.</span><span class="nx">rendered</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="310入力文字列の検証">3.10.入力文字列の検証</h4>
+
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">variable</span> <span class="s2">"environment"</span> <span class="p">{</span>
+    <span class="nx">type</span>        <span class="o">=</span> <span class="nx">string</span>
+    <span class="p">...</span>
+    <span class="nx">validation</span> <span class="p">{</span>
+        <span class="nx">condition</span>     <span class="o">=</span> <span class="nx">contains</span><span class="p">([</span><span class="s2">"dev"</span><span class="p">,</span> <span class="s2">"staging"</span><span class="p">,</span> <span class="s2">"prod"</span><span class="p">],</span> <span class="nx">var</span><span class="p">.</span><span class="nx">environment</span><span class="p">)</span>
+        <span class="nx">error_message</span> <span class="o">=</span> <span class="s2">"The environment must be dev, staging, or prod."</span>
+  <span class="p">}</span>
+ <span class="p">}</span>
 </code></pre></div></div>
 <ul>
-  <li>複数のバリエーションを使うこともできる
-    <div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">variable</span> <span class="s2">"vpc_cidr"</span> <span class="p">{</span>
-  <span class="nx">type</span>        <span class="o">=</span> <span class="nx">string</span>
-  <span class="nx">description</span> <span class="o">=</span> <span class="s2">"CIDR block for the VPC"</span>
-  
-  <span class="nx">validation</span> <span class="p">{</span>
-      <span class="nx">condition</span>     <span class="o">=</span> <span class="nx">can</span><span class="p">(</span><span class="nx">cidrhost</span><span class="p">(</span><span class="nx">var</span><span class="p">.</span><span class="nx">vpc_cidr</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-      <span class="nx">error_message</span> <span class="o">=</span> <span class="s2">"Must be a valid IPv4 CIDR block."</span>
-  <span class="p">}</span>
+  <li>複数のバリエーションを使うこともできる</li>
+</ul>
 
-  <span class="nx">validation</span> <span class="p">{</span>
-      <span class="nx">condition</span>     <span class="o">=</span> <span class="nx">split</span><span class="p">(</span><span class="s2">"/"</span><span class="p">,</span> <span class="nx">var</span><span class="p">.</span><span class="nx">vpc_cidr</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span><span class="p">=</span>  <span class="s2">"24"</span> <span class="o">&amp;&amp;</span> <span class="nx">split</span><span class="p">(</span><span class="s2">"/"</span><span class="p">,</span> <span class="nx">var</span><span class="p">.</span><span class="nx">vpc_cidr</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span><span class="p">=</span> <span class="s2">"16"</span>
-      <span class="nx">error_message</span> <span class="o">=</span> <span class="s2">"VPC CIDR block must be between a /16 and /24."</span>
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">variable</span> <span class="s2">"vpc_cidr"</span> <span class="p">{</span>
+    <span class="nx">type</span>        <span class="o">=</span> <span class="nx">string</span>
+    <span class="nx">description</span> <span class="o">=</span> <span class="s2">"CIDR block for the VPC"</span>
+  
+    <span class="nx">validation</span> <span class="p">{</span>
+        <span class="nx">condition</span>     <span class="o">=</span> <span class="nx">can</span><span class="p">(</span><span class="nx">cidrhost</span><span class="p">(</span><span class="nx">var</span><span class="p">.</span><span class="nx">vpc_cidr</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="nx">error_message</span> <span class="o">=</span> <span class="s2">"Must be a valid IPv4 CIDR block."</span>
+    <span class="p">}</span>
+
+    <span class="nx">validation</span> <span class="p">{</span>
+        <span class="nx">condition</span>     <span class="o">=</span> <span class="nx">split</span><span class="p">(</span><span class="s2">"/"</span><span class="p">,</span> <span class="nx">var</span><span class="p">.</span><span class="nx">vpc_cidr</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span><span class="p">=</span>  <span class="s2">"24"</span> <span class="o">&amp;&amp;</span> <span class="nx">split</span><span class="p">(</span><span class="s2">"/"</span><span class="p">,</span> <span class="nx">var</span><span class="p">.</span><span class="nx">vpc_cidr</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span><span class="p">=</span> <span class="s2">"16"</span>
+        <span class="nx">error_message</span> <span class="o">=</span> <span class="s2">"VPC CIDR block must be between a /16 and /24."</span>
+  <span class="p">}</span>
 <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
+</code></pre></div></div>
+
+<ul>
   <li>tfのバリエーション機能に頼るのは注意
     <ul>
       <li>検証のために外部のデータソースやスクリプトの利用</li>
@@ -4768,15 +4834,15 @@ variable "environment" {
   <li>
     <p>オプションプロパティを持つ例</p>
     <ul>
-      <li><code class="language-plaintext highlighter-rouge">can</code>, <code class="language-plaintext highlighter-rouge">try</code>を使ってデフォルト値を与えている
-        <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cidr_blocks = optional(list(string))
-...
-cidr_blocks = can(rule.cidr_blocks) ? rule.cidr_blocks : ["0.0.0.0/0"]
-</code></pre></div>        </div>
-      </li>
+      <li><code class="language-plaintext highlighter-rouge">can</code>, <code class="language-plaintext highlighter-rouge">try</code>を使ってデフォルト値を与えている</li>
     </ul>
   </li>
 </ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cidr_blocks = optional(list(string))
+...
+cidr_blocks = can(rule.cidr_blocks) ? rule.cidr_blocks : ["0.0.0.0/0"]
+</code></pre></div></div>
 
 <h4 id="312入力データを順次処理する">3.12.入力データを順次処理する</h4>
 
@@ -4815,35 +4881,40 @@ cidr_blocks = can(rule.cidr_blocks) ? rule.cidr_blocks : ["0.0.0.0/0"]
   <span class="nx">depends_on</span> <span class="o">=</span> <span class="p">[</span><span class="nx">aws_iam_role</span><span class="p">.</span><span class="nx">example</span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div></div>
+
 <h4 id="313悪い入力に対する良いエラーメッセージ">3.13.悪い入力に対する良いエラーメッセージ</h4>
 
 <h4 id="314terraformステート間でデータをコンシューマする">3.14.Terraformステート間でデータをコンシューマする</h4>
 
 <ul>
   <li>他のtfステートのリソースや出⼒を参照する必要がある場合</li>
-  <li><code class="language-plaintext highlighter-rouge">terraform_remote_state</code>データソースを使⽤
-```hcl
-data “terraform_remote_state” “network” {
-backend = “s3”
-config = {
-  bucket = “my-terraform-state”
-  key    = “network/terraform.tfstate”
-  region = “us-west-2”
-}
-}</li>
+  <li><code class="language-plaintext highlighter-rouge">terraform_remote_state</code>データソースを使⽤</li>
 </ul>
 
-<p>resource “aws_subnet” “example” {
-  vpc_id     = data.terraform_remote_state.network.outputs.vpc_id
-  cidr_block = “10.0.1.0/24”
-}</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>- 頼りすぎないことが重要
-- s3の場合、アクセス制限、バージョニング、暗号化を確認
-- ステートのロックも確認
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">data</span> <span class="s2">"terraform_remote_state"</span> <span class="s2">"network"</span> <span class="p">{</span>
+  <span class="nx">backend</span> <span class="o">=</span> <span class="s2">"s3"</span>
+  <span class="nx">config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="nx">bucket</span> <span class="o">=</span> <span class="s2">"my-terraform-state"</span>
+    <span class="nx">key</span>    <span class="o">=</span> <span class="s2">"network/terraform.tfstate"</span>
+    <span class="nx">region</span> <span class="o">=</span> <span class="s2">"us-west-2"</span>
+  <span class="p">}</span>
+<span class="p">}</span>
 
-- 出力しない場合に備えて、リモートアクセスは`try`を検討
-```plaintext
-vpc_id = try(data.terraform_remote_state.network.outputs.vpc_id, null)
+<span class="nx">resource</span> <span class="s2">"aws_subnet"</span> <span class="s2">"example"</span> <span class="p">{</span>
+  <span class="nx">vpc_id</span>     <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">terraform_remote_state</span><span class="p">.</span><span class="nx">network</span><span class="p">.</span><span class="nx">outputs</span><span class="p">.</span><span class="nx">vpc_id</span>
+  <span class="nx">cidr_block</span> <span class="o">=</span> <span class="s2">"10.0.1.0/24"</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<ul>
+  <li>頼りすぎないことが重要</li>
+  <li>s3の場合、アクセス制限、バージョニング、暗号化を確認</li>
+  <li>
+    <p>ステートのロックも確認</p>
+  </li>
+  <li>出力しない場合に備えて、リモートアクセスは<code class="language-plaintext highlighter-rouge">try</code>を検討</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vpc_id = try(data.terraform_remote_state.network.outputs.vpc_id, null)
 </code></pre></div></div>
 
 <h3 id="4terraformモジュールとプロバイダー">4.Terraformモジュールとプロバイダー</h3>
@@ -4868,16 +4939,16 @@ vpc_id = try(data.terraform_remote_state.network.outputs.vpc_id, null)
   <li>
     <p>EKSは内部的にEC2やASGを使っていることが分かる</p>
   </li>
-  <li>暗号化のために、KMSの設定
-    <div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># kms.tf</span>
-<span class="nx">resource</span> <span class="s2">"aws_kms_key"</span> <span class="s2">"eks"</span> <span class="p">{</span>
-  <span class="nx">description</span> <span class="o">=</span> <span class="s2">"EKS Secret Encryption Key"</span>
-  <span class="nx">deletion_window_in_days</span> <span class="o">=</span> <span class="mi">7</span>
-  <span class="nx">enable_key_rotation</span> <span class="o">=</span> <span class="kc">true</span>
-<span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
+  <li>暗号化のために、KMSの設定</li>
 </ul>
+
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># kms.tf</span>
+<span class="nx">resource</span> <span class="s2">"aws_kms_key"</span> <span class="s2">"eks"</span> <span class="p">{</span>
+    <span class="nx">description</span> <span class="o">=</span> <span class="s2">"EKS Secret Encryption Key"</span>
+    <span class="nx">deletion_window_in_days</span> <span class="o">=</span> <span class="mi">7</span>
+    <span class="nx">enable_key_rotation</span> <span class="o">=</span> <span class="kc">true</span>
+<span class="p">}</span>
+</code></pre></div></div>
 
 <div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">data</span> <span class="s2">"aws_eks_cluster"</span> <span class="s2">"cluster"</span> <span class="p">{</span>
   <span class="nx">name</span> <span class="o">=</span> <span class="nx">module</span><span class="p">.</span><span class="nx">eks</span><span class="p">.</span><span class="nx">cluster_id</span>
@@ -4968,18 +5039,22 @@ vpc_id = try(data.terraform_remote_state.network.outputs.vpc_id, null)
 <ul>
   <li>認証を行うには資格情報を提供
     <ul>
-      <li><code class="language-plaintext highlighter-rouge">./terraformrc</code>ファイルの資格情報ブロックを使う
-        <div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">credentials</span> <span class="s2">"app.terraform.io"</span> <span class="p">{</span>
-  <span class="nx">token</span> <span class="o">=</span> <span class="s2">"your-api-token"</span>
-<span class="p">}</span>
-</code></pre></div>        </div>
-      </li>
+      <li><code class="language-plaintext highlighter-rouge">./terraformrc</code>ファイルの資格情報ブロックを使う</li>
     </ul>
   </li>
-  <li>別の資格情報ファイルを指すように環境変数をTERRAFORM_CONFIGにセット
-    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">export </span><span class="nv">TERRAFORM_CONFIG</span><span class="o">=</span>/path/to/terraform.rc
-</code></pre></div>    </div>
-  </li>
+</ul>
+
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">credentials</span> <span class="s2">"app.terraform.io"</span> <span class="p">{</span>
+    <span class="nx">token</span> <span class="o">=</span> <span class="s2">"your-api-token"</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<ul>
+  <li>別の資格情報ファイルを指すように環境変数をTERRAFORM_CONFIGにセット</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">export </span><span class="nv">TERRAFORM_CONFIG</span><span class="o">=</span>/path/to/terraform.rc
+</code></pre></div></div>
+<ul>
   <li>通常、HCP Terraform のプライベートモジュールレジストリのようなプライベートモジュールレジストリに保存される</li>
 </ul>
 
@@ -4987,36 +5062,38 @@ vpc_id = try(data.terraform_remote_state.network.outputs.vpc_id, null)
 
 <ul>
   <li>main.tf, variables.tf, outputs.tfファイルの作成</li>
-  <li>別のファイルで呼び出す
-```hcl
- module “ec2_instance” {
-source        = “./my_module”
-ami           = “ami-abc123”
-instance_type = “t2.micro”
-instance_name = “my-instance”
- }</li>
+  <li>別のファイルで呼び出す</li>
 </ul>
 
-<p>output “instance_id” {
-  value = module.ec2_instance.instance_id
- }</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>- READMEには、モジュールの目的、入力、出力を記述
-- モジュールのテストのために、/testsフォルダを作成する場合
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="nx">module</span> <span class="s2">"ec2_instance"</span> <span class="p">{</span>
+  <span class="nx">source</span>        <span class="o">=</span> <span class="s2">"./my_module"</span>
+  <span class="nx">ami</span>           <span class="o">=</span> <span class="s2">"ami-abc123"</span>
+  <span class="nx">instance_type</span> <span class="o">=</span> <span class="s2">"t2.micro"</span>
+  <span class="nx">instance_name</span> <span class="o">=</span> <span class="s2">"my-instance"</span>
+ <span class="p">}</span>
 
-#### 4.6.GitHubのシークレットをTerraformで管理する
+ <span class="nx">output</span> <span class="s2">"instance_id"</span> <span class="p">{</span>
+  <span class="nx">value</span> <span class="o">=</span> <span class="nx">module</span><span class="p">.</span><span class="nx">ec2_instance</span><span class="p">.</span><span class="nx">instance_id</span>
+ <span class="p">}</span>
+</code></pre></div></div>
+<ul>
+  <li>READMEには、モジュールの目的、入力、出力を記述</li>
+  <li>モジュールのテストのために、/testsフォルダを作成する場合</li>
+</ul>
 
-```hcl
-resource "github_actions_secret" "example_secret" {
-  repository     = var.github_repository
-  secret_name    = "MY_SECRET"
-  plaintext_value = var.my_secret
-}
+<h4 id="46githubのシークレットをterraformで管理する">4.6.GitHubのシークレットをTerraformで管理する</h4>
 
-variable "my_secret" {
-  description = "The value of the GitHub secret"
-  type        = string
-  sensitive   = true
- }
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">resource</span> <span class="s2">"github_actions_secret"</span> <span class="s2">"example_secret"</span> <span class="p">{</span>
+  <span class="nx">repository</span>     <span class="o">=</span> <span class="nx">var</span><span class="p">.</span><span class="nx">github_repository</span>
+  <span class="nx">secret_name</span>    <span class="o">=</span> <span class="s2">"MY_SECRET"</span>
+  <span class="nx">plaintext_value</span> <span class="o">=</span> <span class="nx">var</span><span class="p">.</span><span class="nx">my_secret</span>
+<span class="p">}</span>
+
+<span class="nx">variable</span> <span class="s2">"my_secret"</span> <span class="p">{</span>
+  <span class="nx">description</span> <span class="o">=</span> <span class="s2">"The value of the GitHub secret"</span>
+  <span class="nx">type</span>        <span class="o">=</span> <span class="nx">string</span>
+  <span class="nx">sensitive</span>   <span class="o">=</span> <span class="kc">true</span>
+ <span class="p">}</span>
 </code></pre></div></div>
 
 <ul>
@@ -5058,57 +5135,60 @@ variable "my_secret" {
 <h4 id="48consul-kvによるダイナミックコンフィギュレーション">4.8.Consul KVによるダイナミックコンフィギュレーション</h4>
 
 <ul>
-  <li>異なるステート間で依存関係を広げる必要がある場合など
-```hcl
-    <h1 id="configure-the-consul-provider">Configure the Consul provider</h1>
-    <p>provider “consul” {
-address = “localhost:8500”
-scheme  = “http”
- }</p>
-  </li>
+  <li>異なるステート間で依存関係を広げる必要がある場合など</li>
 </ul>
 
-<p># Store the VPC ID in Consul KV
- resource “consul_key_prefix” “vpc” {
-  path_prefix = “terraform/vpc/”
-  subkeys = {
-    “id” = aws_vpc.main.id
-  }
- }</p>
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Configure the Consul provider</span>
+ <span class="nx">provider</span> <span class="s2">"consul"</span> <span class="p">{</span>
+  <span class="nx">address</span> <span class="o">=</span> <span class="s2">"localhost:8500"</span>
+  <span class="nx">scheme</span>  <span class="o">=</span> <span class="s2">"http"</span>
+ <span class="p">}</span>
 
-<p># Retrieve the VPC ID from Consul KV
- data “consul_keys” “vpc” {
-  key {
-    name = “vpc_id”
-    path = “terraform/vpc/id”
-  }
- }</p>
+ <span class="c1"># Store the VPC ID in Consul KV</span>
+ <span class="nx">resource</span> <span class="s2">"consul_key_prefix"</span> <span class="s2">"vpc"</span> <span class="p">{</span>
+  <span class="nx">path_prefix</span> <span class="o">=</span> <span class="s2">"terraform/vpc/"</span>
+  <span class="nx">subkeys</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"id"</span> <span class="p">=</span> <span class="nx">aws_vpc</span><span class="p">.</span><span class="nx">main</span><span class="p">.</span><span class="nx">id</span>
+  <span class="p">}</span>
+ <span class="p">}</span>
 
-<p># Use the retrieved VPC ID
- resource “aws_subnet” “example” {
-  vpc_id     = data.consul_keys.vpc.var.vpc_id
-  cidr_block = “10.0.1.0/24”
- }</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
-- Consulで値を変更し、実行時に反映できるようになる
+ <span class="c1"># Retrieve the VPC ID from Consul KV</span>
+ <span class="nx">data</span> <span class="s2">"consul_keys"</span> <span class="s2">"vpc"</span> <span class="p">{</span>
+  <span class="nx">key</span> <span class="p">{</span>
+    <span class="nx">name</span> <span class="o">=</span> <span class="s2">"vpc_id"</span>
+    <span class="nx">path</span> <span class="o">=</span> <span class="s2">"terraform/vpc/id"</span>
+  <span class="p">}</span>
+ <span class="p">}</span>
 
-#### 4.9.サービス・ヘルス・アウェア・プロバイダの構成
+ <span class="c1"># Use the retrieved VPC ID</span>
+ <span class="nx">resource</span> <span class="s2">"aws_subnet"</span> <span class="s2">"example"</span> <span class="p">{</span>
+  <span class="nx">vpc_id</span>     <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">consul_keys</span><span class="p">.</span><span class="nx">vpc</span><span class="p">.</span><span class="nx">var</span><span class="p">.</span><span class="nx">vpc_id</span>
+  <span class="nx">cidr_block</span> <span class="o">=</span> <span class="s2">"10.0.1.0/24"</span>
+ <span class="p">}</span>
+</code></pre></div></div>
 
-- ConsulのHTTPAPIで正常性を確認
+<ul>
+  <li>Consulで値を変更し、実行時に反映できるようになる</li>
+</ul>
 
-```hcl
-# Data source to check service health via Consul HTTP API
- data "http" "service_health_check" {
-  url = "http://localhost:8500/v1/health/service/my-service"
- }
+<h4 id="49サービスヘルスアウェアプロバイダの構成">4.9.サービス・ヘルス・アウェア・プロバイダの構成</h4>
 
- # Local values to process the health check response
- locals {
-  service_health = jsondecode(data.http.service_health_check.body)[0]
-  active_node    = local.service_health.Status == "passing" ? local.service_health.Service.Address : 
-    "fallback_address"
- }
- ...
+<ul>
+  <li>ConsulのHTTPAPIで正常性を確認</li>
+</ul>
+
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Data source to check service health via Consul HTTP API</span>
+ <span class="nx">data</span> <span class="s2">"http"</span> <span class="s2">"service_health_check"</span> <span class="p">{</span>
+  <span class="nx">url</span> <span class="o">=</span> <span class="s2">"http://localhost:8500/v1/health/service/my-service"</span>
+ <span class="p">}</span>
+
+ <span class="c1"># Local values to process the health check response</span>
+ <span class="nx">locals</span> <span class="p">{</span>
+  <span class="nx">service_health</span> <span class="o">=</span> <span class="nx">jsondecode</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">http</span><span class="p">.</span><span class="nx">service_health_check</span><span class="p">.</span><span class="nx">body</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+  <span class="nx">active_node</span>    <span class="o">=</span> <span class="nx">local</span><span class="p">.</span><span class="nx">service_health</span><span class="p">.</span><span class="nx">Status</span> <span class="o">==</span> <span class="s2">"passing"</span> <span class="o">?</span> <span class="nx">local</span><span class="p">.</span><span class="nx">service_health</span><span class="p">.</span><span class="nx">Service</span><span class="p">.</span><span class="nx">Address</span> <span class="o">:</span> 
+    <span class="s2">"fallback_address"</span>
+ <span class="p">}</span>
+ <span class="err">...</span>
 </code></pre></div></div>
 <ul>
   <li>httpデータソースと<code class="language-plaintext highlighter-rouge">jsondecode</code>関数を使用してAPIリクエストを処理</li>
@@ -5299,7 +5379,7 @@ scheme  = “http”
 #### 10.9.Terraformでマルチクラウド監視ソリューションをデプロイする
 
 #### 10.10.TerraformとAWSでディザスターリカバリーを自動化する
--->]]></content><author><name></name></author><category term="blog" /><category term="書籍" /></entry><entry><title type="html">「Domain-Driven Design with Golang」を読む</title><link href="https://hoge-code.github.io/md/posts/2025-05-22-go-ddd" rel="alternate" type="text/html" title="「Domain-Driven Design with Golang」を読む" /><published>2025-05-22T03:00:00+00:00</published><updated>2025-05-22T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/go-ddd</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-22-go-ddd"><![CDATA[<p>オライリーの<code class="language-plaintext highlighter-rouge">Domain-Driven Design with Golang</code>という書籍を読んだので、気になったことを中心に簡単な感想や要約を書きます。(網羅性はありません)</p>
+-->]]></content><author><name></name></author><category term="blog" /><category term="書籍" /><category term="Terraform" /><summary type="html"><![CDATA[Terraform]]></summary></entry><entry><title type="html">「Domain-Driven Design with Golang」を読む</title><link href="https://hoge-code.github.io/md/posts/2025-05-22-go-ddd" rel="alternate" type="text/html" title="「Domain-Driven Design with Golang」を読む" /><published>2025-05-22T03:00:00+00:00</published><updated>2025-05-22T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/go-ddd</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-22-go-ddd"><![CDATA[<p>オライリーの<code class="language-plaintext highlighter-rouge">Domain-Driven Design with Golang</code>という書籍を読んだので、気になったことを中心に簡単な感想や要約を書きます。(網羅性はありません)</p>
 
 <p>Goの書籍の場合、マイクロサービスやデブオペが中心となることが多いですが、この本はDDDやクリーンアーキテクチャなど、設計が中心になっています。</p>
 
@@ -5366,115 +5446,133 @@ scheme  = “http”
       <li>サブスクに登録すると、カスタマーという</li>
     </ul>
   </li>
-  <li>取り合えずインターフェースを作成してみる
-```go
-// ユーザータイプ
-type UserType int</li>
+  <li>取り合えずインターフェースを作成してみる</li>
 </ul>
 
-<p>// サブスクリプションタイプ
-type SubscriptionType int</p>
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// ユーザータイプ</span>
+<span class="k">type</span> <span class="n">UserType</span> <span class="kt">int</span>
 
-<p>const (
-	// ユーザータイプの定義
-	unknownUserType UserType = iota
-	lead
-	customer
-	churned
-	lostLead
-)</p>
+<span class="c">// サブスクリプションタイプ</span>
+<span class="k">type</span> <span class="n">SubscriptionType</span> <span class="kt">int</span>
 
-<p>const (
-	// サブスクリプションタイプの定義
-	unknownSubscriptionType SubscriptionType = iota
-	basic
-	premium
-	exclusive
-)</p>
+<span class="k">const</span> <span class="p">(</span>
+	<span class="c">// ユーザータイプの定義</span>
+	<span class="n">unknownUserType</span> <span class="n">UserType</span> <span class="o">=</span> <span class="no">iota</span>
+	<span class="n">lead</span>
+	<span class="n">customer</span>
+	<span class="n">churned</span>
+	<span class="n">lostLead</span>
+<span class="p">)</span>
 
-<p>// ユーザー追加リクエスト
-type UserAddRequest struct {
-	UserType       UserType
-	Email          string
-	SubType        SubscriptionType
-	PaymentDetails PaymentDetails
-}</p>
+<span class="k">const</span> <span class="p">(</span>
+	<span class="c">// サブスクリプションタイプの定義</span>
+	<span class="n">unknownSubscriptionType</span> <span class="n">SubscriptionType</span> <span class="o">=</span> <span class="no">iota</span>
+	<span class="n">basic</span>
+	<span class="n">premium</span>
+	<span class="n">exclusive</span>
+<span class="p">)</span>
 
-<p>// ユーザー修正リクエスト
-type UserModifyRequest struct {
-	ID             string
-	UserType       UserType
-	Email          string
-	SubType        SubscriptionType
-	PaymentDetails PaymentDetails
-}</p>
+<span class="c">// ユーザー追加リクエスト</span>
+<span class="k">type</span> <span class="n">UserAddRequest</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">UserType</span>       <span class="n">UserType</span>
+	<span class="n">Email</span>          <span class="kt">string</span>
+	<span class="n">SubType</span>        <span class="n">SubscriptionType</span>
+	<span class="n">PaymentDetails</span> <span class="n">PaymentDetails</span>
+<span class="p">}</span>
 
-<p>// ユーザー
-type User struct {
-	ID             string
-	PaymentDetails PaymentDetails
-}</p>
+<span class="c">// ユーザー修正リクエスト</span>
+<span class="k">type</span> <span class="n">UserModifyRequest</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">ID</span>             <span class="kt">string</span>
+	<span class="n">UserType</span>       <span class="n">UserType</span>
+	<span class="n">Email</span>          <span class="kt">string</span>
+	<span class="n">SubType</span>        <span class="n">SubscriptionType</span>
+	<span class="n">PaymentDetails</span> <span class="n">PaymentDetails</span>
+<span class="p">}</span>
 
-<p>// ユーザーマネージャーインターフェース
-type UserManager interface {
-	AddUser(ctx context.Context, request UserAddRequest) (User, error)
-	ModifyUser(ctx context.Context, request UserModifyRequest) (User, error)
-}</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
-#### ドメインとサブドメイン
+<span class="c">// ユーザー</span>
+<span class="k">type</span> <span class="n">User</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">ID</span>             <span class="kt">string</span>
+	<span class="n">PaymentDetails</span> <span class="n">PaymentDetails</span>
+<span class="p">}</span>
 
-- この例では、`payments`と`subscriptions`
-    - チームはドメインで分割されることが多い
-    - 更にドメインができると、チームが分割される
+<span class="c">// ユーザーマネージャーインターフェース</span>
+<span class="k">type</span> <span class="n">UserManager</span> <span class="k">interface</span> <span class="p">{</span>
+	<span class="n">AddUser</span><span class="p">(</span><span class="n">ctx</span> <span class="n">context</span><span class="o">.</span><span class="n">Context</span><span class="p">,</span> <span class="n">request</span> <span class="n">UserAddRequest</span><span class="p">)</span> <span class="p">(</span><span class="n">User</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+	<span class="n">ModifyUser</span><span class="p">(</span><span class="n">ctx</span> <span class="n">context</span><span class="o">.</span><span class="n">Context</span><span class="p">,</span> <span class="n">request</span> <span class="n">UserModifyRequest</span><span class="p">)</span> <span class="p">(</span><span class="n">User</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
 
-#### ユビキタス言語
+<h4 id="ドメインとサブドメイン">ドメインとサブドメイン</h4>
 
-- customerはチームによって違う意味を持つ場合がある
-- 用語集をドキュメントに管理し、定期的にレビューすることが重要
-- 開発者は定義が正しいか、エッジケースを考える必要
+<ul>
+  <li>この例では、<code class="language-plaintext highlighter-rouge">payments</code>と<code class="language-plaintext highlighter-rouge">subscriptions</code>
+    <ul>
+      <li>チームはドメインで分割されることが多い</li>
+      <li>更にドメインができると、チームが分割される</li>
+    </ul>
+  </li>
+</ul>
 
-##### ユビキタス言語の利点
+<h4 id="ユビキタス言語">ユビキタス言語</h4>
 
-- ITプロジェクトが失敗するよくある理由
-    - `got lost in translation`
-- 具体例：顧客ごとに複数のアカウントをサポートしたい
-    - しかし、顧客エンティティが存在しない
-    - アカウントごとに一人のユーザーという仮定
-    - `customer`ではなく`user`が使われていた
-        - ユビキタス言語を使用していれば避けられたかもしれない
+<ul>
+  <li>customerはチームによって違う意味を持つ場合がある</li>
+  <li>用語集をドキュメントに管理し、定期的にレビューすることが重要</li>
+  <li>開発者は定義が正しいか、エッジケースを考える必要</li>
+</ul>
 
-- 登録→lead user→サブスク→customerというサンプルコード
-```go
-// リード作成リクエスト
-type LeadRequest struct {
-	email string
-}
+<h5 id="ユビキタス言語の利点">ユビキタス言語の利点</h5>
 
-// リード
-type Lead struct {
-	id string
-}
+<ul>
+  <li>ITプロジェクトが失敗するよくある理由
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">got lost in translation</code></li>
+    </ul>
+  </li>
+  <li>具体例：顧客ごとに複数のアカウントをサポートしたい
+    <ul>
+      <li>しかし、顧客エンティティが存在しない</li>
+      <li>アカウントごとに一人のユーザーという仮定</li>
+      <li><code class="language-plaintext highlighter-rouge">customer</code>ではなく<code class="language-plaintext highlighter-rouge">user</code>が使われていた
+        <ul>
+          <li>ユビキタス言語を使用していれば避けられたかもしれない</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>登録→lead user→サブスク→customerというサンプルコード</li>
+</ul>
 
-// リード作成インターフェース
-type LeadCreator interface {
-	CreateLead(ctx context.Context, request LeadRequest) (Lead, error)
-}
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// リード作成リクエスト</span>
+<span class="k">type</span> <span class="n">LeadRequest</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">email</span> <span class="kt">string</span>
+<span class="p">}</span>
 
-// 顧客
-type Customer struct {
-	leadID string
-	userID string
-}
+<span class="c">// リード</span>
+<span class="k">type</span> <span class="n">Lead</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">id</span> <span class="kt">string</span>
+<span class="p">}</span>
 
-// リード変換インターフェース
-type LeadConvertor interface {
-	Convert(ctx context.Context, subSelection SubscriptionType) (Customer, error)
-}
+<span class="c">// リード作成インターフェース</span>
+<span class="k">type</span> <span class="n">LeadCreator</span> <span class="k">interface</span> <span class="p">{</span>
+	<span class="n">CreateLead</span><span class="p">(</span><span class="n">ctx</span> <span class="n">context</span><span class="o">.</span><span class="n">Context</span><span class="p">,</span> <span class="n">request</span> <span class="n">LeadRequest</span><span class="p">)</span> <span class="p">(</span><span class="n">Lead</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+<span class="p">}</span>
 
-// リードを顧客に変換
-func (l Lead) Convert(ctx context.Context, subSelection SubscriptionType) (Customer, error) {
-	// TODO 実装する
-}
+<span class="c">// 顧客</span>
+<span class="k">type</span> <span class="n">Customer</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">leadID</span> <span class="kt">string</span>
+	<span class="n">userID</span> <span class="kt">string</span>
+<span class="p">}</span>
+
+<span class="c">// リード変換インターフェース</span>
+<span class="k">type</span> <span class="n">LeadConvertor</span> <span class="k">interface</span> <span class="p">{</span>
+	<span class="n">Convert</span><span class="p">(</span><span class="n">ctx</span> <span class="n">context</span><span class="o">.</span><span class="n">Context</span><span class="p">,</span> <span class="n">subSelection</span> <span class="n">SubscriptionType</span><span class="p">)</span> <span class="p">(</span><span class="n">Customer</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c">// リードを顧客に変換</span>
+<span class="k">func</span> <span class="p">(</span><span class="n">l</span> <span class="n">Lead</span><span class="p">)</span> <span class="n">Convert</span><span class="p">(</span><span class="n">ctx</span> <span class="n">context</span><span class="o">.</span><span class="n">Context</span><span class="p">,</span> <span class="n">subSelection</span> <span class="n">SubscriptionType</span><span class="p">)</span> <span class="p">(</span><span class="n">Customer</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+	<span class="c">// TODO 実装する</span>
+<span class="p">}</span>
 </code></pre></div></div>
 
 <ul>
@@ -5603,67 +5701,72 @@ oapi-codegen <span class="nt">--config</span><span class="o">=</span>config.yml 
 <h5 id="適切な識別子を生成する">適切な識別子を生成する</h5>
 
 <ul>
-  <li>UUIDは128ビット
-```go
-import “github.com/google/uuid”</li>
+  <li>UUIDは128ビット</li>
 </ul>
 
-<p>// SomeEntity構造体
-type SomeEntity struct {
-    id uuid.UUID
-}</p>
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="s">"github.com/google/uuid"</span>
 
-<p>// 新しいSomeEntityを作成する関数
-func NewSomeEntity() *SomeEntity {
-    id := uuid.New()
-    return &amp;SomeEntity{id: id}
-}</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
-- PostgreSQLなどはUUIDを生成できる
+<span class="c">// SomeEntity構造体</span>
+<span class="k">type</span> <span class="n">SomeEntity</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">id</span> <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span>
+<span class="p">}</span>
 
-個人的にRDBの`AUTO INCREMENT`を使う場合が多いが、DDDではエンティティでPKを生成し、保存するほうがいい気がします。
+<span class="c">// 新しいSomeEntityを作成する関数</span>
+<span class="k">func</span> <span class="n">NewSomeEntity</span><span class="p">()</span> <span class="o">*</span><span class="n">SomeEntity</span> <span class="p">{</span>
+    <span class="n">id</span> <span class="o">:=</span> <span class="n">uuid</span><span class="o">.</span><span class="n">New</span><span class="p">()</span>
+    <span class="k">return</span> <span class="o">&amp;</span><span class="n">SomeEntity</span><span class="p">{</span><span class="n">id</span><span class="o">:</span> <span class="n">id</span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
 
-##### エンティティを定義する際の警告
+<ul>
+  <li>PostgreSQLなどはUUIDを生成できる</li>
+</ul>
 
-- DB設計に任せると、貧血ドメインモデルになる
-- 以下はゲッター、セッターだからのエンティティのリファクタリング後
-```go
-type AuctionRefactored struct {
-	id            int
-	startingPrice money.Money
-	sellerID      int
-	createdAt     time.Time
-	auctionStart  time.Time
-	auctionEnd    time.Time
-}
+<p>個人的にRDBの<code class="language-plaintext highlighter-rouge">AUTO INCREMENT</code>を使う場合が多いが、DDDではエンティティでPKを生成し、保存するほうがいい気がします。</p>
 
-// オークションの経過時間を取得するメソッド
-func (a *AuctionRefactored) GetAuctionElapsedDuration() time.Duration {
-	return a.auctionEnd.Sub(a.auctionStart) // auctionEnd - auctionStart
-}
+<h5 id="エンティティを定義する際の警告">エンティティを定義する際の警告</h5>
 
-// UTCでのオークション終了時間を取得するメソッド
-func (a *AuctionRefactored) GetAuctionEndTimeInUTC() time.Time {
-	return a.auctionEnd
-}
+<ul>
+  <li>DB設計に任せると、貧血ドメインモデルになる</li>
+  <li>以下はゲッター、セッターだからのエンティティのリファクタリング後</li>
+</ul>
 
-// オークション終了時間を設定するメソッド
-func (a *AuctionRefactored) SetAuctionEnd(auctionEnd time.Time) error {
-	if err := a.validateTimeZone(auctionEnd); err != nil {
-		return err
-	}
-	a.auctionEnd = auctionEnd
-	return nil
-}
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">AuctionRefactored</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">id</span>            <span class="kt">int</span>
+	<span class="n">startingPrice</span> <span class="n">money</span><span class="o">.</span><span class="n">Money</span>
+	<span class="n">sellerID</span>      <span class="kt">int</span>
+	<span class="n">createdAt</span>     <span class="n">time</span><span class="o">.</span><span class="n">Time</span>
+	<span class="n">auctionStart</span>  <span class="n">time</span><span class="o">.</span><span class="n">Time</span>
+	<span class="n">auctionEnd</span>    <span class="n">time</span><span class="o">.</span><span class="n">Time</span>
+<span class="p">}</span>
 
-// タイムゾーンがUTCかどうかを検証するヘルパーメソッド
-func (a *AuctionRefactored) validateTimeZone(t time.Time) error {
-	tz, _ := t.Zone()
-	if tz != time.UTC.String() {
-		return errors.New("time zone must be UTC")
-	}
-	return nil
-}
+<span class="c">// オークションの経過時間を取得するメソッド</span>
+<span class="k">func</span> <span class="p">(</span><span class="n">a</span> <span class="o">*</span><span class="n">AuctionRefactored</span><span class="p">)</span> <span class="n">GetAuctionElapsedDuration</span><span class="p">()</span> <span class="n">time</span><span class="o">.</span><span class="n">Duration</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="n">a</span><span class="o">.</span><span class="n">auctionEnd</span><span class="o">.</span><span class="n">Sub</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">auctionStart</span><span class="p">)</span> <span class="c">// auctionEnd - auctionStart</span>
+<span class="p">}</span>
+
+<span class="c">// UTCでのオークション終了時間を取得するメソッド</span>
+<span class="k">func</span> <span class="p">(</span><span class="n">a</span> <span class="o">*</span><span class="n">AuctionRefactored</span><span class="p">)</span> <span class="n">GetAuctionEndTimeInUTC</span><span class="p">()</span> <span class="n">time</span><span class="o">.</span><span class="n">Time</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="n">a</span><span class="o">.</span><span class="n">auctionEnd</span>
+<span class="p">}</span>
+
+<span class="c">// オークション終了時間を設定するメソッド</span>
+<span class="k">func</span> <span class="p">(</span><span class="n">a</span> <span class="o">*</span><span class="n">AuctionRefactored</span><span class="p">)</span> <span class="n">SetAuctionEnd</span><span class="p">(</span><span class="n">auctionEnd</span> <span class="n">time</span><span class="o">.</span><span class="n">Time</span><span class="p">)</span> <span class="kt">error</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">a</span><span class="o">.</span><span class="n">validateTimeZone</span><span class="p">(</span><span class="n">auctionEnd</span><span class="p">);</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="n">err</span>
+	<span class="p">}</span>
+	<span class="n">a</span><span class="o">.</span><span class="n">auctionEnd</span> <span class="o">=</span> <span class="n">auctionEnd</span>
+	<span class="k">return</span> <span class="no">nil</span>
+<span class="p">}</span>
+
+<span class="c">// タイムゾーンがUTCかどうかを検証するヘルパーメソッド</span>
+<span class="k">func</span> <span class="p">(</span><span class="n">a</span> <span class="o">*</span><span class="n">AuctionRefactored</span><span class="p">)</span> <span class="n">validateTimeZone</span><span class="p">(</span><span class="n">t</span> <span class="n">time</span><span class="o">.</span><span class="n">Time</span><span class="p">)</span> <span class="kt">error</span> <span class="p">{</span>
+	<span class="n">tz</span><span class="p">,</span> <span class="n">_</span> <span class="o">:=</span> <span class="n">t</span><span class="o">.</span><span class="n">Zone</span><span class="p">()</span>
+	<span class="k">if</span> <span class="n">tz</span> <span class="o">!=</span> <span class="n">time</span><span class="o">.</span><span class="n">UTC</span><span class="o">.</span><span class="n">String</span><span class="p">()</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="n">errors</span><span class="o">.</span><span class="n">New</span><span class="p">(</span><span class="s">"time zone must be UTC"</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="no">nil</span>
+<span class="p">}</span>
 </code></pre></div></div>
 <ul>
   <li>エンティティがビジネスロジックを持つことが分かりやすい</li>
@@ -5685,40 +5788,46 @@ func (a *AuctionRefactored) validateTimeZone(t time.Time) error {
 <h4 id="値オブジェクトの操作">値オブジェクトの操作</h4>
 
 <ul>
-  <li>良くない例
-```go
-// Point構造体
-type Point struct {
-  x int
-  y int
-}</li>
+  <li>良くない例</li>
 </ul>
 
-<p>// NewPointは新しいPointインスタンスを作成する関数
-func NewPoint(x, y int) *Point {
-    return &amp;Point{
-        x: x,
-        y: y,
-    }
-}</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
-- `&amp;`を使用すると、メモリへの参照となるので、同じ値でも等しくなくなる
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// Point構造体</span>
+<span class="k">type</span> <span class="n">Point</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">x</span> <span class="kt">int</span>
+    <span class="n">y</span> <span class="kt">int</span>
+<span class="p">}</span>
 
-- 良い例
-```go
-// Point構造体
-type Point struct {
-    x int
-    y int
-}
+<span class="c">// NewPointは新しいPointインスタンスを作成する関数</span>
+<span class="k">func</span> <span class="n">NewPoint</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="kt">int</span><span class="p">)</span> <span class="o">*</span><span class="n">Point</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="o">&amp;</span><span class="n">Point</span><span class="p">{</span>
+        <span class="n">x</span><span class="o">:</span> <span class="n">x</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">:</span> <span class="n">y</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
 
-// NewPointは新しいPointインスタンスを作成する関数（値渡し）
-func NewPoint(x, y int) Point {
-    return Point{
-        x: x,
-        y: y,
-    }
-}
+<ul>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">&amp;</code>を使用すると、メモリへの参照となるので、同じ値でも等しくなくなる</p>
+  </li>
+  <li>
+    <p>良い例</p>
+  </li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// Point構造体</span>
+<span class="k">type</span> <span class="n">Point</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">x</span> <span class="kt">int</span>
+    <span class="n">y</span> <span class="kt">int</span>
+<span class="p">}</span>
+
+<span class="c">// NewPointは新しいPointインスタンスを作成する関数（値渡し）</span>
+<span class="k">func</span> <span class="n">NewPoint</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="kt">int</span><span class="p">)</span> <span class="n">Point</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">Point</span><span class="p">{</span>
+        <span class="n">x</span><span class="o">:</span> <span class="n">x</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">:</span> <span class="n">y</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span>
 </code></pre></div></div>
 
 <ul>
@@ -5755,44 +5864,45 @@ func NewPoint(x, y int) Point {
       <li>新しいカードを追加すると、残高が合計残高に反映されるなど</li>
     </ul>
   </li>
-  <li>Wallet Aggregateのサンプル
-```go
-package main</li>
+  <li>Wallet Aggregateのサンプル</li>
 </ul>
 
-<p>import (
-	…
-)</p>
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span> <span class="n">main</span>
 
-<p>type WalletItem interface {
-	GetBalance() (money.Money, error)
-}</p>
+<span class="k">import</span> <span class="p">(</span>
+	<span class="o">...</span>
+<span class="p">)</span>
 
-<p>type Wallet struct {
-	id         uuid.UUID
-	ownerID    uuid.UUID
-	walletItems []WalletItem
-}</p>
+<span class="k">type</span> <span class="n">WalletItem</span> <span class="k">interface</span> <span class="p">{</span>
+	<span class="n">GetBalance</span><span class="p">()</span> <span class="p">(</span><span class="n">money</span><span class="o">.</span><span class="n">Money</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+<span class="p">}</span>
 
-<p>// GetWalletBalanceはウォレットの合計残高を取得するメソッド
-func (w Wallet) GetWalletBalance() (money.Money, error) {
-	var bal money.Money</p>
+<span class="k">type</span> <span class="n">Wallet</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">id</span>         <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span>
+	<span class="n">ownerID</span>    <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span>
+	<span class="n">walletItems</span> <span class="p">[]</span><span class="n">WalletItem</span>
+<span class="p">}</span>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// 各ウォレットアイテムから残高を取得して合計を算出
-for _, v := range w.walletItems {
-	itemBal, err := v.GetBalance()
-	if err != nil {
-		return bal, errors.New("failed to get balance")
-	}
+<span class="c">// GetWalletBalanceはウォレットの合計残高を取得するメソッド</span>
+<span class="k">func</span> <span class="p">(</span><span class="n">w</span> <span class="n">Wallet</span><span class="p">)</span> <span class="n">GetWalletBalance</span><span class="p">()</span> <span class="p">(</span><span class="n">money</span><span class="o">.</span><span class="n">Money</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">var</span> <span class="n">bal</span> <span class="n">money</span><span class="o">.</span><span class="n">Money</span>
 
-	// 残高を加算
-	bal, err = bal.Add(itemBal)
-	if err != nil {
-		return bal, errors.New("failed to increment balance")
-	}
-}
+	<span class="c">// 各ウォレットアイテムから残高を取得して合計を算出</span>
+	<span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">v</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">w</span><span class="o">.</span><span class="n">walletItems</span> <span class="p">{</span>
+		<span class="n">itemBal</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">v</span><span class="o">.</span><span class="n">GetBalance</span><span class="p">()</span>
+		<span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+			<span class="k">return</span> <span class="n">bal</span><span class="p">,</span> <span class="n">errors</span><span class="o">.</span><span class="n">New</span><span class="p">(</span><span class="s">"failed to get balance"</span><span class="p">)</span>
+		<span class="p">}</span>
 
-return bal, nil } ```
+		<span class="c">// 残高を加算</span>
+		<span class="n">bal</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">bal</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">itemBal</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+			<span class="k">return</span> <span class="n">bal</span><span class="p">,</span> <span class="n">errors</span><span class="o">.</span><span class="n">New</span><span class="p">(</span><span class="s">"failed to increment balance"</span><span class="p">)</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+
+	<span class="k">return</span> <span class="n">bal</span><span class="p">,</span> <span class="no">nil</span>
+<span class="p">}</span>
 </code></pre></div></div>
 
 <h5 id="集約の発見">集約の発見</h5>
@@ -5806,17 +5916,19 @@ return bal, nil } ```
       <li>トランザクションが成功する可能性の向上</li>
     </ul>
   </li>
-  <li>例えば、以下は不適切
-    <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">Order</span> <span class="k">struct</span> <span class="p">{</span>
-  <span class="n">items</span>          <span class="p">[]</span><span class="n">item</span>       
-  <span class="n">taxAmount</span>      <span class="n">money</span><span class="o">.</span><span class="n">Money</span>
-  <span class="n">discount</span>       <span class="n">money</span><span class="o">.</span><span class="n">Money</span> 
-  <span class="n">paymentCardID</span>  <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span>   
-  <span class="n">customerID</span>     <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span>    
-  <span class="n">marketingOptIn</span> <span class="kt">bool</span>          
+  <li>例えば、以下は不適切</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">Order</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">items</span>          <span class="p">[]</span><span class="n">item</span>       
+	<span class="n">taxAmount</span>      <span class="n">money</span><span class="o">.</span><span class="n">Money</span>
+	<span class="n">discount</span>       <span class="n">money</span><span class="o">.</span><span class="n">Money</span> 
+	<span class="n">paymentCardID</span>  <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span>   
+	<span class="n">customerID</span>     <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span>    
+	<span class="n">marketingOptIn</span> <span class="kt">bool</span>          
 <span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
+</code></pre></div></div>
+<ul>
   <li>オプトイン、オプトアウトは注文と関係ないから</li>
 </ul>
 
@@ -5843,34 +5955,35 @@ return bal, nil } ```
 
 <ul>
   <li>ファクトリはカプセル化も提供</li>
-  <li>誰かが営業時間外に予約を作成しようとした場合のサンプル
-```go
-// Booking構造体は、予約情報を保持
-type Booking struct {
-  id            uuid.UUID
-  from          time.Time
-  to            time.Time
-  hairDresserID uuid.UUID
-}</li>
+  <li>誰かが営業時間外に予約を作成しようとした場合のサンプル</li>
 </ul>
 
-<p>// CreateBookingは新しい予約を作成する関数
-func CreateBooking(from, to time.Time, hairDresserID uuid.UUID) (*Booking, error) {
-	// 営業終了時刻（例: 17:00pm）を設定
-	closingTime, _ := time.Parse(time.Kitchen, “5:00PM”)</p>
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// Booking構造体は、予約情報を保持</span>
+<span class="k">type</span> <span class="n">Booking</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">id</span>            <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span>
+	<span class="n">from</span>          <span class="n">time</span><span class="o">.</span><span class="n">Time</span>
+	<span class="n">to</span>            <span class="n">time</span><span class="o">.</span><span class="n">Time</span>
+	<span class="n">hairDresserID</span> <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span>
+<span class="p">}</span>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// 予約時間が営業時間外か確認
-if from.After(closingTime) {
-	return nil, errors.New("no appointments after closing time")
-}
+<span class="c">// CreateBookingは新しい予約を作成する関数</span>
+<span class="k">func</span> <span class="n">CreateBooking</span><span class="p">(</span><span class="n">from</span><span class="p">,</span> <span class="n">to</span> <span class="n">time</span><span class="o">.</span><span class="n">Time</span><span class="p">,</span> <span class="n">hairDresserID</span> <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span><span class="p">)</span> <span class="p">(</span><span class="o">*</span><span class="n">Booking</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+	<span class="c">// 営業終了時刻（例: 17:00pm）を設定</span>
+	<span class="n">closingTime</span><span class="p">,</span> <span class="n">_</span> <span class="o">:=</span> <span class="n">time</span><span class="o">.</span><span class="n">Parse</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">Kitchen</span><span class="p">,</span> <span class="s">"5:00PM"</span><span class="p">)</span>
+	
+	<span class="c">// 予約時間が営業時間外か確認</span>
+	<span class="k">if</span> <span class="n">from</span><span class="o">.</span><span class="n">After</span><span class="p">(</span><span class="n">closingTime</span><span class="p">)</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="no">nil</span><span class="p">,</span> <span class="n">errors</span><span class="o">.</span><span class="n">New</span><span class="p">(</span><span class="s">"no appointments after closing time"</span><span class="p">)</span>
+	<span class="p">}</span>
 
-// 予約を作成して返す
-return &amp;Booking{
-	id:            uuid.New(),           // 新しい予約IDを生成
-	from:          from,                 // 予約開始時刻
-	to:            to,                   // 予約終了時刻
-	hairDresserID: hairDresserID,       // 美容師IDは引数から取得
-}, nil } ```
+	<span class="c">// 予約を作成して返す</span>
+	<span class="k">return</span> <span class="o">&amp;</span><span class="n">Booking</span><span class="p">{</span>
+		<span class="n">id</span><span class="o">:</span>            <span class="n">uuid</span><span class="o">.</span><span class="n">New</span><span class="p">(),</span>           <span class="c">// 新しい予約IDを生成</span>
+		<span class="n">from</span><span class="o">:</span>          <span class="n">from</span><span class="p">,</span>                 <span class="c">// 予約開始時刻</span>
+		<span class="n">to</span><span class="o">:</span>            <span class="n">to</span><span class="p">,</span>                   <span class="c">// 予約終了時刻</span>
+		<span class="n">hairDresserID</span><span class="o">:</span> <span class="n">hairDresserID</span><span class="p">,</span>       <span class="c">// 美容師IDは引数から取得</span>
+	<span class="p">},</span> <span class="no">nil</span>
+<span class="p">}</span>
 </code></pre></div></div>
 
 <ul>
@@ -5904,58 +6017,61 @@ return &amp;Booking{
       <li>2つのドメインオブジェクトを利用して計算</li>
     </ul>
   </li>
-  <li>良くない例
-```go
-type ShoppingCart struct {
-  ID          int
-  Products    []Product <br />
-  IsFull      bool
-  MaxCartSize int
- }</li>
+  <li>良くない例</li>
 </ul>
 
-<p>func (s *ShoppingCart) AddToCart(p Product) bool {
-    if s.IsFull{
-        …
-    }
-    if p.CanBeBought() {
-        …
-    }
-    …
-}</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
-- 上記の実装中に別のエンティティを参照し、関係ないロジックを追加している
-- リファクタリング後
-```go
-// CheckoutServiceは、カート内の商品に関連する処理を行うサービス
-type CheckoutService struct {
-	shoppingCart *ShoppingCart
-}
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">ShoppingCart</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">ID</span>          <span class="kt">int</span>
+    <span class="n">Products</span>    <span class="p">[]</span><span class="n">Product</span>   
+    <span class="n">IsFull</span>      <span class="kt">bool</span>
+    <span class="n">MaxCartSize</span> <span class="kt">int</span>
+ <span class="p">}</span>
 
-// NewCheckoutServiceは、新しいCheckoutServiceを作成するコンストラクタ
-func NewCheckoutService(shoppingCart *ShoppingCart) *CheckoutService {
-	return &amp;CheckoutService{shoppingCart: shoppingCart}
-}
+<span class="k">func</span> <span class="p">(</span><span class="n">s</span> <span class="o">*</span><span class="n">ShoppingCart</span><span class="p">)</span> <span class="n">AddToCart</span><span class="p">(</span><span class="n">p</span> <span class="n">Product</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">IsFull</span><span class="p">{</span>
+        <span class="o">...</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">CanBeBought</span><span class="p">()</span> <span class="p">{</span>
+        <span class="o">...</span>
+    <span class="p">}</span>
+    <span class="o">...</span>
+<span class="p">}</span>
+</code></pre></div></div>
 
-// AddProductToBasketは、ショッピングカートに商品を追加するメソッド
-func (c *CheckoutService) AddProductToBasket(p *Product) error {
-	// カートが満杯の場合は追加できない
-	if c.shoppingCart.IsFull {
-		return errors.New("cannot add to cart, it's full")
-	}
+<ul>
+  <li>上記の実装中に別のエンティティを参照し、関係ないロジックを追加している</li>
+  <li>リファクタリング後</li>
+</ul>
 
-	// 商品が購入可能であればカートに追加
-	if p.CanBeBought() {
-		c.shoppingCart.Products = append(c.shoppingCart.Products, *p)
-	}
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// CheckoutServiceは、カート内の商品に関連する処理を行うサービス</span>
+<span class="k">type</span> <span class="n">CheckoutService</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">shoppingCart</span> <span class="o">*</span><span class="n">ShoppingCart</span>
+<span class="p">}</span>
 
-	// カートが満杯かどうかチェックし、満杯の場合はIsFullをtrueに設定
-	if len(c.shoppingCart.Products) &gt;= c.shoppingCart.MaxCartSize {
-		c.shoppingCart.IsFull = true
-	}
+<span class="c">// NewCheckoutServiceは、新しいCheckoutServiceを作成するコンストラクタ</span>
+<span class="k">func</span> <span class="n">NewCheckoutService</span><span class="p">(</span><span class="n">shoppingCart</span> <span class="o">*</span><span class="n">ShoppingCart</span><span class="p">)</span> <span class="o">*</span><span class="n">CheckoutService</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="o">&amp;</span><span class="n">CheckoutService</span><span class="p">{</span><span class="n">shoppingCart</span><span class="o">:</span> <span class="n">shoppingCart</span><span class="p">}</span>
+<span class="p">}</span>
 
-	return nil
-}
+<span class="c">// AddProductToBasketは、ショッピングカートに商品を追加するメソッド</span>
+<span class="k">func</span> <span class="p">(</span><span class="n">c</span> <span class="o">*</span><span class="n">CheckoutService</span><span class="p">)</span> <span class="n">AddProductToBasket</span><span class="p">(</span><span class="n">p</span> <span class="o">*</span><span class="n">Product</span><span class="p">)</span> <span class="kt">error</span> <span class="p">{</span>
+	<span class="c">// カートが満杯の場合は追加できない</span>
+	<span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">shoppingCart</span><span class="o">.</span><span class="n">IsFull</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="n">errors</span><span class="o">.</span><span class="n">New</span><span class="p">(</span><span class="s">"cannot add to cart, it's full"</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="c">// 商品が購入可能であればカートに追加</span>
+	<span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">CanBeBought</span><span class="p">()</span> <span class="p">{</span>
+		<span class="n">c</span><span class="o">.</span><span class="n">shoppingCart</span><span class="o">.</span><span class="n">Products</span> <span class="o">=</span> <span class="nb">append</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">shoppingCart</span><span class="o">.</span><span class="n">Products</span><span class="p">,</span> <span class="o">*</span><span class="n">p</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="c">// カートが満杯かどうかチェックし、満杯の場合はIsFullをtrueに設定</span>
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">shoppingCart</span><span class="o">.</span><span class="n">Products</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">c</span><span class="o">.</span><span class="n">shoppingCart</span><span class="o">.</span><span class="n">MaxCartSize</span> <span class="p">{</span>
+		<span class="n">c</span><span class="o">.</span><span class="n">shoppingCart</span><span class="o">.</span><span class="n">IsFull</span> <span class="o">=</span> <span class="no">true</span>
+	<span class="p">}</span>
+
+	<span class="k">return</span> <span class="no">nil</span>
+<span class="p">}</span>
 </code></pre></div></div>
 <ul>
   <li>複数のエンティティにまたがるロジックを書く
@@ -6007,6 +6123,7 @@ func (c *CheckoutService) AddProductToBasket(p *Product) error {
 </code></pre></div></div>
 
 <p>ここでは、インフラサービスも簡単に追加でき、下の例では注文後のメール送信も簡単に追加できる。</p>
+
 <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">BookingAppService</span> <span class="k">struct</span> <span class="p">{</span>
    <span class="n">bookingRepo</span>          <span class="n">BookingRepository</span>
    <span class="n">bookingDomainService</span> <span class="n">BookingDomainService</span>
@@ -6181,7 +6298,7 @@ func (c *CheckoutService) AddProductToBasket(p *Product) error {
 #### 二分脊椎
 
 #### まとめ
--->]]></content><author><name></name></author><category term="blog" /><category term="書籍" /></entry><entry><title type="html">「Get Your Hands Dirty on Clean Architecture」を読む</title><link href="https://hoge-code.github.io/md/posts/2025-05-22-clean-arch" rel="alternate" type="text/html" title="「Get Your Hands Dirty on Clean Architecture」を読む" /><published>2025-05-22T03:00:00+00:00</published><updated>2025-05-22T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/clean-arch</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-22-clean-arch"><![CDATA[<p>Packt社の<code class="language-plaintext highlighter-rouge">Get Your Hands Dirty on Clean Architecture</code>という書籍を読んだので、気になったことを中心に簡単な感想や要約を書きます。日本語にも翻訳されていて、こちらは「手を動かしてわかるクリーンアーキテクチャ」というタイトルになっています。</p>
+-->]]></content><author><name></name></author><category term="blog" /><category term="書籍" /><category term="設計" /><category term="Go" /><summary type="html"><![CDATA[Go, DDD]]></summary></entry><entry><title type="html">「Get Your Hands Dirty on Clean Architecture」を読む</title><link href="https://hoge-code.github.io/md/posts/2025-05-22-clean-arch" rel="alternate" type="text/html" title="「Get Your Hands Dirty on Clean Architecture」を読む" /><published>2025-05-22T03:00:00+00:00</published><updated>2025-05-22T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/clean-arch</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-22-clean-arch"><![CDATA[<p>Packt社の<code class="language-plaintext highlighter-rouge">Get Your Hands Dirty on Clean Architecture</code>という書籍を読んだので、気になったことを中心に簡単な感想や要約を書きます。日本語にも翻訳されていて、こちらは「手を動かしてわかるクリーンアーキテクチャ」というタイトルになっています。</p>
 
 <p>また、この書籍はJavaで書かれていますが、ソースコードが全て画像(文字ではない)になっていて、コピーできないのでGoに変換して書いてみます。</p>
 
@@ -6344,6 +6461,7 @@ web
             - UpdateAccountStatePort
 - common
 </code></pre></div></div>
+
 <p><strong>フォルダ構造の解説</strong></p>
 <ul>
   <li><code class="language-plaintext highlighter-rouge">adapter</code>パッケージ
@@ -6708,6 +6826,7 @@ web
 </ul>
 
 <p>言語によって実装は異なりますが、ベースとなる型を拡張することでDRYを実現できます。FastAPIなどで特に一般的な手法です。Goでは例えば以下のように実装できます。</p>
+
 <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">UpdateAccountCommand</span> <span class="k">struct</span> <span class="p">{</span>
 	<span class="n">AccountDetails</span>
 	<span class="n">ID</span> <span class="kt">string</span> <span class="s">`json:"id" validate:"required"`</span>
@@ -7019,7 +7138,7 @@ web
 #### 自分の経験を信じましょう
 
 #### 場合によります
--->]]></content><author><name></name></author><category term="blog" /><category term="書籍" /></entry><entry><title type="html">自動補完のローカルと全文検索の比較</title><link href="https://hoge-code.github.io/md/posts/2025-05-04-auto-complete" rel="alternate" type="text/html" title="自動補完のローカルと全文検索の比較" /><published>2025-05-04T03:00:00+00:00</published><updated>2025-05-04T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/auto-complete</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-04-auto-complete"><![CDATA[<p>検索機能などで使われるオートコンプリートをクライアント側のJSONファイルと、リモートの全文検索を実装する方法を比較して考えてみます。</p>
+-->]]></content><author><name></name></author><category term="blog" /><category term="書籍" /><category term="設計" /><category term="Go" /><summary type="html"><![CDATA[Go]]></summary></entry><entry><title type="html">自動補完のローカルと全文検索の比較</title><link href="https://hoge-code.github.io/md/posts/2025-05-04-auto-complete" rel="alternate" type="text/html" title="自動補完のローカルと全文検索の比較" /><published>2025-05-04T03:00:00+00:00</published><updated>2025-05-04T03:00:00+00:00</updated><id>https://hoge-code.github.io/md/posts/auto-complete</id><content type="html" xml:base="https://hoge-code.github.io/md/posts/2025-05-04-auto-complete"><![CDATA[<p>検索機能などで使われるオートコンプリートをクライアント側のJSONファイルと、リモートの全文検索を実装する方法を比較して考えてみます。</p>
 
 <p><strong>目次</strong></p>
 <ul id="markdown-toc">
@@ -7236,4 +7355,4 @@ web
   </span><span class="p">}</span><span class="w">
 </span><span class="p">}</span><span class="w">
 </span></code></pre></div></div>
-<hr />]]></content><author><name></name></author><category term="blog" /><category term="elasticsearch" /><category term="React" /><summary type="html"><![CDATA[elasticsearch, fuse.js]]></summary></entry></feed>
+<hr />]]></content><author><name></name></author><category term="blog" /><category term="Elasticsearch" /><category term="React" /><summary type="html"><![CDATA[Elasticsearch, Fuse.js]]></summary></entry></feed>

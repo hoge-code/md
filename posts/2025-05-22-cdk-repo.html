@@ -35,6 +35,8 @@
 
 <p>自分の知る範囲では日本語のCDKの書籍は存在せず、個人的にAWSドキュメントは情報量が多すぎて全て目を通すのは難しく感じるので、この書籍(とリポジトリ)はCDKの基礎を学ぶ上で非常に有効でした。</p>
 
+<p>画像は全て同書からの引用です。</p>
+
 <p><strong>目次</strong></p>
 <ul id="markdown-toc">
   <li><a href="#githubフォルダ" id="markdown-toc-githubフォルダ">.githubフォルダ</a></li>
@@ -52,7 +54,12 @@
   <li><a href="https://www.oreilly.com/library/view/aws-cdk/9798341640801/">オライリー</a></li>
 </ul>
 
+<hr />
+
+<p><strong>フォルダ構造</strong></p>
+
 <p>treeコマンドで出力してみると以下のような構造になっています。</p>
+
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>├───.github
 │   └───workflows
 ├───infrastructure
@@ -83,6 +90,7 @@
 <h4 id="cdk-orchestratoryaml"><code class="language-plaintext highlighter-rouge">cdk-orchestrator.yaml</code></h4>
 
 <p>ルートyamlで他のyamlを呼び出すような構造になっています。</p>
+
 <div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">jobs</span><span class="pi">:</span>
   <span class="na">project-tools-update</span><span class="pi">:</span>
     <span class="na">uses</span><span class="pi">:</span> <span class="s">./.github/workflows/reusable-project-tools-update.yaml</span>
@@ -101,6 +109,7 @@
 <h4 id="reusable-cdk-deployyaml"><code class="language-plaintext highlighter-rouge">reusable-cdk-deploy.yaml</code></h4>
 
 <p>先ほどのyamlから呼び出されるファイルです。</p>
+
 <div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">on</span><span class="pi">:</span>
   <span class="na">workflow_call</span><span class="pi">:</span>
     <span class="na">inputs</span><span class="pi">:</span>
@@ -145,11 +154,13 @@
 <p>エントリーポイントファイルです。このファイルでは、複数のスタックをインポートし、呼び出しています。</p>
 
 <p>ファイルの先頭ではシェルスクリプトのように使用言語を定義し、ソースマップを呼び出しています。</p>
+
 <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#!/usr/bin/env node
 </span><span class="k">import</span> <span class="dl">"</span><span class="s2">source-map-support/register</span><span class="dl">"</span><span class="p">;</span>
 </code></pre></div></div>
 
 <p>これは必須のコンテキストが設定されていない場合にエラーを出力する関数です。</p>
+
 <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nf">checkRequiredContext</span><span class="p">(</span><span class="nx">app</span><span class="p">:</span> <span class="nx">cdk</span><span class="p">.</span><span class="nx">App</span><span class="p">,</span> <span class="nx">key</span><span class="p">:</span> <span class="kr">string</span><span class="p">):</span> <span class="k">void</span> <span class="p">{</span>
   <span class="kd">const</span> <span class="nx">contextValue</span> <span class="o">=</span> <span class="nx">app</span><span class="p">.</span><span class="nx">node</span><span class="p">.</span><span class="nf">tryGetContext</span><span class="p">(</span><span class="nx">key</span><span class="p">);</span>
   <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">contextValue</span><span class="p">)</span> <span class="p">{</span>
@@ -160,6 +171,7 @@
 </code></pre></div></div>
 
 <p>こちらでは、共通で使用する環境変数を定義しています。</p>
+
 <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">appEnv</span><span class="p">:</span> <span class="nx">cdk</span><span class="p">.</span><span class="nx">Environment</span> <span class="o">=</span> <span class="p">{</span>
   <span class="na">account</span><span class="p">:</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">CDK_DEFAULT_ACCOUNT</span><span class="p">,</span>
   <span class="na">region</span><span class="p">:</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">CDK_DEFAULT_REGION</span><span class="p">,</span>
@@ -167,6 +179,7 @@
 </code></pre></div></div>
 
 <p>上記で定義した<code class="language-plaintext highlighter-rouge">appEnv</code>は、スタックに渡すデフォルトのプロップス内に入れています。</p>
+
 <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/** Default props to be used by all stacks */</span>
 <span class="kd">const</span> <span class="nx">defaultStackProps</span><span class="p">:</span> <span class="nx">cdk</span><span class="p">.</span><span class="nx">StackProps</span> <span class="o">=</span> <span class="p">{</span>
   <span class="na">env</span><span class="p">:</span> <span class="nx">appEnv</span><span class="p">,</span>
@@ -179,6 +192,7 @@
 </code></pre></div></div>
 
 <p>上記のデフォルトスタックプロップスは、以下のように拡張して再利用できます。</p>
+
 <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">chatbotStack</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ChatbotStack</span><span class="p">(</span><span class="nx">app</span><span class="p">,</span> <span class="s2">`ChatbotStack`</span><span class="p">,</span> <span class="p">{</span>
   <span class="p">...</span><span class="nx">defaultStackProps</span><span class="p">,</span>
   <span class="na">calculatedEnergyTable</span><span class="p">:</span> <span class="nx">sharedResourcesStack</span><span class="p">.</span><span class="nx">calculatedEnergyTable</span><span class="p">,</span>
@@ -187,11 +201,13 @@
 </code></pre></div></div>
 
 <p>ファイルの最後では、依存性を追加し、デプロイの安定性を高めています。</p>
+
 <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">dataPipelineStack</span><span class="p">.</span><span class="nf">addDependency</span><span class="p">(</span><span class="nx">sharedResourcesStack</span><span class="p">);</span>
 <span class="nx">webStack</span><span class="p">.</span><span class="nf">addDependency</span><span class="p">(</span><span class="nx">authStack</span><span class="p">);</span>
 </code></pre></div></div>
 
 <p>CLIだけでなく、プログラムからテンプレートを作成するようにします。</p>
+
 <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">app</span><span class="p">.</span><span class="nf">synth</span><span class="p">();</span>
 </code></pre></div></div>
 
@@ -206,6 +222,7 @@
 <h5 id="chatbot-constructts">chatbot-construct.ts</h5>
 
 <p>まず、<code class="language-plaintext highlighter-rouge">interface</code>でコンストラクタが受け取るプロップスを定義します。この際、<code class="language-plaintext highlighter-rouge">dynamodb.Table</code>などは別のコンストラクタで定義したものを利用しています。</p>
+
 <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">interface</span> <span class="nx">ChatbotConstructProps</span> <span class="p">{</span>
   <span class="k">readonly</span> <span class="nx">table</span><span class="p">:</span> <span class="nx">dynamodb</span><span class="p">.</span><span class="nx">Table</span><span class="p">;</span>
   <span class="k">readonly</span> <span class="nx">applicationName</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
@@ -215,6 +232,7 @@
 </code></pre></div></div>
 
 <p><code class="language-plaintext highlighter-rouge">Construct</code>クラスを拡張し、独自のコンストラクタを作成しています。先ほど作成した<code class="language-plaintext highlighter-rouge">ChatbotConstructProps</code>はコンストラクタで受け取ります。</p>
+
 <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">class</span> <span class="nc">ChatbotConstruct</span> <span class="kd">extends</span> <span class="nc">Construct</span> <span class="p">{</span>
   <span class="k">public</span> <span class="k">readonly</span> <span class="nx">chatbotId</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
   <span class="k">public</span> <span class="k">readonly</span> <span class="nx">knowledgeBase</span><span class="p">:</span> <span class="nx">s3</span><span class="p">.</span><span class="nx">Bucket</span><span class="p">;</span>
@@ -254,6 +272,7 @@
 <h5 id="custom-lambda-constructts">custom-lambda-construct.ts</h5>
 
 <p>以下のようにプロップスを定義します。</p>
+
 <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">interface</span> <span class="nx">CustomLambdaProps</span> <span class="p">{</span>
   <span class="k">readonly</span> <span class="nx">lambdaName</span><span class="p">?:</span> <span class="kr">string</span><span class="p">;</span>
   <span class="k">readonly</span> <span class="nx">concurrencyLimit</span><span class="p">?:</span> <span class="nx">Integer</span><span class="p">;</span>
@@ -269,6 +288,7 @@
 </code></pre></div></div>
 
 <p>カスタム<code class="language-plaintext highlighter-rouge">Lambda</code>を作成します。この際、<code class="language-plaintext highlighter-rouge">Lambda</code>と関連性の高いDLQ用の<code class="language-plaintext highlighter-rouge">SQS</code>もこのコンストラクタの中で定義します。</p>
+
 <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">class</span> <span class="nc">CustomLambdaConstruct</span> <span class="kd">extends</span> <span class="nc">lambda</span><span class="p">.</span><span class="nb">Function</span> <span class="p">{</span>
   <span class="p">...</span>
   <span class="nf">constructor</span><span class="p">(</span><span class="nx">scope</span><span class="p">:</span> <span class="nx">Construct</span><span class="p">,</span> <span class="nx">id</span><span class="p">:</span> <span class="kr">string</span><span class="p">,</span> <span class="nx">props</span><span class="p">:</span> <span class="nx">CustomLambdaProps</span><span class="p">)</span> <span class="p">{</span>
@@ -285,6 +305,7 @@
 </code></pre></div></div>
 
 <p>以下のように、受け取ったプロップスを親クラスに渡します。</p>
+
 <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="c1">// Call the parent constructor with the provided props and defaults</span>
     <span class="k">super</span><span class="p">(</span><span class="nx">scope</span><span class="p">,</span> <span class="nx">id</span><span class="p">,</span> <span class="p">{</span>
       <span class="p">...</span><span class="nx">props</span><span class="p">,</span>
@@ -315,6 +336,7 @@
 </ul>
 
 <p>最後にセキュリティ準拠のために、<code class="language-plaintext highlighter-rouge">cdk-nag</code>を使います。</p>
+
 <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      <span class="nx">NagSuppressions</span><span class="p">.</span><span class="nf">addResourceSuppressions</span><span class="p">(</span>
       <span class="k">this</span><span class="p">,</span>
       <span class="p">[</span>
@@ -385,8 +407,9 @@
       <footer>
         <p>
           Tags: 
-          <a href="/md/tag/cdk">CDK</a>,  
-          <a href="/md/tag/書籍">書籍</a> 
+          <a href="/md/tag/書籍">書籍</a>,  
+          <a href="/md/tag/aws">AWS</a>,  
+          <a href="/md/tag/cdk">CDK</a> 
         </p>
       </footer>
     </article>
@@ -421,9 +444,9 @@
       
         <li><a href="/md/tag/開発">開発</a></li>
       
-        <li><a href="/md/tag/elasticsearch">elasticsearch</a></li>
+        <li><a href="/md/tag/elasticsearch">Elasticsearch</a></li>
       
-        <li><a href="/md/tag/firebase">firebase</a></li>
+        <li><a href="/md/tag/firebase">Firebase</a></li>
       
         <li><a href="/md/tag/sqlite">sqlite</a></li>
       
@@ -431,9 +454,15 @@
       
         <li><a href="/md/tag/書籍">書籍</a></li>
       
+        <li><a href="/md/tag/設計">設計</a></li>
+      
         <li><a href="/md/tag/aws">AWS</a></li>
       
         <li><a href="/md/tag/cdk">CDK</a></li>
+      
+        <li><a href="/md/tag/go">Go</a></li>
+      
+        <li><a href="/md/tag/terraform">Terraform</a></li>
       
     </ul>
     <h2><a href="/md/archives/">Archives</a></h2>

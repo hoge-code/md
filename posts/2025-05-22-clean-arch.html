@@ -194,6 +194,7 @@ web
             - UpdateAccountStatePort
 - common
 </code></pre></div></div>
+
 <p><strong>フォルダ構造の解説</strong></p>
 <ul>
   <li><code class="language-plaintext highlighter-rouge">adapter</code>パッケージ
@@ -558,6 +559,7 @@ web
 </ul>
 
 <p>言語によって実装は異なりますが、ベースとなる型を拡張することでDRYを実現できます。FastAPIなどで特に一般的な手法です。Goでは例えば以下のように実装できます。</p>
+
 <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">UpdateAccountCommand</span> <span class="k">struct</span> <span class="p">{</span>
 	<span class="n">AccountDetails</span>
 	<span class="n">ID</span> <span class="kt">string</span> <span class="s">`json:"id" validate:"required"`</span>
@@ -875,7 +877,9 @@ web
       <footer>
         <p>
           Tags: 
-          <a href="/md/tag/書籍">書籍</a> 
+          <a href="/md/tag/書籍">書籍</a>,  
+          <a href="/md/tag/設計">設計</a>,  
+          <a href="/md/tag/go">Go</a> 
         </p>
       </footer>
     </article>
@@ -910,9 +914,9 @@ web
       
         <li><a href="/md/tag/開発">開発</a></li>
       
-        <li><a href="/md/tag/elasticsearch">elasticsearch</a></li>
+        <li><a href="/md/tag/elasticsearch">Elasticsearch</a></li>
       
-        <li><a href="/md/tag/firebase">firebase</a></li>
+        <li><a href="/md/tag/firebase">Firebase</a></li>
       
         <li><a href="/md/tag/sqlite">sqlite</a></li>
       
@@ -920,9 +924,15 @@ web
       
         <li><a href="/md/tag/書籍">書籍</a></li>
       
+        <li><a href="/md/tag/設計">設計</a></li>
+      
         <li><a href="/md/tag/aws">AWS</a></li>
       
         <li><a href="/md/tag/cdk">CDK</a></li>
+      
+        <li><a href="/md/tag/go">Go</a></li>
+      
+        <li><a href="/md/tag/terraform">Terraform</a></li>
       
     </ul>
     <h2><a href="/md/archives/">Archives</a></h2>

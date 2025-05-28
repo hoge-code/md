@@ -33,7 +33,11 @@
 
       <div class="content"><p>Packt社の<code class="language-plaintext highlighter-rouge">Scalable Application Development with NestJS</code>という書籍を一部読んだので、気になったことを中心に簡単な感想や要約を書きます。(網羅性はありません)</p>
 
-<p>この書籍は<code class="language-plaintext highlighter-rouge">NestJS</code>について書かれている数少ない書籍です。自分の知っている範囲内では日本語にそのような書籍はなく、洋書でも殆どありません。(公式ドキュメントは読みやすいです。)また、<code class="language-plaintext highlighter-rouge">NestJS</code>はDTO、DI、モジュール指向、GraphQLやマイクロサービスとの統合など、多くのことを学べるフレームワークだと思います。この本は<code class="language-plaintext highlighter-rouge">NestJS</code>について体系的に説明し、実際の開発の流れまで書かれています。</p>
+<p>この書籍は<code class="language-plaintext highlighter-rouge">NestJS</code>について書かれている数少ない書籍です。自分の知っている範囲内では日本語にそのような書籍はなく、洋書でも殆どありません。(公式ドキュメントは読みやすいです。)</p>
+
+<p>また、<code class="language-plaintext highlighter-rouge">NestJS</code>はDTO、DI、モジュール指向、GraphQLやマイクロサービスとの統合など、多くのことを学べるフレームワークだと思います。</p>
+
+<p>この本は<code class="language-plaintext highlighter-rouge">NestJS</code>について体系的に説明し、実際の開発の流れまで書かれています。</p>
 
 <p>全体にはまだ目を通せていませんが、ケーススタディのパートが面白かったのでまとめてみます。</p>
 
@@ -41,12 +45,7 @@
 <ul id="markdown-toc">
   <li><a href="#第12章-電子商取引アプリケーション" id="markdown-toc-第12章-電子商取引アプリケーション">第12章 電子商取引アプリケーション</a></li>
   <li><a href="#第13章-snsプラットフォーム" id="markdown-toc-第13章-snsプラットフォーム">第13章 SNSプラットフォーム</a></li>
-  <li><a href="#ミューテーション型" id="markdown-toc-ミューテーション型">ミューテーション型</a></li>
-  <li><a href="#サブスクリプション型" id="markdown-toc-サブスクリプション型">サブスクリプション型</a></li>
-  <li><a href="#入力型新しいpostを作成するための入力データ" id="markdown-toc-入力型新しいpostを作成するための入力データ">入力型（新しいPostを作成するための入力データ）</a>    <ul>
-      <li><a href="#第14章-erpシステム" id="markdown-toc-第14章-erpシステム">第14章 ERPシステム</a></li>
-    </ul>
-  </li>
+  <li><a href="#第14章-erpシステム" id="markdown-toc-第14章-erpシステム">第14章 ERPシステム</a></li>
 </ul>
 
 <hr />
@@ -94,21 +93,22 @@
 <p><strong>RESTAPIでも実装の前にドキュメント作成が重要</strong></p>
 <ul>
   <li>これはGRPCと同じような開発の進め方</li>
-  <li>HTTPメソッド定義前に、エンドポイントをリスト
-    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># products
-  /products
-  /products/{id}
-  /products/{id}/orders
-  /products/{id}/orders/{orderId}
-  /products/{id}/reviews
-  /products/search
-# users
-  ...
-</code></pre></div>    </div>
-  </li>
+  <li>HTTPメソッド定義前に、エンドポイントをリスト</li>
 </ul>
 
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># products
+    /products
+    /products/{id}
+    /products/{id}/orders
+    /products/{id}/orders/{orderId}
+    /products/{id}/reviews
+    /products/search
+# users
+    ...
+</code></pre></div></div>
+
 <p><strong>APIではレスポンスの統一が重要</strong></p>
+
 <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">Class</span> <span class="nx">APIResponse</span> <span class="p">{</span>
     <span class="nl">success</span><span class="p">:</span> <span class="nx">boolean</span><span class="p">,</span>
     <span class="nx">message</span><span class="p">:</span> <span class="kr">string</span><span class="p">,</span>
@@ -141,21 +141,23 @@
 <h4 id="製品と注文用のrest-apiの実装">製品と注文用のREST APIの実装</h4>
 
 <ul>
-  <li>下の例では、製品エンティティを定義している
-    <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">@</span><span class="nd">Entity</span><span class="p">(</span><span class="dl">'</span><span class="s1">products</span><span class="dl">'</span><span class="p">)</span>
+  <li>下の例では、製品エンティティを定義している</li>
+</ul>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">@</span><span class="nd">Entity</span><span class="p">(</span><span class="dl">'</span><span class="s1">products</span><span class="dl">'</span><span class="p">)</span>
 <span class="k">export</span> <span class="kd">class</span> <span class="nc">Product</span> <span class="p">{</span>
-  <span class="p">@</span><span class="nd">PrimaryGeneratedColumn</span><span class="p">(</span><span class="dl">'</span><span class="s1">uuid</span><span class="dl">'</span><span class="p">)</span>
-  <span class="nx">id</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
-  <span class="p">...</span>
-  <span class="p">@</span><span class="nd">Column</span><span class="p">(</span><span class="dl">'</span><span class="s1">simple-json</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span>
-      <span class="na">default</span><span class="p">:</span> <span class="p">{},</span>
-      <span class="na">comment</span><span class="p">:</span> <span class="dl">"</span><span class="s2">product's specs</span><span class="dl">"</span><span class="p">,</span>
-  <span class="p">})</span>
-  <span class="nx">specs</span><span class="p">:</span> <span class="nb">Record</span><span class="o">&lt;</span><span class="kr">string</span><span class="p">,</span> <span class="kr">string</span><span class="o">&gt;</span><span class="p">;</span>
-  <span class="p">...</span>
+    <span class="p">@</span><span class="nd">PrimaryGeneratedColumn</span><span class="p">(</span><span class="dl">'</span><span class="s1">uuid</span><span class="dl">'</span><span class="p">)</span>
+    <span class="nx">id</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+    <span class="p">...</span>
+    <span class="p">@</span><span class="nd">Column</span><span class="p">(</span><span class="dl">'</span><span class="s1">simple-json</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span>
+        <span class="na">default</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="na">comment</span><span class="p">:</span> <span class="dl">"</span><span class="s2">product's specs</span><span class="dl">"</span><span class="p">,</span>
+    <span class="p">})</span>
+    <span class="nx">specs</span><span class="p">:</span> <span class="nb">Record</span><span class="o">&lt;</span><span class="kr">string</span><span class="p">,</span> <span class="kr">string</span><span class="o">&gt;</span><span class="p">;</span>
+    <span class="p">...</span>
 <span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
+</code></pre></div></div>
+<ul>
   <li>上記で興味深い点
     <ul>
       <li>自動採番を使わずにUUIDを使用している</li>
@@ -166,29 +168,31 @@
 
 <p><strong>DTOクラスの作成</strong></p>
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">src/products/dto/create-product.dto.ts</code>などでDTOクラスを作成
-    <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">class</span> <span class="nc">CreateProductDto</span> <span class="p">{</span>
-  <span class="p">@</span><span class="nd">IsString</span><span class="p">({</span>
-      <span class="na">message</span><span class="p">:</span> <span class="dl">'</span><span class="s1">name must be a string</span><span class="dl">'</span><span class="p">,</span>
-  <span class="p">})</span>
-  <span class="p">@</span><span class="nd">Length</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="p">{</span>
-      <span class="na">message</span><span class="p">:</span> <span class="dl">'</span><span class="s1">name must be between 5 and 25 characters</span><span class="dl">'</span><span class="p">,</span>
-  <span class="p">})</span>
-  <span class="nx">name</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+  <li><code class="language-plaintext highlighter-rouge">src/products/dto/create-product.dto.ts</code>などでDTOクラスを作成</li>
+</ul>
 
-  <span class="p">@</span><span class="nd">IsString</span><span class="p">({</span>
-  <span class="na">message</span><span class="p">:</span> <span class="dl">'</span><span class="s1">description must be a string</span><span class="dl">'</span><span class="p">,</span>
-  <span class="p">})</span>
-  <span class="p">@</span><span class="nd">Length</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="p">{</span>
-      <span class="na">message</span><span class="p">:</span> <span class="dl">'</span><span class="s1">description must be between 25 and 255
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">class</span> <span class="nc">CreateProductDto</span> <span class="p">{</span>
+    <span class="p">@</span><span class="nd">IsString</span><span class="p">({</span>
+        <span class="na">message</span><span class="p">:</span> <span class="dl">'</span><span class="s1">name must be a string</span><span class="dl">'</span><span class="p">,</span>
+    <span class="p">})</span>
+    <span class="p">@</span><span class="nd">Length</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="p">{</span>
+        <span class="na">message</span><span class="p">:</span> <span class="dl">'</span><span class="s1">name must be between 5 and 25 characters</span><span class="dl">'</span><span class="p">,</span>
+    <span class="p">})</span>
+    <span class="nx">name</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+
+    <span class="p">@</span><span class="nd">IsString</span><span class="p">({</span>
+    <span class="na">message</span><span class="p">:</span> <span class="dl">'</span><span class="s1">description must be a string</span><span class="dl">'</span><span class="p">,</span>
+    <span class="p">})</span>
+    <span class="p">@</span><span class="nd">Length</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="p">{</span>
+        <span class="na">message</span><span class="p">:</span> <span class="dl">'</span><span class="s1">description must be between 25 and 255
 characters</span><span class="dl">'</span><span class="p">,</span>
-  <span class="p">})</span>
-  <span class="p">@</span><span class="nd">Validate</span><span class="p">(</span><span class="nx">ProductDescription</span><span class="p">)</span>
-  <span class="nx">description</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
-  <span class="p">...</span>
+    <span class="p">})</span>
+    <span class="p">@</span><span class="nd">Validate</span><span class="p">(</span><span class="nx">ProductDescription</span><span class="p">)</span>
+    <span class="nx">description</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+    <span class="p">...</span>
 <span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
+</code></pre></div></div>
+<ul>
   <li>上記で興味深い点
     <ul>
       <li><code class="language-plaintext highlighter-rouge">class-validator</code>ライブラリは便利</li>
@@ -227,19 +231,19 @@ characters</span><span class="dl">'</span><span class="p">,</span>
 <p><strong>ページネーションの設定</strong></p>
 <ul>
   <li>現在のページ、制限などの情報も提供する必要</li>
-  <li><code class="language-plaintext highlighter-rouge">PagniationService</code>クラスなどを作成すると便利
-    <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">@</span><span class="nd">Injectable</span><span class="p">()</span>
-<span class="k">export</span> <span class="kd">class</span> <span class="nc">PaginationService</span> <span class="p">{</span>
-  <span class="nf">getPaginationMeta</span><span class="p">(</span>
-      <span class="nx">page</span><span class="p">:</span> <span class="kr">number</span><span class="p">,</span>
-      <span class="nx">limit</span><span class="p">:</span> <span class="kr">number</span><span class="p">,</span>
-      <span class="nx">totalItems</span><span class="p">:</span> <span class="kr">number</span>
-  <span class="p">)</span>
-  <span class="p">...</span>
-<span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
+  <li><code class="language-plaintext highlighter-rouge">PagniationService</code>クラスなどを作成すると便利</li>
 </ul>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">@</span><span class="nd">Injectable</span><span class="p">()</span>
+<span class="k">export</span> <span class="kd">class</span> <span class="nc">PaginationService</span> <span class="p">{</span>
+    <span class="nf">getPaginationMeta</span><span class="p">(</span>
+        <span class="nx">page</span><span class="p">:</span> <span class="kr">number</span><span class="p">,</span>
+        <span class="nx">limit</span><span class="p">:</span> <span class="kr">number</span><span class="p">,</span>
+        <span class="nx">totalItems</span><span class="p">:</span> <span class="kr">number</span>
+    <span class="p">)</span>
+    <span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div></div>
 
 <p>ページネーションAPIは一見簡単そうですが、含めるべきフィールドが多かったりと、見た目以上に面倒に感じます。</p>
 
@@ -351,20 +355,21 @@ characters</span><span class="dl">'</span><span class="p">,</span>
   <li>GraphQLでもDTOを作成します
     <ul>
       <li>これを元に、<code class="language-plaintext highlighter-rouge">NestJS</code>がスキーマファイルを生成します</li>
-      <li><code class="language-plaintext highlighter-rouge">src/users/dto/create-user.dto.ts</code>
-        <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">@</span><span class="nd">InputType</span><span class="p">()</span>
-<span class="k">export</span> <span class="kd">class</span> <span class="nc">CreateUserDto</span> <span class="p">{</span>
-  <span class="p">@</span><span class="nd">Field</span><span class="p">()</span>
-  <span class="nx">username</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
-  <span class="p">...</span>
-<span class="p">}</span>
-</code></pre></div>        </div>
-      </li>
+      <li><code class="language-plaintext highlighter-rouge">src/users/dto/create-user.dto.ts</code></li>
     </ul>
   </li>
 </ul>
 
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">@</span><span class="nd">InputType</span><span class="p">()</span>
+<span class="k">export</span> <span class="kd">class</span> <span class="nc">CreateUserDto</span> <span class="p">{</span>
+    <span class="p">@</span><span class="nd">Field</span><span class="p">()</span>
+    <span class="nx">username</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+    <span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
 <p><strong>リゾルバーファイルの生成</strong></p>
+
 <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">@</span><span class="nd">Resolver</span><span class="p">(</span><span class="k">of</span> <span class="o">=&gt;</span> <span class="nx">User</span><span class="p">)</span>
 <span class="k">export</span> <span class="kd">class</span> <span class="nc">UsersResolver</span> <span class="p">{</span>
   <span class="nf">constructor</span><span class="p">(</span>
@@ -385,54 +390,55 @@ characters</span><span class="dl">'</span><span class="p">,</span>
 <h4 id="ソーシャルネットワーキングのコンテキストでリアルタイムの更新と通知を投稿する">ソーシャルネットワーキングのコンテキストでリアルタイムの更新と通知を投稿する</h4>
 
 <ul>
-  <li>GraphQLのサブスクリプションを使用すれば、リアルタイムに反映できる
-    <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">pubSub</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">PubSub</span><span class="p">();</span>
+  <li>GraphQLのサブスクリプションを使用すれば、リアルタイムに反映できる</li>
+</ul>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">pubSub</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">PubSub</span><span class="p">();</span>
 <span class="p">@</span><span class="nd">Resolver</span><span class="p">(</span><span class="k">of</span> <span class="o">=&gt;</span> <span class="nx">Post</span><span class="p">)</span>
 <span class="k">export</span> <span class="kd">class</span> <span class="nc">PostsResolver</span> <span class="p">{</span>
-<span class="nf">constructor</span><span class="p">(</span>
-  <span class="k">private</span> <span class="k">readonly</span> <span class="nx">postsService</span><span class="p">:</span> <span class="nx">PostsService</span>
-<span class="p">)</span> <span class="p">{}</span>
+  <span class="nf">constructor</span><span class="p">(</span>
+    <span class="k">private</span> <span class="k">readonly</span> <span class="nx">postsService</span><span class="p">:</span> <span class="nx">PostsService</span>
+  <span class="p">)</span> <span class="p">{}</span>
 
-<span class="p">@</span><span class="nd">Mutation</span><span class="p">(</span><span class="nx">returns</span> <span class="o">=&gt;</span> <span class="nx">Post</span><span class="p">)</span>
-<span class="k">async</span> <span class="nf">createPost</span><span class="p">(</span>
-  <span class="p">@</span><span class="nd">Args</span><span class="p">(</span><span class="dl">'</span><span class="s1">createPostDto</span><span class="dl">'</span><span class="p">)</span> <span class="nx">createPostDto</span><span class="p">:</span> <span class="nx">CreatePostDto</span>
-<span class="p">)</span> <span class="p">{</span>
-  <span class="kd">const</span> <span class="nx">newPost</span> <span class="o">=</span> <span class="k">await</span> <span class="k">this</span><span class="p">.</span><span class="nx">postsService</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span><span class="nx">createPostDto</span><span class="p">);</span>
-  <span class="nx">pubSub</span><span class="p">.</span><span class="nf">publish</span><span class="p">(</span><span class="dl">'</span><span class="s1">postAdded</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span> <span class="na">postAdded</span><span class="p">:</span> <span class="nx">newPost</span> <span class="p">});</span>
-  <span class="k">return</span> <span class="nx">newPost</span><span class="p">;</span>
-<span class="p">}</span>
+  <span class="p">@</span><span class="nd">Mutation</span><span class="p">(</span><span class="nx">returns</span> <span class="o">=&gt;</span> <span class="nx">Post</span><span class="p">)</span>
+  <span class="k">async</span> <span class="nf">createPost</span><span class="p">(</span>
+    <span class="p">@</span><span class="nd">Args</span><span class="p">(</span><span class="dl">'</span><span class="s1">createPostDto</span><span class="dl">'</span><span class="p">)</span> <span class="nx">createPostDto</span><span class="p">:</span> <span class="nx">CreatePostDto</span>
+  <span class="p">)</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">newPost</span> <span class="o">=</span> <span class="k">await</span> <span class="k">this</span><span class="p">.</span><span class="nx">postsService</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span><span class="nx">createPostDto</span><span class="p">);</span>
+    <span class="nx">pubSub</span><span class="p">.</span><span class="nf">publish</span><span class="p">(</span><span class="dl">'</span><span class="s1">postAdded</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span> <span class="na">postAdded</span><span class="p">:</span> <span class="nx">newPost</span> <span class="p">});</span>
+    <span class="k">return</span> <span class="nx">newPost</span><span class="p">;</span>
+  <span class="p">}</span>
 
-<span class="p">@</span><span class="nd">Subscription</span><span class="p">(</span><span class="nx">returns</span> <span class="o">=&gt;</span> <span class="nx">Post</span><span class="p">)</span>
-<span class="nf">postAdded</span><span class="p">()</span> <span class="p">{</span>
-  <span class="k">return</span> <span class="nx">pubSub</span><span class="p">.</span><span class="nf">asyncIterator</span><span class="p">(</span><span class="dl">'</span><span class="s1">postAdded</span><span class="dl">'</span><span class="p">);</span>
+  <span class="p">@</span><span class="nd">Subscription</span><span class="p">(</span><span class="nx">returns</span> <span class="o">=&gt;</span> <span class="nx">Post</span><span class="p">)</span>
+  <span class="nf">postAdded</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">pubSub</span><span class="p">.</span><span class="nf">asyncIterator</span><span class="p">(</span><span class="dl">'</span><span class="s1">postAdded</span><span class="dl">'</span><span class="p">);</span>
+  <span class="p">}</span>
 <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
+</code></pre></div></div>
+<ul>
   <li>上記ではサブスクリプションリゾルバを追加している</li>
   <li>
     <p>また、ポストが追加された際に、そのサブスクリプションを呼び出す処理を書いている</p>
   </li>
-  <li>上記に対応するスキーマファイルはこういう形になる
-```plaintext
-    <h1 id="ミューテーション型">ミューテーション型</h1>
-    <p>type Mutation {
-createPost(createPostDto: CreatePostInput!): Post!
-}</p>
-  </li>
+  <li>上記に対応するスキーマファイルはこういう形になる</li>
 </ul>
 
-<h1 id="サブスクリプション型">サブスクリプション型</h1>
-<p>type Subscription {
-  postAdded: Post!
-}</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># ミューテーション型
+type Mutation {
+  createPost(createPostDto: CreatePostInput!): Post!
+}
 
-<h1 id="入力型新しいpostを作成するための入力データ">入力型（新しいPostを作成するための入力データ）</h1>
-<p>input CreatePostInput {
+# サブスクリプション型
+type Subscription {
+  postAdded: Post!
+}
+
+# 入力型（新しいPostを作成するための入力データ）
+input CreatePostInput {
   title: String!
   content: String!
 }
-```</p>
+</code></pre></div></div>
 
 <ul>
   <li>これを<code class="language-plaintext highlighter-rouge">Apollo client</code>などで呼び出せば、リアルタイム処理を簡単に実装できる</li>
@@ -468,7 +474,8 @@ createPost(createPostDto: CreatePostInput!): Post!
       <footer>
         <p>
           Tags: 
-          <a href="/md/tag/書籍">書籍</a> 
+          <a href="/md/tag/書籍">書籍</a>,  
+          <a href="/md/tag/nodejs">Nodejs</a> 
         </p>
       </footer>
     </article>
@@ -503,9 +510,9 @@ createPost(createPostDto: CreatePostInput!): Post!
       
         <li><a href="/md/tag/開発">開発</a></li>
       
-        <li><a href="/md/tag/elasticsearch">elasticsearch</a></li>
+        <li><a href="/md/tag/elasticsearch">Elasticsearch</a></li>
       
-        <li><a href="/md/tag/firebase">firebase</a></li>
+        <li><a href="/md/tag/firebase">Firebase</a></li>
       
         <li><a href="/md/tag/sqlite">sqlite</a></li>
       
@@ -513,9 +520,15 @@ createPost(createPostDto: CreatePostInput!): Post!
       
         <li><a href="/md/tag/書籍">書籍</a></li>
       
+        <li><a href="/md/tag/設計">設計</a></li>
+      
         <li><a href="/md/tag/aws">AWS</a></li>
       
         <li><a href="/md/tag/cdk">CDK</a></li>
+      
+        <li><a href="/md/tag/go">Go</a></li>
+      
+        <li><a href="/md/tag/terraform">Terraform</a></li>
       
     </ul>
     <h2><a href="/md/archives/">Archives</a></h2>

@@ -371,12 +371,15 @@ go <span class="nb">install </span>google.golang.org/grpc/cmd/protoc-gen-go-grpc
 <h5 id="322-プロトコルバッファコンパイラの使用">3.2.2 プロトコルバッファコンパイラの使用</h5>
 
 <ul>
-  <li>protocコマンドで生成
-    <div class="language-proto highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">syntax</span> <span class="o">=</span> <span class="err">“</span><span class="n">proto3</span><span class="err">”</span><span class="p">;</span>
+  <li>protocコマンドで生成</li>
+</ul>
+
+<div class="language-proto highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">syntax</span> <span class="o">=</span> <span class="err">“</span><span class="n">proto3</span><span class="err">”</span><span class="p">;</span>
 <span class="k">option</span> <span class="na">go_package</span><span class="o">=</span><span class="s">" GitHub/huseyinbabal/microservices/order"</span><span class="p">;</span>
 <span class="o">...</span>
-</code></pre></div>    </div>
-  </li>
+</code></pre></div></div>
+
+<ul>
   <li><code class="language-plaintext highlighter-rouge">option</code>はパッケージ名</li>
 </ul>
 
@@ -770,7 +773,7 @@ go get <span class="nt">-u</span> github.com/huseyinbabal/microservices-proto/go
   <li>上記の<code class="language-plaintext highlighter-rouge">payment</code>は、<code class="language-plaintext highlighter-rouge">go get</code>で依存関係を追加したので<code class="language-plaintext highlighter-rouge">Order</code>サービスから利用できる</li>
 </ul>
 
-<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">func</span> <span class="n">NewAdapter</span><span class="p">(</span><span class="n">paymentServiceUrl</span> <span class="kt">string</span><span class="p">)</span> <span class="p">(</span><span class="err">\</span><span class="o">*</span><span class="n">Adapter</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">func</span> <span class="n">NewAdapter</span><span class="p">(</span><span class="n">paymentServiceUrl</span> <span class="kt">string</span><span class="p">)</span> <span class="p">(</span><span class="o">*</span><span class="n">Adapter</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">var</span> <span class="n">opts</span> <span class="p">[]</span><span class="n">grpc</span><span class="o">.</span><span class="n">DialOption</span> 
     <span class="n">opts</span> <span class="o">=</span> <span class="nb">append</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span><span class="n">grpc</span><span class="o">.</span><span class="n">WithTransportCredentials</span><span class="p">(</span><span class="n">insecure</span><span class="o">.</span><span class="n">NewCredentials</span><span class="p">()))</span> 
     <span class="n">conn</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">grpc</span><span class="o">.</span><span class="n">Dial</span><span class="p">(</span><span class="n">paymentServiceUrl</span><span class="p">,</span> <span class="n">opts</span><span class="o">...</span><span class="p">)</span> 
@@ -832,12 +835,14 @@ go get <span class="nt">-u</span> github.com/huseyinbabal/microservices-proto/go
 <h5 id="532-エラーコードとメッセージを返す">5.3.2 エラーコードとメッセージを返す</h5>
 
 <ul>
-  <li>以下のようにしてエラーを作成する
-    <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">err</span> <span class="o">=</span> <span class="n">status</span><span class="o">.</span><span class="n">Errorf</span><span class="p">(</span>
-  <span class="n">codes</span><span class="o">.</span><span class="n">InvalidArgument</span><span class="p">,</span>
-  <span class="n">fmt</span><span class="o">.</span><span class="n">Sprintf</span><span class="p">(</span><span class="s">"failed to charge user: %d"</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">UserId</span><span class="p">))</span>
-</code></pre></div>    </div>
-  </li>
+  <li>以下のようにしてエラーを作成する</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">err</span> <span class="o">=</span> <span class="n">status</span><span class="o">.</span><span class="n">Errorf</span><span class="p">(</span>
+    <span class="n">codes</span><span class="o">.</span><span class="n">InvalidArgument</span><span class="p">,</span>
+    <span class="n">fmt</span><span class="o">.</span><span class="n">Sprintf</span><span class="p">(</span><span class="s">"failed to charge user: %d"</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">UserId</span><span class="p">))</span>
+</code></pre></div></div>
+<ul>
   <li><code class="language-plaintext highlighter-rouge">status</code>ライブラリ、<code class="language-plaintext highlighter-rouge">codes</code>ライブラリを使用</li>
 </ul>
 
@@ -882,23 +887,23 @@ go get <span class="nt">-u</span> github.com/huseyinbabal/microservices-proto/go
       <li>複数のダウンストリームサーバがあることが多いから</li>
     </ul>
   </li>
-  <li>以下のようにして、複数のエラーを扱う
-    <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="n">paymentErr</span> <span class="o">:=</span> <span class="n">a</span><span class="o">.</span><span class="n">payment</span><span class="o">.</span><span class="n">Charge</span><span class="p">(</span><span class="o">&amp;</span><span class="n">order</span><span class="p">)</span>
- <span class="k">if</span> <span class="n">paymentErr</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
-  <span class="n">st</span> <span class="o">:=</span> <span class="n">status</span><span class="o">.</span><span class="n">Convert</span><span class="p">(</span><span class="n">paymentErr</span><span class="p">)</span> 
-  <span class="k">var</span> <span class="n">allErrors</span> <span class="p">[]</span><span class="kt">string</span> 
-      <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">detail</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">st</span><span class="o">.</span><span class="n">Details</span><span class="p">(</span>
-          <span class="k">switch</span> <span class="n">t</span> <span class="o">:=</span> <span class="n">detail</span><span class="o">.</span><span class="p">(</span><span class="k">type</span><span class="p">)</span> <span class="p">{</span>
-          <span class="k">case</span> <span class="o">*</span><span class="n">errdetails</span><span class="o">.</span><span class="n">BadRequest</span><span class="o">:</span> 
-              <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">violation</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">t</span><span class="o">.</span><span class="n">GetFieldViolations</span><span class="p">()</span> <span class="p">{</span>
-                  <span class="n">allErrors</span> <span class="o">=</span> <span class="nb">append</span><span class="p">(</span><span class="n">allErrors</span><span class="p">,</span> <span class="n">violation</span><span class="o">.</span><span class="n">Description</span><span class="p">)</span>
-               <span class="p">}</span>
-          <span class="p">}</span>
-          <span class="o">...</span>
- <span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
+  <li>以下のようにして、複数のエラーを扱う</li>
 </ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="n">paymentErr</span> <span class="o">:=</span> <span class="n">a</span><span class="o">.</span><span class="n">payment</span><span class="o">.</span><span class="n">Charge</span><span class="p">(</span><span class="o">&amp;</span><span class="n">order</span><span class="p">)</span>
+ <span class="k">if</span> <span class="n">paymentErr</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+    <span class="n">st</span> <span class="o">:=</span> <span class="n">status</span><span class="o">.</span><span class="n">Convert</span><span class="p">(</span><span class="n">paymentErr</span><span class="p">)</span> 
+    <span class="k">var</span> <span class="n">allErrors</span> <span class="p">[]</span><span class="kt">string</span> 
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">detail</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">st</span><span class="o">.</span><span class="n">Details</span><span class="p">(</span>
+            <span class="k">switch</span> <span class="n">t</span> <span class="o">:=</span> <span class="n">detail</span><span class="o">.</span><span class="p">(</span><span class="k">type</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">case</span> <span class="o">*</span><span class="n">errdetails</span><span class="o">.</span><span class="n">BadRequest</span><span class="o">:</span> 
+                <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">violation</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">t</span><span class="o">.</span><span class="n">GetFieldViolations</span><span class="p">()</span> <span class="p">{</span>
+                    <span class="n">allErrors</span> <span class="o">=</span> <span class="nb">append</span><span class="p">(</span><span class="n">allErrors</span><span class="p">,</span> <span class="n">violation</span><span class="o">.</span><span class="n">Description</span><span class="p">)</span>
+                 <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="o">...</span>
+ <span class="p">}</span>
+</code></pre></div></div>
 
 <h5 id="535-支払いサービスの実行">5.3.5 支払いサービスの実行</h5>
 
@@ -1076,7 +1081,9 @@ go get <span class="nt">-u</span> github.com/huseyinbabal/microservices-proto/go
       <footer>
         <p>
           Tags: 
-          <a href="/md/tag/書籍">書籍</a> 
+          <a href="/md/tag/書籍">書籍</a>,  
+          <a href="/md/tag/設計">設計</a>,  
+          <a href="/md/tag/go">Go</a> 
         </p>
       </footer>
     </article>
@@ -1111,9 +1118,9 @@ go get <span class="nt">-u</span> github.com/huseyinbabal/microservices-proto/go
       
         <li><a href="/md/tag/開発">開発</a></li>
       
-        <li><a href="/md/tag/elasticsearch">elasticsearch</a></li>
+        <li><a href="/md/tag/elasticsearch">Elasticsearch</a></li>
       
-        <li><a href="/md/tag/firebase">firebase</a></li>
+        <li><a href="/md/tag/firebase">Firebase</a></li>
       
         <li><a href="/md/tag/sqlite">sqlite</a></li>
       
@@ -1121,9 +1128,15 @@ go get <span class="nt">-u</span> github.com/huseyinbabal/microservices-proto/go
       
         <li><a href="/md/tag/書籍">書籍</a></li>
       
+        <li><a href="/md/tag/設計">設計</a></li>
+      
         <li><a href="/md/tag/aws">AWS</a></li>
       
         <li><a href="/md/tag/cdk">CDK</a></li>
+      
+        <li><a href="/md/tag/go">Go</a></li>
+      
+        <li><a href="/md/tag/terraform">Terraform</a></li>
       
     </ul>
     <h2><a href="/md/archives/">Archives</a></h2>

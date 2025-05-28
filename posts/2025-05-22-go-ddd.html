@@ -98,115 +98,133 @@
       <li>サブスクに登録すると、カスタマーという</li>
     </ul>
   </li>
-  <li>取り合えずインターフェースを作成してみる
-```go
-// ユーザータイプ
-type UserType int</li>
+  <li>取り合えずインターフェースを作成してみる</li>
 </ul>
 
-<p>// サブスクリプションタイプ
-type SubscriptionType int</p>
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// ユーザータイプ</span>
+<span class="k">type</span> <span class="n">UserType</span> <span class="kt">int</span>
 
-<p>const (
-	// ユーザータイプの定義
-	unknownUserType UserType = iota
-	lead
-	customer
-	churned
-	lostLead
-)</p>
+<span class="c">// サブスクリプションタイプ</span>
+<span class="k">type</span> <span class="n">SubscriptionType</span> <span class="kt">int</span>
 
-<p>const (
-	// サブスクリプションタイプの定義
-	unknownSubscriptionType SubscriptionType = iota
-	basic
-	premium
-	exclusive
-)</p>
+<span class="k">const</span> <span class="p">(</span>
+	<span class="c">// ユーザータイプの定義</span>
+	<span class="n">unknownUserType</span> <span class="n">UserType</span> <span class="o">=</span> <span class="no">iota</span>
+	<span class="n">lead</span>
+	<span class="n">customer</span>
+	<span class="n">churned</span>
+	<span class="n">lostLead</span>
+<span class="p">)</span>
 
-<p>// ユーザー追加リクエスト
-type UserAddRequest struct {
-	UserType       UserType
-	Email          string
-	SubType        SubscriptionType
-	PaymentDetails PaymentDetails
-}</p>
+<span class="k">const</span> <span class="p">(</span>
+	<span class="c">// サブスクリプションタイプの定義</span>
+	<span class="n">unknownSubscriptionType</span> <span class="n">SubscriptionType</span> <span class="o">=</span> <span class="no">iota</span>
+	<span class="n">basic</span>
+	<span class="n">premium</span>
+	<span class="n">exclusive</span>
+<span class="p">)</span>
 
-<p>// ユーザー修正リクエスト
-type UserModifyRequest struct {
-	ID             string
-	UserType       UserType
-	Email          string
-	SubType        SubscriptionType
-	PaymentDetails PaymentDetails
-}</p>
+<span class="c">// ユーザー追加リクエスト</span>
+<span class="k">type</span> <span class="n">UserAddRequest</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">UserType</span>       <span class="n">UserType</span>
+	<span class="n">Email</span>          <span class="kt">string</span>
+	<span class="n">SubType</span>        <span class="n">SubscriptionType</span>
+	<span class="n">PaymentDetails</span> <span class="n">PaymentDetails</span>
+<span class="p">}</span>
 
-<p>// ユーザー
-type User struct {
-	ID             string
-	PaymentDetails PaymentDetails
-}</p>
+<span class="c">// ユーザー修正リクエスト</span>
+<span class="k">type</span> <span class="n">UserModifyRequest</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">ID</span>             <span class="kt">string</span>
+	<span class="n">UserType</span>       <span class="n">UserType</span>
+	<span class="n">Email</span>          <span class="kt">string</span>
+	<span class="n">SubType</span>        <span class="n">SubscriptionType</span>
+	<span class="n">PaymentDetails</span> <span class="n">PaymentDetails</span>
+<span class="p">}</span>
 
-<p>// ユーザーマネージャーインターフェース
-type UserManager interface {
-	AddUser(ctx context.Context, request UserAddRequest) (User, error)
-	ModifyUser(ctx context.Context, request UserModifyRequest) (User, error)
-}</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
-#### ドメインとサブドメイン
+<span class="c">// ユーザー</span>
+<span class="k">type</span> <span class="n">User</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">ID</span>             <span class="kt">string</span>
+	<span class="n">PaymentDetails</span> <span class="n">PaymentDetails</span>
+<span class="p">}</span>
 
-- この例では、`payments`と`subscriptions`
-    - チームはドメインで分割されることが多い
-    - 更にドメインができると、チームが分割される
+<span class="c">// ユーザーマネージャーインターフェース</span>
+<span class="k">type</span> <span class="n">UserManager</span> <span class="k">interface</span> <span class="p">{</span>
+	<span class="n">AddUser</span><span class="p">(</span><span class="n">ctx</span> <span class="n">context</span><span class="o">.</span><span class="n">Context</span><span class="p">,</span> <span class="n">request</span> <span class="n">UserAddRequest</span><span class="p">)</span> <span class="p">(</span><span class="n">User</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+	<span class="n">ModifyUser</span><span class="p">(</span><span class="n">ctx</span> <span class="n">context</span><span class="o">.</span><span class="n">Context</span><span class="p">,</span> <span class="n">request</span> <span class="n">UserModifyRequest</span><span class="p">)</span> <span class="p">(</span><span class="n">User</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
 
-#### ユビキタス言語
+<h4 id="ドメインとサブドメイン">ドメインとサブドメイン</h4>
 
-- customerはチームによって違う意味を持つ場合がある
-- 用語集をドキュメントに管理し、定期的にレビューすることが重要
-- 開発者は定義が正しいか、エッジケースを考える必要
+<ul>
+  <li>この例では、<code class="language-plaintext highlighter-rouge">payments</code>と<code class="language-plaintext highlighter-rouge">subscriptions</code>
+    <ul>
+      <li>チームはドメインで分割されることが多い</li>
+      <li>更にドメインができると、チームが分割される</li>
+    </ul>
+  </li>
+</ul>
 
-##### ユビキタス言語の利点
+<h4 id="ユビキタス言語">ユビキタス言語</h4>
 
-- ITプロジェクトが失敗するよくある理由
-    - `got lost in translation`
-- 具体例：顧客ごとに複数のアカウントをサポートしたい
-    - しかし、顧客エンティティが存在しない
-    - アカウントごとに一人のユーザーという仮定
-    - `customer`ではなく`user`が使われていた
-        - ユビキタス言語を使用していれば避けられたかもしれない
+<ul>
+  <li>customerはチームによって違う意味を持つ場合がある</li>
+  <li>用語集をドキュメントに管理し、定期的にレビューすることが重要</li>
+  <li>開発者は定義が正しいか、エッジケースを考える必要</li>
+</ul>
 
-- 登録→lead user→サブスク→customerというサンプルコード
-```go
-// リード作成リクエスト
-type LeadRequest struct {
-	email string
-}
+<h5 id="ユビキタス言語の利点">ユビキタス言語の利点</h5>
 
-// リード
-type Lead struct {
-	id string
-}
+<ul>
+  <li>ITプロジェクトが失敗するよくある理由
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">got lost in translation</code></li>
+    </ul>
+  </li>
+  <li>具体例：顧客ごとに複数のアカウントをサポートしたい
+    <ul>
+      <li>しかし、顧客エンティティが存在しない</li>
+      <li>アカウントごとに一人のユーザーという仮定</li>
+      <li><code class="language-plaintext highlighter-rouge">customer</code>ではなく<code class="language-plaintext highlighter-rouge">user</code>が使われていた
+        <ul>
+          <li>ユビキタス言語を使用していれば避けられたかもしれない</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>登録→lead user→サブスク→customerというサンプルコード</li>
+</ul>
 
-// リード作成インターフェース
-type LeadCreator interface {
-	CreateLead(ctx context.Context, request LeadRequest) (Lead, error)
-}
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// リード作成リクエスト</span>
+<span class="k">type</span> <span class="n">LeadRequest</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">email</span> <span class="kt">string</span>
+<span class="p">}</span>
 
-// 顧客
-type Customer struct {
-	leadID string
-	userID string
-}
+<span class="c">// リード</span>
+<span class="k">type</span> <span class="n">Lead</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">id</span> <span class="kt">string</span>
+<span class="p">}</span>
 
-// リード変換インターフェース
-type LeadConvertor interface {
-	Convert(ctx context.Context, subSelection SubscriptionType) (Customer, error)
-}
+<span class="c">// リード作成インターフェース</span>
+<span class="k">type</span> <span class="n">LeadCreator</span> <span class="k">interface</span> <span class="p">{</span>
+	<span class="n">CreateLead</span><span class="p">(</span><span class="n">ctx</span> <span class="n">context</span><span class="o">.</span><span class="n">Context</span><span class="p">,</span> <span class="n">request</span> <span class="n">LeadRequest</span><span class="p">)</span> <span class="p">(</span><span class="n">Lead</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+<span class="p">}</span>
 
-// リードを顧客に変換
-func (l Lead) Convert(ctx context.Context, subSelection SubscriptionType) (Customer, error) {
-	// TODO 実装する
-}
+<span class="c">// 顧客</span>
+<span class="k">type</span> <span class="n">Customer</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">leadID</span> <span class="kt">string</span>
+	<span class="n">userID</span> <span class="kt">string</span>
+<span class="p">}</span>
+
+<span class="c">// リード変換インターフェース</span>
+<span class="k">type</span> <span class="n">LeadConvertor</span> <span class="k">interface</span> <span class="p">{</span>
+	<span class="n">Convert</span><span class="p">(</span><span class="n">ctx</span> <span class="n">context</span><span class="o">.</span><span class="n">Context</span><span class="p">,</span> <span class="n">subSelection</span> <span class="n">SubscriptionType</span><span class="p">)</span> <span class="p">(</span><span class="n">Customer</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c">// リードを顧客に変換</span>
+<span class="k">func</span> <span class="p">(</span><span class="n">l</span> <span class="n">Lead</span><span class="p">)</span> <span class="n">Convert</span><span class="p">(</span><span class="n">ctx</span> <span class="n">context</span><span class="o">.</span><span class="n">Context</span><span class="p">,</span> <span class="n">subSelection</span> <span class="n">SubscriptionType</span><span class="p">)</span> <span class="p">(</span><span class="n">Customer</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+	<span class="c">// TODO 実装する</span>
+<span class="p">}</span>
 </code></pre></div></div>
 
 <ul>
@@ -335,67 +353,72 @@ oapi-codegen <span class="nt">--config</span><span class="o">=</span>config.yml 
 <h5 id="適切な識別子を生成する">適切な識別子を生成する</h5>
 
 <ul>
-  <li>UUIDは128ビット
-```go
-import “github.com/google/uuid”</li>
+  <li>UUIDは128ビット</li>
 </ul>
 
-<p>// SomeEntity構造体
-type SomeEntity struct {
-    id uuid.UUID
-}</p>
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="s">"github.com/google/uuid"</span>
 
-<p>// 新しいSomeEntityを作成する関数
-func NewSomeEntity() *SomeEntity {
-    id := uuid.New()
-    return &amp;SomeEntity{id: id}
-}</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
-- PostgreSQLなどはUUIDを生成できる
+<span class="c">// SomeEntity構造体</span>
+<span class="k">type</span> <span class="n">SomeEntity</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">id</span> <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span>
+<span class="p">}</span>
 
-個人的にRDBの`AUTO INCREMENT`を使う場合が多いが、DDDではエンティティでPKを生成し、保存するほうがいい気がします。
+<span class="c">// 新しいSomeEntityを作成する関数</span>
+<span class="k">func</span> <span class="n">NewSomeEntity</span><span class="p">()</span> <span class="o">*</span><span class="n">SomeEntity</span> <span class="p">{</span>
+    <span class="n">id</span> <span class="o">:=</span> <span class="n">uuid</span><span class="o">.</span><span class="n">New</span><span class="p">()</span>
+    <span class="k">return</span> <span class="o">&amp;</span><span class="n">SomeEntity</span><span class="p">{</span><span class="n">id</span><span class="o">:</span> <span class="n">id</span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
 
-##### エンティティを定義する際の警告
+<ul>
+  <li>PostgreSQLなどはUUIDを生成できる</li>
+</ul>
 
-- DB設計に任せると、貧血ドメインモデルになる
-- 以下はゲッター、セッターだからのエンティティのリファクタリング後
-```go
-type AuctionRefactored struct {
-	id            int
-	startingPrice money.Money
-	sellerID      int
-	createdAt     time.Time
-	auctionStart  time.Time
-	auctionEnd    time.Time
-}
+<p>個人的にRDBの<code class="language-plaintext highlighter-rouge">AUTO INCREMENT</code>を使う場合が多いが、DDDではエンティティでPKを生成し、保存するほうがいい気がします。</p>
 
-// オークションの経過時間を取得するメソッド
-func (a *AuctionRefactored) GetAuctionElapsedDuration() time.Duration {
-	return a.auctionEnd.Sub(a.auctionStart) // auctionEnd - auctionStart
-}
+<h5 id="エンティティを定義する際の警告">エンティティを定義する際の警告</h5>
 
-// UTCでのオークション終了時間を取得するメソッド
-func (a *AuctionRefactored) GetAuctionEndTimeInUTC() time.Time {
-	return a.auctionEnd
-}
+<ul>
+  <li>DB設計に任せると、貧血ドメインモデルになる</li>
+  <li>以下はゲッター、セッターだからのエンティティのリファクタリング後</li>
+</ul>
 
-// オークション終了時間を設定するメソッド
-func (a *AuctionRefactored) SetAuctionEnd(auctionEnd time.Time) error {
-	if err := a.validateTimeZone(auctionEnd); err != nil {
-		return err
-	}
-	a.auctionEnd = auctionEnd
-	return nil
-}
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">AuctionRefactored</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">id</span>            <span class="kt">int</span>
+	<span class="n">startingPrice</span> <span class="n">money</span><span class="o">.</span><span class="n">Money</span>
+	<span class="n">sellerID</span>      <span class="kt">int</span>
+	<span class="n">createdAt</span>     <span class="n">time</span><span class="o">.</span><span class="n">Time</span>
+	<span class="n">auctionStart</span>  <span class="n">time</span><span class="o">.</span><span class="n">Time</span>
+	<span class="n">auctionEnd</span>    <span class="n">time</span><span class="o">.</span><span class="n">Time</span>
+<span class="p">}</span>
 
-// タイムゾーンがUTCかどうかを検証するヘルパーメソッド
-func (a *AuctionRefactored) validateTimeZone(t time.Time) error {
-	tz, _ := t.Zone()
-	if tz != time.UTC.String() {
-		return errors.New("time zone must be UTC")
-	}
-	return nil
-}
+<span class="c">// オークションの経過時間を取得するメソッド</span>
+<span class="k">func</span> <span class="p">(</span><span class="n">a</span> <span class="o">*</span><span class="n">AuctionRefactored</span><span class="p">)</span> <span class="n">GetAuctionElapsedDuration</span><span class="p">()</span> <span class="n">time</span><span class="o">.</span><span class="n">Duration</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="n">a</span><span class="o">.</span><span class="n">auctionEnd</span><span class="o">.</span><span class="n">Sub</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">auctionStart</span><span class="p">)</span> <span class="c">// auctionEnd - auctionStart</span>
+<span class="p">}</span>
+
+<span class="c">// UTCでのオークション終了時間を取得するメソッド</span>
+<span class="k">func</span> <span class="p">(</span><span class="n">a</span> <span class="o">*</span><span class="n">AuctionRefactored</span><span class="p">)</span> <span class="n">GetAuctionEndTimeInUTC</span><span class="p">()</span> <span class="n">time</span><span class="o">.</span><span class="n">Time</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="n">a</span><span class="o">.</span><span class="n">auctionEnd</span>
+<span class="p">}</span>
+
+<span class="c">// オークション終了時間を設定するメソッド</span>
+<span class="k">func</span> <span class="p">(</span><span class="n">a</span> <span class="o">*</span><span class="n">AuctionRefactored</span><span class="p">)</span> <span class="n">SetAuctionEnd</span><span class="p">(</span><span class="n">auctionEnd</span> <span class="n">time</span><span class="o">.</span><span class="n">Time</span><span class="p">)</span> <span class="kt">error</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">a</span><span class="o">.</span><span class="n">validateTimeZone</span><span class="p">(</span><span class="n">auctionEnd</span><span class="p">);</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="n">err</span>
+	<span class="p">}</span>
+	<span class="n">a</span><span class="o">.</span><span class="n">auctionEnd</span> <span class="o">=</span> <span class="n">auctionEnd</span>
+	<span class="k">return</span> <span class="no">nil</span>
+<span class="p">}</span>
+
+<span class="c">// タイムゾーンがUTCかどうかを検証するヘルパーメソッド</span>
+<span class="k">func</span> <span class="p">(</span><span class="n">a</span> <span class="o">*</span><span class="n">AuctionRefactored</span><span class="p">)</span> <span class="n">validateTimeZone</span><span class="p">(</span><span class="n">t</span> <span class="n">time</span><span class="o">.</span><span class="n">Time</span><span class="p">)</span> <span class="kt">error</span> <span class="p">{</span>
+	<span class="n">tz</span><span class="p">,</span> <span class="n">_</span> <span class="o">:=</span> <span class="n">t</span><span class="o">.</span><span class="n">Zone</span><span class="p">()</span>
+	<span class="k">if</span> <span class="n">tz</span> <span class="o">!=</span> <span class="n">time</span><span class="o">.</span><span class="n">UTC</span><span class="o">.</span><span class="n">String</span><span class="p">()</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="n">errors</span><span class="o">.</span><span class="n">New</span><span class="p">(</span><span class="s">"time zone must be UTC"</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="no">nil</span>
+<span class="p">}</span>
 </code></pre></div></div>
 <ul>
   <li>エンティティがビジネスロジックを持つことが分かりやすい</li>
@@ -417,40 +440,46 @@ func (a *AuctionRefactored) validateTimeZone(t time.Time) error {
 <h4 id="値オブジェクトの操作">値オブジェクトの操作</h4>
 
 <ul>
-  <li>良くない例
-```go
-// Point構造体
-type Point struct {
-  x int
-  y int
-}</li>
+  <li>良くない例</li>
 </ul>
 
-<p>// NewPointは新しいPointインスタンスを作成する関数
-func NewPoint(x, y int) *Point {
-    return &amp;Point{
-        x: x,
-        y: y,
-    }
-}</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
-- `&amp;`を使用すると、メモリへの参照となるので、同じ値でも等しくなくなる
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// Point構造体</span>
+<span class="k">type</span> <span class="n">Point</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">x</span> <span class="kt">int</span>
+    <span class="n">y</span> <span class="kt">int</span>
+<span class="p">}</span>
 
-- 良い例
-```go
-// Point構造体
-type Point struct {
-    x int
-    y int
-}
+<span class="c">// NewPointは新しいPointインスタンスを作成する関数</span>
+<span class="k">func</span> <span class="n">NewPoint</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="kt">int</span><span class="p">)</span> <span class="o">*</span><span class="n">Point</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="o">&amp;</span><span class="n">Point</span><span class="p">{</span>
+        <span class="n">x</span><span class="o">:</span> <span class="n">x</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">:</span> <span class="n">y</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
 
-// NewPointは新しいPointインスタンスを作成する関数（値渡し）
-func NewPoint(x, y int) Point {
-    return Point{
-        x: x,
-        y: y,
-    }
-}
+<ul>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">&amp;</code>を使用すると、メモリへの参照となるので、同じ値でも等しくなくなる</p>
+  </li>
+  <li>
+    <p>良い例</p>
+  </li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// Point構造体</span>
+<span class="k">type</span> <span class="n">Point</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">x</span> <span class="kt">int</span>
+    <span class="n">y</span> <span class="kt">int</span>
+<span class="p">}</span>
+
+<span class="c">// NewPointは新しいPointインスタンスを作成する関数（値渡し）</span>
+<span class="k">func</span> <span class="n">NewPoint</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="kt">int</span><span class="p">)</span> <span class="n">Point</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">Point</span><span class="p">{</span>
+        <span class="n">x</span><span class="o">:</span> <span class="n">x</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">:</span> <span class="n">y</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span>
 </code></pre></div></div>
 
 <ul>
@@ -487,44 +516,45 @@ func NewPoint(x, y int) Point {
       <li>新しいカードを追加すると、残高が合計残高に反映されるなど</li>
     </ul>
   </li>
-  <li>Wallet Aggregateのサンプル
-```go
-package main</li>
+  <li>Wallet Aggregateのサンプル</li>
 </ul>
 
-<p>import (
-	…
-)</p>
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span> <span class="n">main</span>
 
-<p>type WalletItem interface {
-	GetBalance() (money.Money, error)
-}</p>
+<span class="k">import</span> <span class="p">(</span>
+	<span class="o">...</span>
+<span class="p">)</span>
 
-<p>type Wallet struct {
-	id         uuid.UUID
-	ownerID    uuid.UUID
-	walletItems []WalletItem
-}</p>
+<span class="k">type</span> <span class="n">WalletItem</span> <span class="k">interface</span> <span class="p">{</span>
+	<span class="n">GetBalance</span><span class="p">()</span> <span class="p">(</span><span class="n">money</span><span class="o">.</span><span class="n">Money</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+<span class="p">}</span>
 
-<p>// GetWalletBalanceはウォレットの合計残高を取得するメソッド
-func (w Wallet) GetWalletBalance() (money.Money, error) {
-	var bal money.Money</p>
+<span class="k">type</span> <span class="n">Wallet</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">id</span>         <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span>
+	<span class="n">ownerID</span>    <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span>
+	<span class="n">walletItems</span> <span class="p">[]</span><span class="n">WalletItem</span>
+<span class="p">}</span>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// 各ウォレットアイテムから残高を取得して合計を算出
-for _, v := range w.walletItems {
-	itemBal, err := v.GetBalance()
-	if err != nil {
-		return bal, errors.New("failed to get balance")
-	}
+<span class="c">// GetWalletBalanceはウォレットの合計残高を取得するメソッド</span>
+<span class="k">func</span> <span class="p">(</span><span class="n">w</span> <span class="n">Wallet</span><span class="p">)</span> <span class="n">GetWalletBalance</span><span class="p">()</span> <span class="p">(</span><span class="n">money</span><span class="o">.</span><span class="n">Money</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">var</span> <span class="n">bal</span> <span class="n">money</span><span class="o">.</span><span class="n">Money</span>
 
-	// 残高を加算
-	bal, err = bal.Add(itemBal)
-	if err != nil {
-		return bal, errors.New("failed to increment balance")
-	}
-}
+	<span class="c">// 各ウォレットアイテムから残高を取得して合計を算出</span>
+	<span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">v</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">w</span><span class="o">.</span><span class="n">walletItems</span> <span class="p">{</span>
+		<span class="n">itemBal</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">v</span><span class="o">.</span><span class="n">GetBalance</span><span class="p">()</span>
+		<span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+			<span class="k">return</span> <span class="n">bal</span><span class="p">,</span> <span class="n">errors</span><span class="o">.</span><span class="n">New</span><span class="p">(</span><span class="s">"failed to get balance"</span><span class="p">)</span>
+		<span class="p">}</span>
 
-return bal, nil } ```
+		<span class="c">// 残高を加算</span>
+		<span class="n">bal</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">bal</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">itemBal</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+			<span class="k">return</span> <span class="n">bal</span><span class="p">,</span> <span class="n">errors</span><span class="o">.</span><span class="n">New</span><span class="p">(</span><span class="s">"failed to increment balance"</span><span class="p">)</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+
+	<span class="k">return</span> <span class="n">bal</span><span class="p">,</span> <span class="no">nil</span>
+<span class="p">}</span>
 </code></pre></div></div>
 
 <h5 id="集約の発見">集約の発見</h5>
@@ -538,17 +568,19 @@ return bal, nil } ```
       <li>トランザクションが成功する可能性の向上</li>
     </ul>
   </li>
-  <li>例えば、以下は不適切
-    <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">Order</span> <span class="k">struct</span> <span class="p">{</span>
-  <span class="n">items</span>          <span class="p">[]</span><span class="n">item</span>       
-  <span class="n">taxAmount</span>      <span class="n">money</span><span class="o">.</span><span class="n">Money</span>
-  <span class="n">discount</span>       <span class="n">money</span><span class="o">.</span><span class="n">Money</span> 
-  <span class="n">paymentCardID</span>  <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span>   
-  <span class="n">customerID</span>     <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span>    
-  <span class="n">marketingOptIn</span> <span class="kt">bool</span>          
+  <li>例えば、以下は不適切</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">Order</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">items</span>          <span class="p">[]</span><span class="n">item</span>       
+	<span class="n">taxAmount</span>      <span class="n">money</span><span class="o">.</span><span class="n">Money</span>
+	<span class="n">discount</span>       <span class="n">money</span><span class="o">.</span><span class="n">Money</span> 
+	<span class="n">paymentCardID</span>  <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span>   
+	<span class="n">customerID</span>     <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span>    
+	<span class="n">marketingOptIn</span> <span class="kt">bool</span>          
 <span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
+</code></pre></div></div>
+<ul>
   <li>オプトイン、オプトアウトは注文と関係ないから</li>
 </ul>
 
@@ -575,34 +607,35 @@ return bal, nil } ```
 
 <ul>
   <li>ファクトリはカプセル化も提供</li>
-  <li>誰かが営業時間外に予約を作成しようとした場合のサンプル
-```go
-// Booking構造体は、予約情報を保持
-type Booking struct {
-  id            uuid.UUID
-  from          time.Time
-  to            time.Time
-  hairDresserID uuid.UUID
-}</li>
+  <li>誰かが営業時間外に予約を作成しようとした場合のサンプル</li>
 </ul>
 
-<p>// CreateBookingは新しい予約を作成する関数
-func CreateBooking(from, to time.Time, hairDresserID uuid.UUID) (*Booking, error) {
-	// 営業終了時刻（例: 17:00pm）を設定
-	closingTime, _ := time.Parse(time.Kitchen, “5:00PM”)</p>
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// Booking構造体は、予約情報を保持</span>
+<span class="k">type</span> <span class="n">Booking</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">id</span>            <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span>
+	<span class="n">from</span>          <span class="n">time</span><span class="o">.</span><span class="n">Time</span>
+	<span class="n">to</span>            <span class="n">time</span><span class="o">.</span><span class="n">Time</span>
+	<span class="n">hairDresserID</span> <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span>
+<span class="p">}</span>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// 予約時間が営業時間外か確認
-if from.After(closingTime) {
-	return nil, errors.New("no appointments after closing time")
-}
+<span class="c">// CreateBookingは新しい予約を作成する関数</span>
+<span class="k">func</span> <span class="n">CreateBooking</span><span class="p">(</span><span class="n">from</span><span class="p">,</span> <span class="n">to</span> <span class="n">time</span><span class="o">.</span><span class="n">Time</span><span class="p">,</span> <span class="n">hairDresserID</span> <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span><span class="p">)</span> <span class="p">(</span><span class="o">*</span><span class="n">Booking</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+	<span class="c">// 営業終了時刻（例: 17:00pm）を設定</span>
+	<span class="n">closingTime</span><span class="p">,</span> <span class="n">_</span> <span class="o">:=</span> <span class="n">time</span><span class="o">.</span><span class="n">Parse</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">Kitchen</span><span class="p">,</span> <span class="s">"5:00PM"</span><span class="p">)</span>
+	
+	<span class="c">// 予約時間が営業時間外か確認</span>
+	<span class="k">if</span> <span class="n">from</span><span class="o">.</span><span class="n">After</span><span class="p">(</span><span class="n">closingTime</span><span class="p">)</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="no">nil</span><span class="p">,</span> <span class="n">errors</span><span class="o">.</span><span class="n">New</span><span class="p">(</span><span class="s">"no appointments after closing time"</span><span class="p">)</span>
+	<span class="p">}</span>
 
-// 予約を作成して返す
-return &amp;Booking{
-	id:            uuid.New(),           // 新しい予約IDを生成
-	from:          from,                 // 予約開始時刻
-	to:            to,                   // 予約終了時刻
-	hairDresserID: hairDresserID,       // 美容師IDは引数から取得
-}, nil } ```
+	<span class="c">// 予約を作成して返す</span>
+	<span class="k">return</span> <span class="o">&amp;</span><span class="n">Booking</span><span class="p">{</span>
+		<span class="n">id</span><span class="o">:</span>            <span class="n">uuid</span><span class="o">.</span><span class="n">New</span><span class="p">(),</span>           <span class="c">// 新しい予約IDを生成</span>
+		<span class="n">from</span><span class="o">:</span>          <span class="n">from</span><span class="p">,</span>                 <span class="c">// 予約開始時刻</span>
+		<span class="n">to</span><span class="o">:</span>            <span class="n">to</span><span class="p">,</span>                   <span class="c">// 予約終了時刻</span>
+		<span class="n">hairDresserID</span><span class="o">:</span> <span class="n">hairDresserID</span><span class="p">,</span>       <span class="c">// 美容師IDは引数から取得</span>
+	<span class="p">},</span> <span class="no">nil</span>
+<span class="p">}</span>
 </code></pre></div></div>
 
 <ul>
@@ -636,58 +669,61 @@ return &amp;Booking{
       <li>2つのドメインオブジェクトを利用して計算</li>
     </ul>
   </li>
-  <li>良くない例
-```go
-type ShoppingCart struct {
-  ID          int
-  Products    []Product <br />
-  IsFull      bool
-  MaxCartSize int
- }</li>
+  <li>良くない例</li>
 </ul>
 
-<p>func (s *ShoppingCart) AddToCart(p Product) bool {
-    if s.IsFull{
-        …
-    }
-    if p.CanBeBought() {
-        …
-    }
-    …
-}</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
-- 上記の実装中に別のエンティティを参照し、関係ないロジックを追加している
-- リファクタリング後
-```go
-// CheckoutServiceは、カート内の商品に関連する処理を行うサービス
-type CheckoutService struct {
-	shoppingCart *ShoppingCart
-}
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">ShoppingCart</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">ID</span>          <span class="kt">int</span>
+    <span class="n">Products</span>    <span class="p">[]</span><span class="n">Product</span>   
+    <span class="n">IsFull</span>      <span class="kt">bool</span>
+    <span class="n">MaxCartSize</span> <span class="kt">int</span>
+ <span class="p">}</span>
 
-// NewCheckoutServiceは、新しいCheckoutServiceを作成するコンストラクタ
-func NewCheckoutService(shoppingCart *ShoppingCart) *CheckoutService {
-	return &amp;CheckoutService{shoppingCart: shoppingCart}
-}
+<span class="k">func</span> <span class="p">(</span><span class="n">s</span> <span class="o">*</span><span class="n">ShoppingCart</span><span class="p">)</span> <span class="n">AddToCart</span><span class="p">(</span><span class="n">p</span> <span class="n">Product</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">IsFull</span><span class="p">{</span>
+        <span class="o">...</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">CanBeBought</span><span class="p">()</span> <span class="p">{</span>
+        <span class="o">...</span>
+    <span class="p">}</span>
+    <span class="o">...</span>
+<span class="p">}</span>
+</code></pre></div></div>
 
-// AddProductToBasketは、ショッピングカートに商品を追加するメソッド
-func (c *CheckoutService) AddProductToBasket(p *Product) error {
-	// カートが満杯の場合は追加できない
-	if c.shoppingCart.IsFull {
-		return errors.New("cannot add to cart, it's full")
-	}
+<ul>
+  <li>上記の実装中に別のエンティティを参照し、関係ないロジックを追加している</li>
+  <li>リファクタリング後</li>
+</ul>
 
-	// 商品が購入可能であればカートに追加
-	if p.CanBeBought() {
-		c.shoppingCart.Products = append(c.shoppingCart.Products, *p)
-	}
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// CheckoutServiceは、カート内の商品に関連する処理を行うサービス</span>
+<span class="k">type</span> <span class="n">CheckoutService</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">shoppingCart</span> <span class="o">*</span><span class="n">ShoppingCart</span>
+<span class="p">}</span>
 
-	// カートが満杯かどうかチェックし、満杯の場合はIsFullをtrueに設定
-	if len(c.shoppingCart.Products) &gt;= c.shoppingCart.MaxCartSize {
-		c.shoppingCart.IsFull = true
-	}
+<span class="c">// NewCheckoutServiceは、新しいCheckoutServiceを作成するコンストラクタ</span>
+<span class="k">func</span> <span class="n">NewCheckoutService</span><span class="p">(</span><span class="n">shoppingCart</span> <span class="o">*</span><span class="n">ShoppingCart</span><span class="p">)</span> <span class="o">*</span><span class="n">CheckoutService</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="o">&amp;</span><span class="n">CheckoutService</span><span class="p">{</span><span class="n">shoppingCart</span><span class="o">:</span> <span class="n">shoppingCart</span><span class="p">}</span>
+<span class="p">}</span>
 
-	return nil
-}
+<span class="c">// AddProductToBasketは、ショッピングカートに商品を追加するメソッド</span>
+<span class="k">func</span> <span class="p">(</span><span class="n">c</span> <span class="o">*</span><span class="n">CheckoutService</span><span class="p">)</span> <span class="n">AddProductToBasket</span><span class="p">(</span><span class="n">p</span> <span class="o">*</span><span class="n">Product</span><span class="p">)</span> <span class="kt">error</span> <span class="p">{</span>
+	<span class="c">// カートが満杯の場合は追加できない</span>
+	<span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">shoppingCart</span><span class="o">.</span><span class="n">IsFull</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="n">errors</span><span class="o">.</span><span class="n">New</span><span class="p">(</span><span class="s">"cannot add to cart, it's full"</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="c">// 商品が購入可能であればカートに追加</span>
+	<span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">CanBeBought</span><span class="p">()</span> <span class="p">{</span>
+		<span class="n">c</span><span class="o">.</span><span class="n">shoppingCart</span><span class="o">.</span><span class="n">Products</span> <span class="o">=</span> <span class="nb">append</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">shoppingCart</span><span class="o">.</span><span class="n">Products</span><span class="p">,</span> <span class="o">*</span><span class="n">p</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="c">// カートが満杯かどうかチェックし、満杯の場合はIsFullをtrueに設定</span>
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">shoppingCart</span><span class="o">.</span><span class="n">Products</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">c</span><span class="o">.</span><span class="n">shoppingCart</span><span class="o">.</span><span class="n">MaxCartSize</span> <span class="p">{</span>
+		<span class="n">c</span><span class="o">.</span><span class="n">shoppingCart</span><span class="o">.</span><span class="n">IsFull</span> <span class="o">=</span> <span class="no">true</span>
+	<span class="p">}</span>
+
+	<span class="k">return</span> <span class="no">nil</span>
+<span class="p">}</span>
 </code></pre></div></div>
 <ul>
   <li>複数のエンティティにまたがるロジックを書く
@@ -739,6 +775,7 @@ func (c *CheckoutService) AddProductToBasket(p *Product) error {
 </code></pre></div></div>
 
 <p>ここでは、インフラサービスも簡単に追加でき、下の例では注文後のメール送信も簡単に追加できる。</p>
+
 <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">BookingAppService</span> <span class="k">struct</span> <span class="p">{</span>
    <span class="n">bookingRepo</span>          <span class="n">BookingRepository</span>
    <span class="n">bookingDomainService</span> <span class="n">BookingDomainService</span>
@@ -919,7 +956,9 @@ func (c *CheckoutService) AddProductToBasket(p *Product) error {
       <footer>
         <p>
           Tags: 
-          <a href="/md/tag/書籍">書籍</a> 
+          <a href="/md/tag/書籍">書籍</a>,  
+          <a href="/md/tag/設計">設計</a>,  
+          <a href="/md/tag/go">Go</a> 
         </p>
       </footer>
     </article>
@@ -954,9 +993,9 @@ func (c *CheckoutService) AddProductToBasket(p *Product) error {
       
         <li><a href="/md/tag/開発">開発</a></li>
       
-        <li><a href="/md/tag/elasticsearch">elasticsearch</a></li>
+        <li><a href="/md/tag/elasticsearch">Elasticsearch</a></li>
       
-        <li><a href="/md/tag/firebase">firebase</a></li>
+        <li><a href="/md/tag/firebase">Firebase</a></li>
       
         <li><a href="/md/tag/sqlite">sqlite</a></li>
       
@@ -964,9 +1003,15 @@ func (c *CheckoutService) AddProductToBasket(p *Product) error {
       
         <li><a href="/md/tag/書籍">書籍</a></li>
       
+        <li><a href="/md/tag/設計">設計</a></li>
+      
         <li><a href="/md/tag/aws">AWS</a></li>
       
         <li><a href="/md/tag/cdk">CDK</a></li>
+      
+        <li><a href="/md/tag/go">Go</a></li>
+      
+        <li><a href="/md/tag/terraform">Terraform</a></li>
       
     </ul>
     <h2><a href="/md/archives/">Archives</a></h2>

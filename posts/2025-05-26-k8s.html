@@ -41,6 +41,13 @@
   <li><a href="#1はじめに" id="markdown-toc-1はじめに">1.はじめに</a></li>
   <li><a href="#2コンテナの作成と実行" id="markdown-toc-2コンテナの作成と実行">2.コンテナの作成と実行</a></li>
   <li><a href="#3kubernetesクラスタをデプロイする" id="markdown-toc-3kubernetesクラスタをデプロイする">3.Kubernetesクラスタをデプロイする</a></li>
+  <li><a href="#4一般的なkubectlコマンド" id="markdown-toc-4一般的なkubectlコマンド">4.一般的なkubectlコマンド</a></li>
+  <li><a href="#5ポッド" id="markdown-toc-5ポッド">5.ポッド</a></li>
+  <li><a href="#6ラベルと注釈" id="markdown-toc-6ラベルと注釈">6.ラベルと注釈</a></li>
+  <li><a href="#7サービス検出" id="markdown-toc-7サービス検出">7.サービス検出</a></li>
+  <li><a href="#8イングレスを使ったhttpロードバランサ" id="markdown-toc-8イングレスを使ったhttpロードバランサ">8.イングレスを使ったHTTPロードバランサ</a></li>
+  <li><a href="#9レプリカセット" id="markdown-toc-9レプリカセット">9.レプリカセット</a></li>
+  <li><a href="#10デプロイ" id="markdown-toc-10デプロイ">10.デプロイ</a></li>
 </ul>
 
 <hr />
@@ -114,11 +121,11 @@
 <h5 id="ドッカーファイル">ドッカーファイル</h5>
 
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">.dockerignore</code>ファイルの追加を忘れずに
-    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>node_modules
-</code></pre></div>    </div>
-  </li>
+  <li><code class="language-plaintext highlighter-rouge">.dockerignore</code>ファイルの追加を忘れずに</li>
 </ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>node_modules
+</code></pre></div></div>
 
 <h5 id="画像サイズを最適化する">画像サイズを最適化する</h5>
 
@@ -162,40 +169,53 @@
 <h4 id="多段階イメージビルド">多段階イメージビルド</h4>
 
 <ul>
-  <li>大きいイメージはデプロイが遅くなる
-```dockerfile
-…</li>
+  <li>大きいイメージはデプロイが遅くなる</li>
 </ul>
 
-<p>FROM alpine
-USER nobody:nobody
-COPY –from=build /go/bin/kuard /kuard
-CMD [ “/kuard” ]</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>- ビルドイメージとデプロイイメージで分ける
-- 500MB→20MBまでこの例では削減できた
-  - デプロイ時間の大幅な短縮
+<div class="language-dockerfile highlighter-rouge"><div class="highlight"><pre class="highlight"><code>...
 
-マルチステージビルドは有名ですが、ここまでサイズが変わるとは思いませんでした。また、`USER`や`ENV`はあまり使用したことがなかったので意識したいです。
+<span class="k">FROM</span><span class="s"> alpine</span>
+<span class="k">USER</span><span class="s"> nobody:nobody</span>
+<span class="k">COPY</span><span class="s"> --from=build /go/bin/kuard /kuard</span>
+<span class="k">CMD</span><span class="s"> [ "/kuard" ]</span>
+</code></pre></div></div>
+<ul>
+  <li>ビルドイメージとデプロイイメージで分ける</li>
+  <li>500MB→20MBまでこの例では削減できた
+    <ul>
+      <li>デプロイ時間の大幅な短縮</li>
+    </ul>
+  </li>
+</ul>
 
-#### リモートレジストリに画像を保存する
+<p>マルチステージビルドは有名ですが、ここまでサイズが変わるとは思いませんでした。また、<code class="language-plaintext highlighter-rouge">USER</code>や<code class="language-plaintext highlighter-rouge">ENV</code>はあまり使用したことがなかったので意識したいです。</p>
 
-- Gitと同様に、Dockerレジストリにも様々な選択肢
-  - セキュリティ、コラボレーション機能で選ぶ
-- プライベート、パブリックリポジトリ
+<h4 id="リモートレジストリに画像を保存する">リモートレジストリに画像を保存する</h4>
 
-#### コンテナ・ランタイム・インターフェイス
+<ul>
+  <li>Gitと同様に、Dockerレジストリにも様々な選択肢
+    <ul>
+      <li>セキュリティ、コラボレーション機能で選ぶ</li>
+    </ul>
+  </li>
+  <li>プライベート、パブリックリポジトリ</li>
+</ul>
 
-##### Dockerでコンテナを実行する
+<h4 id="コンテナランタイムインターフェイス">コンテナ・ランタイム・インターフェイス</h4>
 
-##### クアード・アプリケーションを探る
+<h5 id="dockerでコンテナを実行する">Dockerでコンテナを実行する</h5>
 
-##### リソースの使用を制限する
+<h5 id="クアードアプリケーションを探る">クアード・アプリケーションを探る</h5>
 
-- 内部的には`cgroup`の機能で実装されている
-```bash
-  --memory 200m \
-  --memory-swap 1G \
-  --cpu-shares 1024 \
+<h5 id="リソースの使用を制限する">リソースの使用を制限する</h5>
+
+<ul>
+  <li>内部的には<code class="language-plaintext highlighter-rouge">cgroup</code>の機能で実装されている</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nt">--memory</span> 200m <span class="se">\</span>
+  <span class="nt">--memory-swap</span> 1G <span class="se">\</span>
+  <span class="nt">--cpu-shares</span> 1024 <span class="se">\</span>
 </code></pre></div></div>
 
 <p><code class="language-plaintext highlighter-rouge">docker-compose.yaml</code>だけでなく、<code class="language-plaintext highlighter-rouge">docker</code>コマンドでもリソースを制限できるのは知りませんでした。</p>
@@ -232,14 +252,14 @@ CMD [ “/kuard” ]</p>
 <h4 id="dockerでkubernetesを実行する">DockerでKubernetesを実行する</h4>
 
 <ul>
-  <li>最近は<code class="language-plaintext highlighter-rouge">kind</code>が人気
-    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="nv">$ </span>kind create cluster <span class="nt">--wait</span> 5m
+  <li>最近は<code class="language-plaintext highlighter-rouge">kind</code>が人気</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="nv">$ </span>kind create cluster <span class="nt">--wait</span> 5m
  <span class="nv">$ </span><span class="nb">export </span><span class="nv">KUBECONFIG</span><span class="o">=</span><span class="s2">"</span><span class="si">$(</span>kind get kubeconfig-path<span class="si">)</span><span class="s2">"</span>
  <span class="nv">$ </span>kubectl cluster-info
  <span class="nv">$ </span>kind delete cluster
-</code></pre></div>    </div>
-  </li>
-</ul>
+</code></pre></div></div>
 
 <h4 id="kubernetesクライアント">Kubernetesクライアント</h4>
 
@@ -283,18 +303,20 @@ CMD [ “/kuard” ]</p>
   <li>Daemonsetを使用して実行している
     <ul>
       <li>使用しない場合もある</li>
-      <li>プロキシがクラスター内の全てのノードに存在する必要
-        <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl get daemonSets <span class="nt">--namespace</span><span class="o">=</span>kube-system kube-proxy
-</code></pre></div>        </div>
-      </li>
+      <li>プロキシがクラスター内の全てのノードに存在する必要</li>
     </ul>
   </li>
 </ul>
 
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl get daemonSets <span class="nt">--namespace</span><span class="o">=</span>kube-system kube-proxy
+</code></pre></div></div>
+
 <h5 id="kubernetes-dns">Kubernetes DNS</h5>
+
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl get deployments <span class="nt">--namespace</span><span class="o">=</span>kube-system core-dns
 kubectl get services <span class="nt">--namespace</span><span class="o">=</span>kube-system core-dns
 </code></pre></div></div>
+
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> NAME       CLUSTER-IP   EXTERNAL-IP   PORT(S)         AGE
  core-dns   10.96.0.10   &lt;none&gt;  53/UDP,53/TCP   45d
 </code></pre></div></div>
@@ -312,7 +334,7 @@ kubectl get services <span class="nt">--namespace</span><span class="o">=</span>
   </li>
 </ul>
 
-<h4 id="4一般的なkubectlコマンド">4.一般的なkubectlコマンド</h4>
+<h3 id="4一般的なkubectlコマンド">4.一般的なkubectlコマンド</h3>
 
 <h4 id="名前空間">名前空間</h4>
 
@@ -356,14 +378,16 @@ kubectl get services <span class="nt">--namespace</span><span class="o">=</span>
     <ul>
       <li><code class="language-plaintext highlighter-rouge">JSONPath</code>クエリ言語の使用
         <ul>
-          <li>指定されたPodのIPアドレスを抽出して出⼒するコマンド
-            <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>kubectl get pods my-pod <span class="nt">-o</span> jsonpath <span class="nt">--template</span><span class="o">={</span>.status.podIP<span class="o">}</span>
-</code></pre></div>            </div>
-          </li>
+          <li>指定されたPodのIPアドレスを抽出して出⼒するコマンド</li>
         </ul>
       </li>
     </ul>
   </li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>kubectl get pods my-pod <span class="nt">-o</span> jsonpath <span class="nt">--template</span><span class="o">={</span>.status.podIP<span class="o">}</span>
+</code></pre></div></div>
+<ul>
   <li><code class="language-plaintext highlighter-rouge">--watch</code>オプション</li>
 </ul>
 
@@ -381,7 +405,7 @@ kubectl get services <span class="nt">--namespace</span><span class="o">=</span>
   <li>labelコマンドとannotateコマンド</li>
   <li>barという名前のPodにcolor=redラベルを追加するコマンド
     <ul>
-      <li>` $ kubectl label pods bar color=red`</li>
+      <li><code class="language-plaintext highlighter-rouge">kubectl label pods bar color=red</code></li>
     </ul>
   </li>
   <li><code class="language-plaintext highlighter-rouge">--overwrite</code>フラグで上書き</li>
@@ -423,7 +447,7 @@ kubectl get services <span class="nt">--namespace</span><span class="o">=</span>
   <li><code class="language-plaintext highlighter-rouge">kubectl help</code>コマンド</li>
 </ul>
 
-<h4 id="5ポッド">5.ポッド</h4>
+<h3 id="5ポッド">5.ポッド</h3>
 
 <h4 id="kubernetesにおけるpod">KubernetesにおけるPod</h4>
 
@@ -471,7 +495,7 @@ kubectl get services <span class="nt">--namespace</span><span class="o">=</span>
 <h5 id="ポッド詳細">ポッド詳細</h5>
 
 <ul>
-  <li>` $ kubectl describe pods kuard`
+  <li><code class="language-plaintext highlighter-rouge">kubectl describe pods kuard</code>
     <ul>
       <li>ラベル、アノテーション、IP、ポート、イメージなどを確認できる</li>
     </ul>
@@ -508,7 +532,7 @@ kubectl get services <span class="nt">--namespace</span><span class="o">=</span>
 <h4 id="正常性確認">正常性確認</h4>
 
 <ul>
-  <li>デフォルトでは、メインプロセス軌道を確認するだけ</li>
+  <li>デフォルトでは、メインプロセス起動を確認するだけ</li>
 </ul>
 
 <h5 id="ライブネスプローブ">ライブネス・プローブ</h5>
@@ -526,10 +550,12 @@ kubectl get services <span class="nt">--namespace</span><span class="o">=</span>
   <li>httpGetプローブの使用</li>
   <li>コンテナ起動5行後から呼び出される</li>
   <li>1秒以内に応答する必要(200-400)</li>
-  <li>3回連続失敗でコンテナは再起動
-    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl port-forward kuard 8080:8080
-</code></pre></div>    </div>
-  </li>
+  <li>3回連続失敗でコンテナは再起動</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl port-forward kuard 8080:8080
+</code></pre></div></div>
+<ul>
   <li>ブラウザで、http://localhost:8080にアクセス
     <ul>
       <li>Liveness Probeを選択</li>
@@ -589,19 +615,22 @@ kubectl get services <span class="nt">--namespace</span><span class="o">=</span>
 
 <ul>
   <li>CPUとメモリを考える</li>
-  <li>CPU半分以上、128メモリ以上のリクエストの例
-    <div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">resources</span><span class="pi">:</span>
-<span class="na">requests</span><span class="pi">:</span>
-  <span class="na">cpu</span><span class="pi">:</span> <span class="s2">"</span><span class="s">500m"</span>
-  <span class="na">memory</span><span class="pi">:</span> <span class="s2">"</span><span class="s">128Mi"</span>
-</code></pre></div>    </div>
-  </li>
+  <li>CPU半分以上、128メモリ以上のリクエストの例</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">resources</span><span class="pi">:</span>
+  <span class="na">requests</span><span class="pi">:</span>
+    <span class="na">cpu</span><span class="pi">:</span> <span class="s2">"</span><span class="s">500m"</span>
+    <span class="na">memory</span><span class="pi">:</span> <span class="s2">"</span><span class="s">128Mi"</span>
+</code></pre></div></div>
+<ul>
   <li>requestsは最小値であることに注意</li>
 </ul>
 
 <p>k8sでも<code class="language-plaintext highlighter-rouge">docker-compose.yaml</code>みたいに書けるのは知りませんでした。</p>
 
 <h5 id="リソースの使用量を制限する">リソースの使用量を制限する</h5>
+
 <div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      <span class="na">resources</span><span class="pi">:</span>
         <span class="na">requests</span><span class="pi">:</span>
           <span class="na">cpu</span><span class="pi">:</span> <span class="s2">"</span><span class="s">500m"</span>
@@ -659,77 +688,68 @@ kubectl get services <span class="nt">--namespace</span><span class="o">=</span>
       <li>EBSなど</li>
     </ul>
   </li>
-  <li>NFSサーバの例
-```yaml
- volumes:
-    <ul>
-      <li>name: “kuard-data”
-nfs:
-  server: my.nfs.server.local
-  path: “/exports”
-```</li>
-    </ul>
-  </li>
+  <li>NFSサーバの例</li>
 </ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="na">volumes</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s2">"</span><span class="s">kuard-data"</span>
+      <span class="na">nfs</span><span class="pi">:</span>
+        <span class="na">server</span><span class="pi">:</span> <span class="s">my.nfs.server.local</span>
+        <span class="na">path</span><span class="pi">:</span> <span class="s2">"</span><span class="s">/exports"</span>
+</code></pre></div></div>
 
 <h4 id="すべてをまとめる">すべてをまとめる</h4>
 
 <ul>
-  <li>永続ボリューム、レディネスプローブとライブネスプローブ、リソース制限の組み合わせ
-```yaml
-apiVersion: v1
- kind: Pod
- metadata:
-name: kuard
- spec:
-volumes:
-    <ul>
-      <li>name: “kuard-data”
-nfs:
-  server: my.nfs.server.local
-  path: “/exports”
-containers:</li>
-      <li>image: gcr.io/kuar-demo/kuard-amd64:blue
-name: kuard
-ports:
-        <ul>
-          <li>containerPort: 8080
-name: http
-protocol: TCP
-resources:
-  requests:
-cpu: “500m”
-memory: “128Mi”
-  limits:
-cpu: “1000m”
-memory: “256Mi”
-volumeMounts:</li>
-          <li>mountPath: “/data”
-name: “kuard-data”
-livenessProbe:
-  httpGet:
-path: /healthy
-port: 8080
-  initialDelaySeconds: 5
-  timeoutSeconds: 1
-  periodSeconds: 10
-  failureThreshold: 3
-readinessProbe:
-  httpGet:
-path: /ready
-port: 8080
-  initialDelaySeconds: 30
-  timeoutSeconds: 1
-  periodSeconds: 10
-  failureThreshold: 3
-```</li>
-        </ul>
-      </li>
-    </ul>
-  </li>
+  <li>永続ボリューム、レディネスプローブとライブネスプローブ、リソース制限の組み合わせ</li>
 </ul>
 
-<h4 id="6ラベルと注釈">6.ラベルと注釈</h4>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">apiVersion</span><span class="pi">:</span> <span class="s">v1</span>
+ <span class="s">kind</span><span class="err">:</span> <span class="s">Pod</span>
+ <span class="s">metadata</span><span class="err">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">kuard</span>
+ <span class="na">spec</span><span class="pi">:</span>
+  <span class="na">volumes</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s2">"</span><span class="s">kuard-data"</span>
+      <span class="na">nfs</span><span class="pi">:</span>
+        <span class="na">server</span><span class="pi">:</span> <span class="s">my.nfs.server.local</span>
+        <span class="na">path</span><span class="pi">:</span> <span class="s2">"</span><span class="s">/exports"</span>
+  <span class="na">containers</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">image</span><span class="pi">:</span> <span class="s">gcr.io/kuar-demo/kuard-amd64:blue</span>
+      <span class="na">name</span><span class="pi">:</span> <span class="s">kuard</span>
+      <span class="na">ports</span><span class="pi">:</span>
+        <span class="pi">-</span> <span class="na">containerPort</span><span class="pi">:</span> <span class="m">8080</span>
+          <span class="na">name</span><span class="pi">:</span> <span class="s">http</span>
+          <span class="na">protocol</span><span class="pi">:</span> <span class="s">TCP</span>
+      <span class="na">resources</span><span class="pi">:</span>
+        <span class="na">requests</span><span class="pi">:</span>
+          <span class="na">cpu</span><span class="pi">:</span> <span class="s2">"</span><span class="s">500m"</span>
+          <span class="na">memory</span><span class="pi">:</span> <span class="s2">"</span><span class="s">128Mi"</span>
+        <span class="na">limits</span><span class="pi">:</span>
+          <span class="na">cpu</span><span class="pi">:</span> <span class="s2">"</span><span class="s">1000m"</span>
+          <span class="na">memory</span><span class="pi">:</span> <span class="s2">"</span><span class="s">256Mi"</span>
+      <span class="na">volumeMounts</span><span class="pi">:</span>
+        <span class="pi">-</span> <span class="na">mountPath</span><span class="pi">:</span> <span class="s2">"</span><span class="s">/data"</span>
+          <span class="na">name</span><span class="pi">:</span> <span class="s2">"</span><span class="s">kuard-data"</span>
+      <span class="na">livenessProbe</span><span class="pi">:</span>
+        <span class="na">httpGet</span><span class="pi">:</span>
+          <span class="na">path</span><span class="pi">:</span> <span class="s">/healthy</span>
+          <span class="na">port</span><span class="pi">:</span> <span class="m">8080</span>
+        <span class="na">initialDelaySeconds</span><span class="pi">:</span> <span class="m">5</span>
+        <span class="na">timeoutSeconds</span><span class="pi">:</span> <span class="m">1</span>
+        <span class="na">periodSeconds</span><span class="pi">:</span> <span class="m">10</span>
+        <span class="na">failureThreshold</span><span class="pi">:</span> <span class="m">3</span>
+      <span class="na">readinessProbe</span><span class="pi">:</span>
+        <span class="na">httpGet</span><span class="pi">:</span>
+          <span class="na">path</span><span class="pi">:</span> <span class="s">/ready</span>
+          <span class="na">port</span><span class="pi">:</span> <span class="m">8080</span>
+        <span class="na">initialDelaySeconds</span><span class="pi">:</span> <span class="m">30</span>
+        <span class="na">timeoutSeconds</span><span class="pi">:</span> <span class="m">1</span>
+        <span class="na">periodSeconds</span><span class="pi">:</span> <span class="m">10</span>
+        <span class="na">failureThreshold</span><span class="pi">:</span> <span class="m">3</span>
+</code></pre></div></div>
+
+<h3 id="6ラベルと注釈">6.ラベルと注釈</h3>
 <!--
 #### ラベル
 
@@ -750,7 +770,7 @@ port: 8080
 #### 概要
 -->
 
-<h4 id="7サービス検出">7.サービス検出</h4>
+<h3 id="7サービス検出">7.サービス検出</h3>
 <!--
 #### サービス検出とは何か？
 
@@ -783,7 +803,7 @@ port: 8080
 #### 概要
 -->
 
-<h4 id="8イングレスを使ったhttpロードバランサ">8.イングレスを使ったHTTPロードバランサ</h4>
+<h3 id="8イングレスを使ったhttpロードバランサ">8.イングレスを使ったHTTPロードバランサ</h3>
 <!--
 #### イングレス仕様とイングレス・コントローラーの比較
 
@@ -822,7 +842,7 @@ port: 8080
 #### 概要
 -->
 
-<h4 id="9レプリカセット">9.レプリカセット</h4>
+<h3 id="9レプリカセット">9.レプリカセット</h3>
 <!--
 #### 和解ループ
 
@@ -861,7 +881,7 @@ port: 8080
 #### 概要
 -->
 
-<h4 id="10デプロイ">10.デプロイ</h4>
+<h3 id="10デプロイ">10.デプロイ</h3>
 <!--
 #### 初めてのデプロイ
 
@@ -897,7 +917,8 @@ port: 8080
       <footer>
         <p>
           Tags: 
-          <a href="/md/tag/書籍">書籍</a> 
+          <a href="/md/tag/書籍">書籍</a>,  
+          <a href="/md/tag/k8s">k8s</a> 
         </p>
       </footer>
     </article>
@@ -932,9 +953,9 @@ port: 8080
       
         <li><a href="/md/tag/開発">開発</a></li>
       
-        <li><a href="/md/tag/elasticsearch">elasticsearch</a></li>
+        <li><a href="/md/tag/elasticsearch">Elasticsearch</a></li>
       
-        <li><a href="/md/tag/firebase">firebase</a></li>
+        <li><a href="/md/tag/firebase">Firebase</a></li>
       
         <li><a href="/md/tag/sqlite">sqlite</a></li>
       
@@ -942,9 +963,15 @@ port: 8080
       
         <li><a href="/md/tag/書籍">書籍</a></li>
       
+        <li><a href="/md/tag/設計">設計</a></li>
+      
         <li><a href="/md/tag/aws">AWS</a></li>
       
         <li><a href="/md/tag/cdk">CDK</a></li>
+      
+        <li><a href="/md/tag/go">Go</a></li>
+      
+        <li><a href="/md/tag/terraform">Terraform</a></li>
       
     </ul>
     <h2><a href="/md/archives/">Archives</a></h2>

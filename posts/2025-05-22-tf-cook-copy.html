@@ -40,22 +40,14 @@
 <ul id="markdown-toc">
   <li><a href="#1terraform-を使い始める" id="markdown-toc-1terraform-を使い始める">1.Terraform を使い始める</a></li>
   <li><a href="#2terraformの基本" id="markdown-toc-2terraformの基本">2.Terraformの基本</a></li>
-  <li><a href="#terraformrego" id="markdown-toc-terraformrego">terraform.rego</a></li>
-  <li><a href="#define-a-policy-to-restrict-allowed-ec2-instance-types" id="markdown-toc-define-a-policy-to-restrict-allowed-ec2-instance-types">Define a policy to restrict allowed EC2 instance types</a></li>
-  <li><a href="#githubdependabotyml" id="markdown-toc-githubdependabotyml">.github/dependabot.yml</a>    <ul>
-      <li><a href="#3terraform構文パターン" id="markdown-toc-3terraform構文パターン">3.Terraform構文パターン</a></li>
-      <li><a href="#4terraformモジュールとプロバイダー" id="markdown-toc-4terraformモジュールとプロバイダー">4.Terraformモジュールとプロバイダー</a></li>
-    </ul>
-  </li>
-  <li><a href="#configure-the-consul-provider" id="markdown-toc-configure-the-consul-provider">Configure the Consul provider</a>    <ul>
-      <li><a href="#5terraformによるコンテナ管理" id="markdown-toc-5terraformによるコンテナ管理">5.Terraformによるコンテナ管理</a></li>
-      <li><a href="#6hcp-terraformとterraform-enterprise" id="markdown-toc-6hcp-terraformとterraform-enterprise">6.HCP TerraformとTerraform Enterprise</a></li>
-      <li><a href="#7terraformでシークレットを消費し管理する" id="markdown-toc-7terraformでシークレットを消費し管理する">7.Terraformでシークレットを消費し管理する</a></li>
-      <li><a href="#8terraformによる構成管理" id="markdown-toc-8terraformによる構成管理">8.Terraformによる構成管理</a></li>
-      <li><a href="#9高度なterraformテクニック" id="markdown-toc-9高度なterraformテクニック">9.高度なTerraformテクニック</a></li>
-      <li><a href="#10実際の使用例" id="markdown-toc-10実際の使用例">10.実際の使用例</a></li>
-    </ul>
-  </li>
+  <li><a href="#3terraform構文パターン" id="markdown-toc-3terraform構文パターン">3.Terraform構文パターン</a></li>
+  <li><a href="#4terraformモジュールとプロバイダー" id="markdown-toc-4terraformモジュールとプロバイダー">4.Terraformモジュールとプロバイダー</a></li>
+  <li><a href="#5terraformによるコンテナ管理" id="markdown-toc-5terraformによるコンテナ管理">5.Terraformによるコンテナ管理</a></li>
+  <li><a href="#6hcp-terraformとterraform-enterprise" id="markdown-toc-6hcp-terraformとterraform-enterprise">6.HCP TerraformとTerraform Enterprise</a></li>
+  <li><a href="#7terraformでシークレットを消費し管理する" id="markdown-toc-7terraformでシークレットを消費し管理する">7.Terraformでシークレットを消費し管理する</a></li>
+  <li><a href="#8terraformによる構成管理" id="markdown-toc-8terraformによる構成管理">8.Terraformによる構成管理</a></li>
+  <li><a href="#9高度なterraformテクニック" id="markdown-toc-9高度なterraformテクニック">9.高度なTerraformテクニック</a></li>
+  <li><a href="#10実際の使用例" id="markdown-toc-10実際の使用例">10.実際の使用例</a></li>
 </ul>
 
 <hr />
@@ -118,54 +110,55 @@
 <ul>
   <li>VPC を作成する場合など、自分で一から作るのは面倒</li>
   <li>パブリックモジュールを使えば簡単に設定できる</li>
-  <li>下の例では、CIDR, AZ, サブネット、NATゲートウェイなどを設定
-    <div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">module</span> <span class="s2">"vpc"</span> <span class="p">{</span>
-  <span class="nx">source</span> <span class="o">=</span> <span class="s2">"terraform-aws-modules/vpc/aws"</span>
-  <span class="p">...</span>
-  <span class="nx">cidr</span> <span class="o">=</span> <span class="s2">"10.0.0.0/16"</span>
-  <span class="nx">azs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"us-west-2a"</span><span class="p">,</span> <span class="s2">"us-west-2b"</span><span class="p">,</span> <span class="s2">"us-west-2c"</span><span class="p">]</span>
-  <span class="nx">private_subnets</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"10.0.1.0/24"</span><span class="p">,</span> <span class="s2">"10.0.2.0/24"</span><span class="p">,</span> <span class="s2">"10.0.3.0/24"</span><span class="p">]</span>
-  <span class="nx">public_subnets</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"10.0.101.0/24"</span><span class="p">,</span> <span class="s2">"10.0.102.0/24"</span><span class="p">,</span> <span class="s2">"10.0.103.0/24"</span><span class="p">]</span>
-  <span class="nx">enable_nat_gateway</span> <span class="o">=</span> <span class="kc">true</span>
-  <span class="nx">tags</span> <span class="o">=</span> <span class="p">{</span>
-      <span class="nx">Terraform</span> <span class="o">=</span> <span class="s2">"true"</span>
-      <span class="nx">Environment</span> <span class="o">=</span> <span class="s2">"dev"</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
+  <li>下の例では、CIDR, AZ, サブネット、NATゲートウェイなどを設定</li>
 </ul>
+
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">module</span> <span class="s2">"vpc"</span> <span class="p">{</span>
+    <span class="nx">source</span> <span class="o">=</span> <span class="s2">"terraform-aws-modules/vpc/aws"</span>
+    <span class="p">...</span>
+    <span class="nx">cidr</span> <span class="o">=</span> <span class="s2">"10.0.0.0/16"</span>
+    <span class="nx">azs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"us-west-2a"</span><span class="p">,</span> <span class="s2">"us-west-2b"</span><span class="p">,</span> <span class="s2">"us-west-2c"</span><span class="p">]</span>
+    <span class="nx">private_subnets</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"10.0.1.0/24"</span><span class="p">,</span> <span class="s2">"10.0.2.0/24"</span><span class="p">,</span> <span class="s2">"10.0.3.0/24"</span><span class="p">]</span>
+    <span class="nx">public_subnets</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"10.0.101.0/24"</span><span class="p">,</span> <span class="s2">"10.0.102.0/24"</span><span class="p">,</span> <span class="s2">"10.0.103.0/24"</span><span class="p">]</span>
+    <span class="nx">enable_nat_gateway</span> <span class="o">=</span> <span class="kc">true</span>
+    <span class="nx">tags</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="nx">Terraform</span> <span class="o">=</span> <span class="s2">"true"</span>
+        <span class="nx">Environment</span> <span class="o">=</span> <span class="s2">"dev"</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
 
 <h4 id="16terraformコンソールでterraformの状態を変更する">1.6.terraformコンソールでTerraformの状態を変更する</h4>
 
 <ul>
   <li>デバッグのために、tfの状態をHCLで変更できる</li>
   <li>本番環境では使ってはいけない</li>
-  <li>下の例は現在のtfの状態をロードするコマンド
-    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>terraform console
-state.&lt;module-name&gt;.&lt;resourcename&gt;.&lt;attribute-name&gt; 
-</code></pre></div>    </div>
-  </li>
+  <li>下の例は現在のtfの状態をロードするコマンド</li>
 </ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>terraform console
+state.&lt;module-name&gt;.&lt;resourcename&gt;.&lt;attribute-name&gt; 
+</code></pre></div></div>
 
 <h4 id="17hashicorp-cloud-platform-terraformを使う">1.7.HashiCorp Cloud Platform Terraformを使う</h4>
 <ul>
   <li>他にS3, Azure Blob, Cloud Storage, Consul, ローカルに保存できる</li>
-  <li>組織名とワークスペース名を指定する必要
-    <div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">terraform</span> <span class="p">{</span>
-  <span class="nx">cloud</span> <span class="p">{</span>
-  <span class="nx">organization</span> <span class="o">=</span> <span class="s2">"&lt;your-organization-name&gt;"</span>
-
-  <span class="nx">workspaces</span> <span class="p">{</span>
-      <span class="nx">name</span> <span class="o">=</span> <span class="s2">"&lt;your-workspace-name&gt;"</span>
-      <span class="p">}</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>    </div>
-    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>terraform init <span class="nt">-backend-config</span><span class="o">=</span><span class="s2">"token=&lt;HCP Terraform API token&gt;"</span>
-</code></pre></div>    </div>
-  </li>
+  <li>組織名とワークスペース名を指定する必要</li>
 </ul>
+
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">terraform</span> <span class="p">{</span>
+    <span class="nx">cloud</span> <span class="p">{</span>
+    <span class="nx">organization</span> <span class="o">=</span> <span class="s2">"&lt;your-organization-name&gt;"</span>
+
+    <span class="nx">workspaces</span> <span class="p">{</span>
+        <span class="nx">name</span> <span class="o">=</span> <span class="s2">"&lt;your-workspace-name&gt;"</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>terraform init <span class="nt">-backend-config</span><span class="o">=</span><span class="s2">"token=&lt;HCP Terraform API token&gt;"</span>
+</code></pre></div></div>
 
 <h4 id="18visual-studio-codeでterraformを使う">1.8.Visual Studio CodeでTerraformを使う</h4>
 
@@ -178,13 +171,15 @@ state.&lt;module-name&gt;.&lt;resourcename&gt;.&lt;attribute-name&gt;
 
 <ul>
   <li>下の例では5.0以上、6.0未満</li>
-  <li>破壊的変更を防ぐ可能性があるので、5.1.0など具体的なほうが良い
-    <div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">provider</span> <span class="s2">"aws"</span> <span class="p">{</span>
-  <span class="nx">version</span> <span class="o">=</span> <span class="s2">"~&gt; 5.0"</span>
-  <span class="nx">region</span> <span class="o">=</span> <span class="s2">"us-west-2"</span>
+  <li>破壊的変更を防ぐ可能性があるので、5.1.0など具体的なほうが良い</li>
+</ul>
+
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">provider</span> <span class="s2">"aws"</span> <span class="p">{</span>
+    <span class="nx">version</span> <span class="o">=</span> <span class="s2">"~&gt; 5.0"</span>
+    <span class="nx">region</span> <span class="o">=</span> <span class="s2">"us-west-2"</span>
 <span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
+</code></pre></div></div>
+<ul>
   <li>ロックファイル(<code class="language-plaintext highlighter-rouge">.terraform.lock.hcl</code>)でバージョンを記録できる</li>
   <li><code class="language-plaintext highlighter-rouge">terraform init- upgrade</code>で範囲内でアップロードできる</li>
 </ul>
@@ -193,54 +188,61 @@ state.&lt;module-name&gt;.&lt;resourcename&gt;.&lt;attribute-name&gt;
 
 <ul>
   <li><code class="language-plaintext highlighter-rouge">github_branch_protection</code>リソースを使ってブランチ保護規則を設定</li>
-  <li>下の例では、CICDを通過しないとマージされない
-    <div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">resource</span> <span class="s2">"github_branch_protection"</span> <span class="s2">"main"</span> <span class="p">{</span>
-  <span class="nx">repository</span> <span class="o">=</span> <span class="nx">github_repository</span><span class="p">.</span><span class="nx">terraform_repo</span><span class="p">.</span><span class="nx">name</span>
-  <span class="p">...</span>
-  <span class="nx">required_status_checks</span> <span class="p">{</span>
-      <span class="nx">strict</span> <span class="o">=</span> <span class="kc">true</span>
-      <span class="nx">contexts</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"ci/terraform-run"</span><span class="p">]</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
+  <li>下の例では、CICDを通過しないとマージされない</li>
 </ul>
+
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">resource</span> <span class="s2">"github_branch_protection"</span> <span class="s2">"main"</span> <span class="p">{</span>
+    <span class="nx">repository</span> <span class="o">=</span> <span class="nx">github_repository</span><span class="p">.</span><span class="nx">terraform_repo</span><span class="p">.</span><span class="nx">name</span>
+    <span class="p">...</span>
+    <span class="nx">required_status_checks</span> <span class="p">{</span>
+        <span class="nx">strict</span> <span class="o">=</span> <span class="kc">true</span>
+        <span class="nx">contexts</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"ci/terraform-run"</span><span class="p">]</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
 
 <h4 id="111terraformでdockerコンテナをデプロイする">1.11.TerraformでDockerコンテナをデプロイする</h4>
 
 <ul>
-  <li>コンテナ、イメージ、ネットワークを定義できる
-```hcl
-provider “docker” {}</li>
+  <li>コンテナ、イメージ、ネットワークを定義できる</li>
 </ul>
 
-<p>resource “docker_container” “example” {
-    image = “nginx”
-    …
-}</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
-#### 1.12.Terraformをアップグレードする：0.xから1.xへ、そしてその先へ
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">provider</span> <span class="s2">"docker"</span> <span class="p">{}</span>
 
-- リストアに備えて、状態ファイルのバックアップを作成
-- レガシーでは、v0.12→v0.12.31→v0.13のように少しずつアップグレードしていた
-- 以前は徹底的なレビューが必要だった
-- v1.xxでは後方互換性に対処
+<span class="nx">resource</span> <span class="s2">"docker_container"</span> <span class="s2">"example"</span> <span class="p">{</span>
+    <span class="nx">image</span> <span class="o">=</span> <span class="s2">"nginx"</span>
+    <span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div></div>
 
-#### 1.13.Terraform変数を使う
+<h4 id="112terraformをアップグレードする0xから1xへそしてその先へ">1.12.Terraformをアップグレードする：0.xから1.xへ、そしてその先へ</h4>
 
-- varaiableで定義
-- `terraform apply -var region=us-east-1`のように上書きできる
-- モジュール化では入力と出力を設定して抽象化
-- 変数のスコープに注意し、グローバル変数は避ける
+<ul>
+  <li>リストアに備えて、状態ファイルのバックアップを作成</li>
+  <li>レガシーでは、v0.12→v0.12.31→v0.13のように少しずつアップグレードしていた</li>
+  <li>以前は徹底的なレビューが必要だった</li>
+  <li>v1.xxでは後方互換性に対処</li>
+</ul>
 
-#### 1.14.一貫した経験のための一貫したコード
+<h4 id="113terraform変数を使う">1.13.Terraform変数を使う</h4>
 
-- `required_version`を使う
-```hcl
-terraform {
-     required_version = "&gt;= 1.0.0"
-     ...
-  }
+<ul>
+  <li>varaiableで定義</li>
+  <li><code class="language-plaintext highlighter-rouge">terraform apply -var region=us-east-1</code>のように上書きできる</li>
+  <li>モジュール化では入力と出力を設定して抽象化</li>
+  <li>変数のスコープに注意し、グローバル変数は避ける</li>
+</ul>
+
+<h4 id="114一貫した経験のための一貫したコード">1.14.一貫した経験のための一貫したコード</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">required_version</code>を使う</li>
+</ul>
+
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">terraform</span> <span class="p">{</span>
+     <span class="nx">required_version</span> <span class="o">=</span> <span class="s2">"&gt;= 1.0.0"</span>
+     <span class="p">...</span>
+  <span class="p">}</span>
 </code></pre></div></div>
 
 <h3 id="2terraformの基本">2.Terraformの基本</h3>
@@ -255,16 +257,14 @@ terraform {
 <h4 id="22terraformコンソールによる迅速な実験">2.2.Terraformコンソールによる迅速な実験</h4>
 
 <ul>
-  <li>nodejsやpythonのようなREPL
-```bash
-terraform console</li>
+  <li>nodejsやpythonのようなREPL</li>
 </ul>
 
-<blockquote>
-  <p>lookup({a=”foo”, b=”bar”}, “a”, “default”)
-“foo”
-```</p>
-</blockquote>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>terraform console
+
+<span class="o">&gt;</span> lookup<span class="o">({</span><span class="nv">a</span><span class="o">=</span><span class="s2">"foo"</span>, <span class="nv">b</span><span class="o">=</span><span class="s2">"bar"</span><span class="o">}</span>, <span class="s2">"a"</span>, <span class="s2">"default"</span><span class="o">)</span>
+<span class="s2">"foo"</span>
+</code></pre></div></div>
 
 <h4 id="23tflintでコード品質を向上させる">2.3.TFLintでコード品質を向上させる</h4>
 
@@ -280,10 +280,12 @@ terraform console</li>
 <ul>
   <li><code class="language-plaintext highlighter-rouge">tfsec</code>コマンドをダウンロード</li>
   <li>tfファイルにコメントを追加して、特定のチェックを無視できる</li>
-  <li>これはなるべく使用せず、使用する場合は文書化する
-    <div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#tfsec:ignore:aws-iam-no-policy-wildcards resource "aws_iam_policy" "example" </span>
-</code></pre></div>    </div>
-  </li>
+  <li>これはなるべく使用せず、使用する場合は文書化する</li>
+</ul>
+
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#tfsec:ignore:aws-iam-no-policy-wildcards resource "aws_iam_policy" "example" </span>
+</code></pre></div></div>
+<ul>
   <li><code class="language-plaintext highlighter-rouge">.tfsec.yml</code>ファイルで設定を構成できる</li>
 </ul>
 
@@ -320,46 +322,47 @@ terraform console</li>
 <ul>
   <li>OPAを使用してポリシーアズコード検証を実装</li>
   <li>インフラをポリシーとして定義</li>
-  <li>OPAポリシーは定期的に最新基準に応じて変更する
-```plaintext
-    <h1 id="terraformrego">terraform.rego</h1>
-  </li>
+  <li>OPAポリシーは定期的に最新基準に応じて変更する</li>
 </ul>
 
-<p>package terraform</p>
-<h1 id="define-a-policy-to-restrict-allowed-ec2-instance-types">Define a policy to restrict allowed EC2 instance types</h1>
-<p>deny[“Instance type must be t2.micro or t2.small”] {
-    …
-}</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
-```bash
-$ terraform init
-$ terraform plan -out=tfplan
-$ terraform show -json tfplan &gt; tfplan.json
-$ opa eval --data terraform.rego --input tfplan.json "data.terraform.deny"
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># terraform.rego
+
+package terraform
+# Define a policy to restrict allowed EC2 instance types
+deny["Instance type must be t2.micro or t2.small"] {
+    ...
+}
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>terraform init
+<span class="nv">$ </span>terraform plan <span class="nt">-out</span><span class="o">=</span>tfplan
+<span class="nv">$ </span>terraform show <span class="nt">-json</span> tfplan <span class="o">&gt;</span> tfplan.json
+<span class="nv">$ </span>opa <span class="nb">eval</span> <span class="nt">--data</span> terraform.rego <span class="nt">--input</span> tfplan.json <span class="s2">"data.terraform.deny"</span>
 </code></pre></div></div>
 <ul>
-  <li>CI/CDに組み込む
-```yaml</li>
-  <li>name: OPA Evaluation
-run: |
-  terraform show -json tfplan &gt; tfplan.json
-  violations=$(opa eval –data terraform.rego –input tfplan.json “data.terraform.deny”)
-  if [ -n “$violations” ]; then
-      …
-  fi
-```</li>
+  <li>CI/CDに組み込む</li>
 </ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">OPA Evaluation</span>
+  <span class="na">run</span><span class="pi">:</span> <span class="pi">|</span>
+    <span class="s">terraform show -json tfplan &gt; tfplan.json</span>
+    <span class="s">violations=$(opa eval --data terraform.rego --input tfplan.json "data.terraform.deny")</span>
+    <span class="s">if [ -n "$violations" ]; then</span>
+        <span class="s">...</span>
+    <span class="s">fi</span>
+</code></pre></div></div>
 
 <h4 id="27terraform-docsでコードをドキュメント化する">2.7.Terraform-docsでコードをドキュメント化する</h4>
 
 <ul>
   <li>ドキュメントを自動生成できる</li>
-  <li>下の例では、現在のディレクトリを指定して出力
-    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>terraform-docs markdown ./ <span class="o">&gt;</span> README.md
+  <li>下の例では、現在のディレクトリを指定して出力</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>terraform-docs markdown ./ <span class="o">&gt;</span> README.md
 <span class="nv">$ </span>terraform-docs asciidoc table ./ <span class="o">&gt;</span> docs.adoc
-</code></pre></div>    </div>
-  </li>
+</code></pre></div></div>
+<ul>
   <li>md, json, yaml, htmlなどに変換できる</li>
   <li>ascii記法にも対応している</li>
   <li><code class="language-plaintext highlighter-rouge">.terraformdocs.yml</code>で設定</li>
@@ -376,15 +379,16 @@ run: |
 <h4 id="29プロバイダのバージョンアップに-dependabot-を使用する">2.9.プロバイダのバージョンアップに Dependabot を使用する</h4>
 
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">Dependabot</code>はtfにも対応しており、プロバイダを自動更新できる
-```yaml
-    <h1 id="githubdependabotyml">.github/dependabot.yml</h1>
-    <p>version: 2
-updates:</p>
-  </li>
-  <li>package-ecosystem: “terraform”
-…
-```</li>
+  <li><code class="language-plaintext highlighter-rouge">Dependabot</code>はtfにも対応しており、プロバイダを自動更新できる</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># .github/dependabot.yml</span>
+<span class="na">version</span><span class="pi">:</span> <span class="m">2</span>
+<span class="na">updates</span><span class="pi">:</span>
+ <span class="pi">-</span> <span class="na">package-ecosystem</span><span class="pi">:</span> <span class="s2">"</span><span class="s">terraform"</span>
+   <span class="s">...</span>
+</code></pre></div></div>
+<ul>
   <li>PRは必ずレビュー、変更に対して検証や自動テスト、破壊的変更を考慮</li>
   <li>プロバイダーの定期的アップデートはセキュリティのため非常に重要</li>
   <li>本番環境へのアップロード前は必ず十分なテストを行う</li>
@@ -409,74 +413,79 @@ updates:</p>
 <ul>
   <li>空白などは予期せぬ動作を起こす可能性
     <ul>
-      <li><code class="language-plaintext highlighter-rouge">chomp</code>や<code class="language-plaintext highlighter-rouge">trimspace</code>関数
-```hcl
-locals {
-  clean_user_input = trimspace(var.user_input)
- }</li>
+      <li><code class="language-plaintext highlighter-rouge">chomp</code>や<code class="language-plaintext highlighter-rouge">trimspace</code>関数</li>
     </ul>
   </li>
 </ul>
 
-<p>output “clean_user_input” {
-    value = local.clean_user_input
- }</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
-#### 3.2.接頭辞と接尾辞を削除する
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">locals</span> <span class="p">{</span>
+    <span class="nx">clean_user_input</span> <span class="o">=</span> <span class="nx">trimspace</span><span class="p">(</span><span class="nx">var</span><span class="p">.</span><span class="nx">user_input</span><span class="p">)</span>
+ <span class="p">}</span>
 
-```hcl
-locals {
-    prefix = "prefix_"
-    suffix = "_suffix"
+<span class="nx">output</span> <span class="s2">"clean_user_input"</span> <span class="p">{</span>
+    <span class="nx">value</span> <span class="o">=</span> <span class="nx">local</span><span class="p">.</span><span class="nx">clean_user_input</span>
+ <span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="32接頭辞と接尾辞を削除する">3.2.接頭辞と接尾辞を削除する</h4>
+
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">locals</span> <span class="p">{</span>
+    <span class="nx">prefix</span> <span class="o">=</span> <span class="s2">"prefix_"</span>
+    <span class="nx">suffix</span> <span class="o">=</span> <span class="s2">"_suffix"</span>
   
-    without_prefix   = trimprefix(var.user_input, local.prefix)
-    clean_user_input = trimsuffix(local.without_prefix, local.suffix)
- }
+    <span class="nx">without_prefix</span>   <span class="o">=</span> <span class="nx">trimprefix</span><span class="p">(</span><span class="nx">var</span><span class="p">.</span><span class="nx">user_input</span><span class="p">,</span> <span class="nx">local</span><span class="p">.</span><span class="nx">prefix</span><span class="p">)</span>
+    <span class="nx">clean_user_input</span> <span class="o">=</span> <span class="nx">trimsuffix</span><span class="p">(</span><span class="nx">local</span><span class="p">.</span><span class="nx">without_prefix</span><span class="p">,</span> <span class="nx">local</span><span class="p">.</span><span class="nx">suffix</span><span class="p">)</span>
+ <span class="p">}</span>
 </code></pre></div></div>
 
 <h4 id="33正規表現を使う">3.3.正規表現を使う</h4>
 
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">regex</code>か<code class="language-plaintext highlighter-rouge">regexall</code>のreplace正規表現関数をサポート
-    <div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">locals</span> <span class="p">{</span>
-  <span class="nx">masked_input</span> <span class="o">=</span> <span class="nx">replace</span><span class="p">(</span><span class="nx">var</span><span class="p">.</span><span class="nx">user_input</span><span class="p">,</span> 
-      <span class="nx">regex</span><span class="p">(</span><span class="s2">"</span><span class="err">\\</span><span class="s2">d{3}-</span><span class="err">\\</span><span class="s2">d{2}-(</span><span class="err">\\</span><span class="s2">d{4})"</span><span class="p">,</span> <span class="nx">var</span><span class="p">.</span><span class="nx">user_input</span><span class="p">),</span>
-      <span class="s2">"XXX-XX-$1"</span>
-<span class="p">)</span>
+  <li><code class="language-plaintext highlighter-rouge">regex</code>か<code class="language-plaintext highlighter-rouge">regexall</code>のreplace正規表現関数をサポート</li>
+</ul>
+
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">locals</span> <span class="p">{</span>
+    <span class="nx">masked_input</span> <span class="o">=</span> <span class="nx">replace</span><span class="p">(</span><span class="nx">var</span><span class="p">.</span><span class="nx">user_input</span><span class="p">,</span> 
+        <span class="nx">regex</span><span class="p">(</span><span class="s2">"</span><span class="err">\\</span><span class="s2">d{3}-</span><span class="err">\\</span><span class="s2">d{2}-(</span><span class="err">\\</span><span class="s2">d{4})"</span><span class="p">,</span> <span class="nx">var</span><span class="p">.</span><span class="nx">user_input</span><span class="p">),</span>
+        <span class="s2">"XXX-XX-$1"</span>
+  <span class="p">)</span>
  <span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
+</code></pre></div></div>
+<ul>
   <li>使いすぎると可読性が落ちることに注意</li>
 </ul>
 
 <h4 id="34高度な文字列操作">3.4.高度な文字列操作</h4>
 
 <ul>
-  <li>ネストされた<code class="language-plaintext highlighter-rouge">replace</code>関数や<code class="language-plaintext highlighter-rouge">format</code>関数
-    <div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">locals</span> <span class="p">{</span>
-  <span class="nx">processed_input</span> <span class="o">=</span> <span class="nx">replace</span><span class="p">(</span>
-      <span class="nx">replace</span><span class="p">(</span>
-      <span class="nx">upper</span><span class="p">(</span><span class="nx">var</span><span class="p">.</span><span class="nx">user_input</span><span class="p">),</span>
-      <span class="s2">"WORLD"</span><span class="p">,</span>
-      <span class="s2">"TERRAFORM"</span>
-      <span class="p">),</span>
-      <span class="s2">"!"</span><span class="p">,</span>
-      <span class="s2">"!!!"</span>
-  <span class="p">)</span>
- <span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
-  <li>複雑な場合は<code class="language-plaintext highlighter-rouge">format</code>関数と組み合わせる
-    <div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">locals</span> <span class="p">{</span>
-  <span class="nx">complex_transformation</span> <span class="o">=</span> <span class="nx">format</span><span class="p">(</span>
-      <span class="s2">"%s: %s"</span><span class="p">,</span>
-      <span class="nx">upper</span><span class="p">(</span><span class="nx">replace</span><span class="p">(</span><span class="nx">var</span><span class="p">.</span><span class="nx">user_input</span><span class="p">,</span> <span class="s2">"hello"</span><span class="p">,</span> <span class="s2">"greetings"</span><span class="p">)),</span>
-      <span class="nx">replace</span><span class="p">(</span><span class="nx">var</span><span class="p">.</span><span class="nx">user_input</span><span class="p">,</span> <span class="s2">"</span><span class="err">\\</span><span class="s2">d+"</span><span class="p">,</span> <span class="s2">"NumbersRemoved"</span><span class="p">)</span>
-  <span class="p">)</span>
-<span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
+  <li>ネストされた<code class="language-plaintext highlighter-rouge">replace</code>関数や<code class="language-plaintext highlighter-rouge">format</code>関数</li>
 </ul>
+
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">locals</span> <span class="p">{</span>
+    <span class="nx">processed_input</span> <span class="o">=</span> <span class="nx">replace</span><span class="p">(</span>
+        <span class="nx">replace</span><span class="p">(</span>
+        <span class="nx">upper</span><span class="p">(</span><span class="nx">var</span><span class="p">.</span><span class="nx">user_input</span><span class="p">),</span>
+        <span class="s2">"WORLD"</span><span class="p">,</span>
+        <span class="s2">"TERRAFORM"</span>
+        <span class="p">),</span>
+        <span class="s2">"!"</span><span class="p">,</span>
+        <span class="s2">"!!!"</span>
+    <span class="p">)</span>
+ <span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>複雑な場合は<code class="language-plaintext highlighter-rouge">format</code>関数と組み合わせる</li>
+</ul>
+
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">locals</span> <span class="p">{</span>
+    <span class="nx">complex_transformation</span> <span class="o">=</span> <span class="nx">format</span><span class="p">(</span>
+        <span class="s2">"%s: %s"</span><span class="p">,</span>
+        <span class="nx">upper</span><span class="p">(</span><span class="nx">replace</span><span class="p">(</span><span class="nx">var</span><span class="p">.</span><span class="nx">user_input</span><span class="p">,</span> <span class="s2">"hello"</span><span class="p">,</span> <span class="s2">"greetings"</span><span class="p">)),</span>
+        <span class="nx">replace</span><span class="p">(</span><span class="nx">var</span><span class="p">.</span><span class="nx">user_input</span><span class="p">,</span> <span class="s2">"</span><span class="err">\\</span><span class="s2">d+"</span><span class="p">,</span> <span class="s2">"NumbersRemoved"</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
 
 <h4 id="35大文字と小文字を区別する文字列を扱う-titleupperlowerを使う">3.5.大文字と小文字を区別する文字列を扱う title、upper、lowerを使う</h4>
 
@@ -537,70 +546,73 @@ locals {
   <li>パスは相対パス</li>
   <li>外部ファイルの変更を自動検知しない
     <ul>
-      <li><code class="language-plaintext highlighter-rouge">replaceflag</code>や<code class="language-plaintext highlighter-rouge">terraform taint</code>を利用
-        <div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">locals</span> <span class="p">{</span>
-  <span class="nx">config_contents</span> <span class="o">=</span> <span class="p">{</span>
-  <span class="nx">for</span> <span class="nx">path</span> <span class="nx">in</span> <span class="nx">var</span><span class="p">.</span><span class="nx">config_files</span> <span class="o">:</span>
-  <span class="nx">path</span> <span class="o">=&gt;</span> <span class="nx">fileexists</span><span class="p">(</span><span class="nx">path</span><span class="p">)</span> <span class="o">?</span> <span class="nx">file</span><span class="p">(</span><span class="nx">path</span><span class="p">)</span> <span class="o">:</span> <span class="s2">"File not found: ${path}"</span>
-<span class="p">}</span>
- <span class="p">}</span>
-</code></pre></div>        </div>
-      </li>
+      <li><code class="language-plaintext highlighter-rouge">replaceflag</code>や<code class="language-plaintext highlighter-rouge">terraform taint</code>を利用</li>
     </ul>
   </li>
 </ul>
 
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">locals</span> <span class="p">{</span>
+    <span class="nx">config_contents</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="nx">for</span> <span class="nx">path</span> <span class="nx">in</span> <span class="nx">var</span><span class="p">.</span><span class="nx">config_files</span> <span class="o">:</span>
+        <span class="nx">path</span> <span class="o">=&gt;</span> <span class="nx">fileexists</span><span class="p">(</span><span class="nx">path</span><span class="p">)</span> <span class="o">?</span> <span class="nx">file</span><span class="p">(</span><span class="nx">path</span><span class="p">)</span> <span class="o">:</span> <span class="s2">"File not found: ${path}"</span>
+  <span class="p">}</span>
+ <span class="p">}</span>
+</code></pre></div></div>
+
 <h4 id="39レンダリングテンプレート">3.9.レンダリングテンプレート</h4>
 
 <ul>
-  <li>変数入力の基づいて設定ファイルやスクリプトを生成
-```hcl
-data “template_file” “bash_script” { 
-　  template = «-EOF
-          #!/bin/bash
-          echo “Hello, ${user_name}”
-          EOF
-  vars = {
-    user_name = var.user_name
-  }
-}</li>
+  <li>変数入力の基づいて設定ファイルやスクリプトを生成</li>
 </ul>
 
-<p>output “rendered_script” {
-    description = “Rendered bash script”
-    value       = data.template_file.bash_script.rendered
-}</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
-#### 3.10.入力文字列の検証
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">data</span> <span class="s2">"template_file"</span> <span class="s2">"bash_script"</span> <span class="p">{</span> 
+<span class="err">　</span>  <span class="nx">template</span> <span class="o">=</span> <span class="o">&lt;&lt;-</span><span class="nx">EOF</span>
+            <span class="c1">#!/bin/bash</span>
+            <span class="nx">echo</span> <span class="s2">"Hello, ${user_name}"</span>
+            <span class="nx">EOF</span>
+    <span class="nx">vars</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="nx">user_name</span> <span class="o">=</span> <span class="nx">var</span><span class="p">.</span><span class="nx">user_name</span>
+    <span class="p">}</span>
+<span class="p">}</span>
 
-```hcl
-variable "environment" {
-    type        = string
-    ...
-    validation {
-        condition     = contains(["dev", "staging", "prod"], var.environment)
-        error_message = "The environment must be dev, staging, or prod."
-  }
- }
+<span class="nx">output</span> <span class="s2">"rendered_script"</span> <span class="p">{</span>
+    <span class="nx">description</span> <span class="o">=</span> <span class="s2">"Rendered bash script"</span>
+    <span class="nx">value</span>       <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">template_file</span><span class="p">.</span><span class="nx">bash_script</span><span class="p">.</span><span class="nx">rendered</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="310入力文字列の検証">3.10.入力文字列の検証</h4>
+
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">variable</span> <span class="s2">"environment"</span> <span class="p">{</span>
+    <span class="nx">type</span>        <span class="o">=</span> <span class="nx">string</span>
+    <span class="p">...</span>
+    <span class="nx">validation</span> <span class="p">{</span>
+        <span class="nx">condition</span>     <span class="o">=</span> <span class="nx">contains</span><span class="p">([</span><span class="s2">"dev"</span><span class="p">,</span> <span class="s2">"staging"</span><span class="p">,</span> <span class="s2">"prod"</span><span class="p">],</span> <span class="nx">var</span><span class="p">.</span><span class="nx">environment</span><span class="p">)</span>
+        <span class="nx">error_message</span> <span class="o">=</span> <span class="s2">"The environment must be dev, staging, or prod."</span>
+  <span class="p">}</span>
+ <span class="p">}</span>
 </code></pre></div></div>
 <ul>
-  <li>複数のバリエーションを使うこともできる
-    <div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">variable</span> <span class="s2">"vpc_cidr"</span> <span class="p">{</span>
-  <span class="nx">type</span>        <span class="o">=</span> <span class="nx">string</span>
-  <span class="nx">description</span> <span class="o">=</span> <span class="s2">"CIDR block for the VPC"</span>
-  
-  <span class="nx">validation</span> <span class="p">{</span>
-      <span class="nx">condition</span>     <span class="o">=</span> <span class="nx">can</span><span class="p">(</span><span class="nx">cidrhost</span><span class="p">(</span><span class="nx">var</span><span class="p">.</span><span class="nx">vpc_cidr</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-      <span class="nx">error_message</span> <span class="o">=</span> <span class="s2">"Must be a valid IPv4 CIDR block."</span>
-  <span class="p">}</span>
+  <li>複数のバリエーションを使うこともできる</li>
+</ul>
 
-  <span class="nx">validation</span> <span class="p">{</span>
-      <span class="nx">condition</span>     <span class="o">=</span> <span class="nx">split</span><span class="p">(</span><span class="s2">"/"</span><span class="p">,</span> <span class="nx">var</span><span class="p">.</span><span class="nx">vpc_cidr</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span><span class="p">=</span>  <span class="s2">"24"</span> <span class="o">&amp;&amp;</span> <span class="nx">split</span><span class="p">(</span><span class="s2">"/"</span><span class="p">,</span> <span class="nx">var</span><span class="p">.</span><span class="nx">vpc_cidr</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span><span class="p">=</span> <span class="s2">"16"</span>
-      <span class="nx">error_message</span> <span class="o">=</span> <span class="s2">"VPC CIDR block must be between a /16 and /24."</span>
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">variable</span> <span class="s2">"vpc_cidr"</span> <span class="p">{</span>
+    <span class="nx">type</span>        <span class="o">=</span> <span class="nx">string</span>
+    <span class="nx">description</span> <span class="o">=</span> <span class="s2">"CIDR block for the VPC"</span>
+  
+    <span class="nx">validation</span> <span class="p">{</span>
+        <span class="nx">condition</span>     <span class="o">=</span> <span class="nx">can</span><span class="p">(</span><span class="nx">cidrhost</span><span class="p">(</span><span class="nx">var</span><span class="p">.</span><span class="nx">vpc_cidr</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="nx">error_message</span> <span class="o">=</span> <span class="s2">"Must be a valid IPv4 CIDR block."</span>
+    <span class="p">}</span>
+
+    <span class="nx">validation</span> <span class="p">{</span>
+        <span class="nx">condition</span>     <span class="o">=</span> <span class="nx">split</span><span class="p">(</span><span class="s2">"/"</span><span class="p">,</span> <span class="nx">var</span><span class="p">.</span><span class="nx">vpc_cidr</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span><span class="p">=</span>  <span class="s2">"24"</span> <span class="o">&amp;&amp;</span> <span class="nx">split</span><span class="p">(</span><span class="s2">"/"</span><span class="p">,</span> <span class="nx">var</span><span class="p">.</span><span class="nx">vpc_cidr</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span><span class="p">=</span> <span class="s2">"16"</span>
+        <span class="nx">error_message</span> <span class="o">=</span> <span class="s2">"VPC CIDR block must be between a /16 and /24."</span>
+  <span class="p">}</span>
 <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
+</code></pre></div></div>
+
+<ul>
   <li>tfのバリエーション機能に頼るのは注意
     <ul>
       <li>検証のために外部のデータソースやスクリプトの利用</li>
@@ -661,15 +673,15 @@ variable "environment" {
   <li>
     <p>オプションプロパティを持つ例</p>
     <ul>
-      <li><code class="language-plaintext highlighter-rouge">can</code>, <code class="language-plaintext highlighter-rouge">try</code>を使ってデフォルト値を与えている
-        <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cidr_blocks = optional(list(string))
-...
-cidr_blocks = can(rule.cidr_blocks) ? rule.cidr_blocks : ["0.0.0.0/0"]
-</code></pre></div>        </div>
-      </li>
+      <li><code class="language-plaintext highlighter-rouge">can</code>, <code class="language-plaintext highlighter-rouge">try</code>を使ってデフォルト値を与えている</li>
     </ul>
   </li>
 </ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cidr_blocks = optional(list(string))
+...
+cidr_blocks = can(rule.cidr_blocks) ? rule.cidr_blocks : ["0.0.0.0/0"]
+</code></pre></div></div>
 
 <h4 id="312入力データを順次処理する">3.12.入力データを順次処理する</h4>
 
@@ -708,35 +720,40 @@ cidr_blocks = can(rule.cidr_blocks) ? rule.cidr_blocks : ["0.0.0.0/0"]
   <span class="nx">depends_on</span> <span class="o">=</span> <span class="p">[</span><span class="nx">aws_iam_role</span><span class="p">.</span><span class="nx">example</span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div></div>
+
 <h4 id="313悪い入力に対する良いエラーメッセージ">3.13.悪い入力に対する良いエラーメッセージ</h4>
 
 <h4 id="314terraformステート間でデータをコンシューマする">3.14.Terraformステート間でデータをコンシューマする</h4>
 
 <ul>
   <li>他のtfステートのリソースや出⼒を参照する必要がある場合</li>
-  <li><code class="language-plaintext highlighter-rouge">terraform_remote_state</code>データソースを使⽤
-```hcl
-data “terraform_remote_state” “network” {
-backend = “s3”
-config = {
-  bucket = “my-terraform-state”
-  key    = “network/terraform.tfstate”
-  region = “us-west-2”
-}
-}</li>
+  <li><code class="language-plaintext highlighter-rouge">terraform_remote_state</code>データソースを使⽤</li>
 </ul>
 
-<p>resource “aws_subnet” “example” {
-  vpc_id     = data.terraform_remote_state.network.outputs.vpc_id
-  cidr_block = “10.0.1.0/24”
-}</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>- 頼りすぎないことが重要
-- s3の場合、アクセス制限、バージョニング、暗号化を確認
-- ステートのロックも確認
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">data</span> <span class="s2">"terraform_remote_state"</span> <span class="s2">"network"</span> <span class="p">{</span>
+  <span class="nx">backend</span> <span class="o">=</span> <span class="s2">"s3"</span>
+  <span class="nx">config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="nx">bucket</span> <span class="o">=</span> <span class="s2">"my-terraform-state"</span>
+    <span class="nx">key</span>    <span class="o">=</span> <span class="s2">"network/terraform.tfstate"</span>
+    <span class="nx">region</span> <span class="o">=</span> <span class="s2">"us-west-2"</span>
+  <span class="p">}</span>
+<span class="p">}</span>
 
-- 出力しない場合に備えて、リモートアクセスは`try`を検討
-```plaintext
-vpc_id = try(data.terraform_remote_state.network.outputs.vpc_id, null)
+<span class="nx">resource</span> <span class="s2">"aws_subnet"</span> <span class="s2">"example"</span> <span class="p">{</span>
+  <span class="nx">vpc_id</span>     <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">terraform_remote_state</span><span class="p">.</span><span class="nx">network</span><span class="p">.</span><span class="nx">outputs</span><span class="p">.</span><span class="nx">vpc_id</span>
+  <span class="nx">cidr_block</span> <span class="o">=</span> <span class="s2">"10.0.1.0/24"</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<ul>
+  <li>頼りすぎないことが重要</li>
+  <li>s3の場合、アクセス制限、バージョニング、暗号化を確認</li>
+  <li>
+    <p>ステートのロックも確認</p>
+  </li>
+  <li>出力しない場合に備えて、リモートアクセスは<code class="language-plaintext highlighter-rouge">try</code>を検討</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vpc_id = try(data.terraform_remote_state.network.outputs.vpc_id, null)
 </code></pre></div></div>
 
 <h3 id="4terraformモジュールとプロバイダー">4.Terraformモジュールとプロバイダー</h3>
@@ -761,16 +778,16 @@ vpc_id = try(data.terraform_remote_state.network.outputs.vpc_id, null)
   <li>
     <p>EKSは内部的にEC2やASGを使っていることが分かる</p>
   </li>
-  <li>暗号化のために、KMSの設定
-    <div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># kms.tf</span>
-<span class="nx">resource</span> <span class="s2">"aws_kms_key"</span> <span class="s2">"eks"</span> <span class="p">{</span>
-  <span class="nx">description</span> <span class="o">=</span> <span class="s2">"EKS Secret Encryption Key"</span>
-  <span class="nx">deletion_window_in_days</span> <span class="o">=</span> <span class="mi">7</span>
-  <span class="nx">enable_key_rotation</span> <span class="o">=</span> <span class="kc">true</span>
-<span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
+  <li>暗号化のために、KMSの設定</li>
 </ul>
+
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># kms.tf</span>
+<span class="nx">resource</span> <span class="s2">"aws_kms_key"</span> <span class="s2">"eks"</span> <span class="p">{</span>
+    <span class="nx">description</span> <span class="o">=</span> <span class="s2">"EKS Secret Encryption Key"</span>
+    <span class="nx">deletion_window_in_days</span> <span class="o">=</span> <span class="mi">7</span>
+    <span class="nx">enable_key_rotation</span> <span class="o">=</span> <span class="kc">true</span>
+<span class="p">}</span>
+</code></pre></div></div>
 
 <div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">data</span> <span class="s2">"aws_eks_cluster"</span> <span class="s2">"cluster"</span> <span class="p">{</span>
   <span class="nx">name</span> <span class="o">=</span> <span class="nx">module</span><span class="p">.</span><span class="nx">eks</span><span class="p">.</span><span class="nx">cluster_id</span>
@@ -861,18 +878,22 @@ vpc_id = try(data.terraform_remote_state.network.outputs.vpc_id, null)
 <ul>
   <li>認証を行うには資格情報を提供
     <ul>
-      <li><code class="language-plaintext highlighter-rouge">./terraformrc</code>ファイルの資格情報ブロックを使う
-        <div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">credentials</span> <span class="s2">"app.terraform.io"</span> <span class="p">{</span>
-  <span class="nx">token</span> <span class="o">=</span> <span class="s2">"your-api-token"</span>
-<span class="p">}</span>
-</code></pre></div>        </div>
-      </li>
+      <li><code class="language-plaintext highlighter-rouge">./terraformrc</code>ファイルの資格情報ブロックを使う</li>
     </ul>
   </li>
-  <li>別の資格情報ファイルを指すように環境変数をTERRAFORM_CONFIGにセット
-    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">export </span><span class="nv">TERRAFORM_CONFIG</span><span class="o">=</span>/path/to/terraform.rc
-</code></pre></div>    </div>
-  </li>
+</ul>
+
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">credentials</span> <span class="s2">"app.terraform.io"</span> <span class="p">{</span>
+    <span class="nx">token</span> <span class="o">=</span> <span class="s2">"your-api-token"</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<ul>
+  <li>別の資格情報ファイルを指すように環境変数をTERRAFORM_CONFIGにセット</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">export </span><span class="nv">TERRAFORM_CONFIG</span><span class="o">=</span>/path/to/terraform.rc
+</code></pre></div></div>
+<ul>
   <li>通常、HCP Terraform のプライベートモジュールレジストリのようなプライベートモジュールレジストリに保存される</li>
 </ul>
 
@@ -880,36 +901,38 @@ vpc_id = try(data.terraform_remote_state.network.outputs.vpc_id, null)
 
 <ul>
   <li>main.tf, variables.tf, outputs.tfファイルの作成</li>
-  <li>別のファイルで呼び出す
-```hcl
- module “ec2_instance” {
-source        = “./my_module”
-ami           = “ami-abc123”
-instance_type = “t2.micro”
-instance_name = “my-instance”
- }</li>
+  <li>別のファイルで呼び出す</li>
 </ul>
 
-<p>output “instance_id” {
-  value = module.ec2_instance.instance_id
- }</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>- READMEには、モジュールの目的、入力、出力を記述
-- モジュールのテストのために、/testsフォルダを作成する場合
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="nx">module</span> <span class="s2">"ec2_instance"</span> <span class="p">{</span>
+  <span class="nx">source</span>        <span class="o">=</span> <span class="s2">"./my_module"</span>
+  <span class="nx">ami</span>           <span class="o">=</span> <span class="s2">"ami-abc123"</span>
+  <span class="nx">instance_type</span> <span class="o">=</span> <span class="s2">"t2.micro"</span>
+  <span class="nx">instance_name</span> <span class="o">=</span> <span class="s2">"my-instance"</span>
+ <span class="p">}</span>
 
-#### 4.6.GitHubのシークレットをTerraformで管理する
+ <span class="nx">output</span> <span class="s2">"instance_id"</span> <span class="p">{</span>
+  <span class="nx">value</span> <span class="o">=</span> <span class="nx">module</span><span class="p">.</span><span class="nx">ec2_instance</span><span class="p">.</span><span class="nx">instance_id</span>
+ <span class="p">}</span>
+</code></pre></div></div>
+<ul>
+  <li>READMEには、モジュールの目的、入力、出力を記述</li>
+  <li>モジュールのテストのために、/testsフォルダを作成する場合</li>
+</ul>
 
-```hcl
-resource "github_actions_secret" "example_secret" {
-  repository     = var.github_repository
-  secret_name    = "MY_SECRET"
-  plaintext_value = var.my_secret
-}
+<h4 id="46githubのシークレットをterraformで管理する">4.6.GitHubのシークレットをTerraformで管理する</h4>
 
-variable "my_secret" {
-  description = "The value of the GitHub secret"
-  type        = string
-  sensitive   = true
- }
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">resource</span> <span class="s2">"github_actions_secret"</span> <span class="s2">"example_secret"</span> <span class="p">{</span>
+  <span class="nx">repository</span>     <span class="o">=</span> <span class="nx">var</span><span class="p">.</span><span class="nx">github_repository</span>
+  <span class="nx">secret_name</span>    <span class="o">=</span> <span class="s2">"MY_SECRET"</span>
+  <span class="nx">plaintext_value</span> <span class="o">=</span> <span class="nx">var</span><span class="p">.</span><span class="nx">my_secret</span>
+<span class="p">}</span>
+
+<span class="nx">variable</span> <span class="s2">"my_secret"</span> <span class="p">{</span>
+  <span class="nx">description</span> <span class="o">=</span> <span class="s2">"The value of the GitHub secret"</span>
+  <span class="nx">type</span>        <span class="o">=</span> <span class="nx">string</span>
+  <span class="nx">sensitive</span>   <span class="o">=</span> <span class="kc">true</span>
+ <span class="p">}</span>
 </code></pre></div></div>
 
 <ul>
@@ -951,57 +974,60 @@ variable "my_secret" {
 <h4 id="48consul-kvによるダイナミックコンフィギュレーション">4.8.Consul KVによるダイナミックコンフィギュレーション</h4>
 
 <ul>
-  <li>異なるステート間で依存関係を広げる必要がある場合など
-```hcl
-    <h1 id="configure-the-consul-provider">Configure the Consul provider</h1>
-    <p>provider “consul” {
-address = “localhost:8500”
-scheme  = “http”
- }</p>
-  </li>
+  <li>異なるステート間で依存関係を広げる必要がある場合など</li>
 </ul>
 
-<p># Store the VPC ID in Consul KV
- resource “consul_key_prefix” “vpc” {
-  path_prefix = “terraform/vpc/”
-  subkeys = {
-    “id” = aws_vpc.main.id
-  }
- }</p>
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Configure the Consul provider</span>
+ <span class="nx">provider</span> <span class="s2">"consul"</span> <span class="p">{</span>
+  <span class="nx">address</span> <span class="o">=</span> <span class="s2">"localhost:8500"</span>
+  <span class="nx">scheme</span>  <span class="o">=</span> <span class="s2">"http"</span>
+ <span class="p">}</span>
 
-<p># Retrieve the VPC ID from Consul KV
- data “consul_keys” “vpc” {
-  key {
-    name = “vpc_id”
-    path = “terraform/vpc/id”
-  }
- }</p>
+ <span class="c1"># Store the VPC ID in Consul KV</span>
+ <span class="nx">resource</span> <span class="s2">"consul_key_prefix"</span> <span class="s2">"vpc"</span> <span class="p">{</span>
+  <span class="nx">path_prefix</span> <span class="o">=</span> <span class="s2">"terraform/vpc/"</span>
+  <span class="nx">subkeys</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"id"</span> <span class="p">=</span> <span class="nx">aws_vpc</span><span class="p">.</span><span class="nx">main</span><span class="p">.</span><span class="nx">id</span>
+  <span class="p">}</span>
+ <span class="p">}</span>
 
-<p># Use the retrieved VPC ID
- resource “aws_subnet” “example” {
-  vpc_id     = data.consul_keys.vpc.var.vpc_id
-  cidr_block = “10.0.1.0/24”
- }</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
-- Consulで値を変更し、実行時に反映できるようになる
+ <span class="c1"># Retrieve the VPC ID from Consul KV</span>
+ <span class="nx">data</span> <span class="s2">"consul_keys"</span> <span class="s2">"vpc"</span> <span class="p">{</span>
+  <span class="nx">key</span> <span class="p">{</span>
+    <span class="nx">name</span> <span class="o">=</span> <span class="s2">"vpc_id"</span>
+    <span class="nx">path</span> <span class="o">=</span> <span class="s2">"terraform/vpc/id"</span>
+  <span class="p">}</span>
+ <span class="p">}</span>
 
-#### 4.9.サービス・ヘルス・アウェア・プロバイダの構成
+ <span class="c1"># Use the retrieved VPC ID</span>
+ <span class="nx">resource</span> <span class="s2">"aws_subnet"</span> <span class="s2">"example"</span> <span class="p">{</span>
+  <span class="nx">vpc_id</span>     <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">consul_keys</span><span class="p">.</span><span class="nx">vpc</span><span class="p">.</span><span class="nx">var</span><span class="p">.</span><span class="nx">vpc_id</span>
+  <span class="nx">cidr_block</span> <span class="o">=</span> <span class="s2">"10.0.1.0/24"</span>
+ <span class="p">}</span>
+</code></pre></div></div>
 
-- ConsulのHTTPAPIで正常性を確認
+<ul>
+  <li>Consulで値を変更し、実行時に反映できるようになる</li>
+</ul>
 
-```hcl
-# Data source to check service health via Consul HTTP API
- data "http" "service_health_check" {
-  url = "http://localhost:8500/v1/health/service/my-service"
- }
+<h4 id="49サービスヘルスアウェアプロバイダの構成">4.9.サービス・ヘルス・アウェア・プロバイダの構成</h4>
 
- # Local values to process the health check response
- locals {
-  service_health = jsondecode(data.http.service_health_check.body)[0]
-  active_node    = local.service_health.Status == "passing" ? local.service_health.Service.Address : 
-    "fallback_address"
- }
- ...
+<ul>
+  <li>ConsulのHTTPAPIで正常性を確認</li>
+</ul>
+
+<div class="language-hcl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Data source to check service health via Consul HTTP API</span>
+ <span class="nx">data</span> <span class="s2">"http"</span> <span class="s2">"service_health_check"</span> <span class="p">{</span>
+  <span class="nx">url</span> <span class="o">=</span> <span class="s2">"http://localhost:8500/v1/health/service/my-service"</span>
+ <span class="p">}</span>
+
+ <span class="c1"># Local values to process the health check response</span>
+ <span class="nx">locals</span> <span class="p">{</span>
+  <span class="nx">service_health</span> <span class="o">=</span> <span class="nx">jsondecode</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">http</span><span class="p">.</span><span class="nx">service_health_check</span><span class="p">.</span><span class="nx">body</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+  <span class="nx">active_node</span>    <span class="o">=</span> <span class="nx">local</span><span class="p">.</span><span class="nx">service_health</span><span class="p">.</span><span class="nx">Status</span> <span class="o">==</span> <span class="s2">"passing"</span> <span class="o">?</span> <span class="nx">local</span><span class="p">.</span><span class="nx">service_health</span><span class="p">.</span><span class="nx">Service</span><span class="p">.</span><span class="nx">Address</span> <span class="o">:</span> 
+    <span class="s2">"fallback_address"</span>
+ <span class="p">}</span>
+ <span class="err">...</span>
 </code></pre></div></div>
 <ul>
   <li>httpデータソースと<code class="language-plaintext highlighter-rouge">jsondecode</code>関数を使用してAPIリクエストを処理</li>
@@ -1199,7 +1225,8 @@ scheme  = “http”
       <footer>
         <p>
           Tags: 
-          <a href="/md/tag/書籍">書籍</a> 
+          <a href="/md/tag/書籍">書籍</a>,  
+          <a href="/md/tag/terraform">Terraform</a> 
         </p>
       </footer>
     </article>
@@ -1234,9 +1261,9 @@ scheme  = “http”
       
         <li><a href="/md/tag/開発">開発</a></li>
       
-        <li><a href="/md/tag/elasticsearch">elasticsearch</a></li>
+        <li><a href="/md/tag/elasticsearch">Elasticsearch</a></li>
       
-        <li><a href="/md/tag/firebase">firebase</a></li>
+        <li><a href="/md/tag/firebase">Firebase</a></li>
       
         <li><a href="/md/tag/sqlite">sqlite</a></li>
       
@@ -1244,9 +1271,15 @@ scheme  = “http”
       
         <li><a href="/md/tag/書籍">書籍</a></li>
       
+        <li><a href="/md/tag/設計">設計</a></li>
+      
         <li><a href="/md/tag/aws">AWS</a></li>
       
         <li><a href="/md/tag/cdk">CDK</a></li>
+      
+        <li><a href="/md/tag/go">Go</a></li>
+      
+        <li><a href="/md/tag/terraform">Terraform</a></li>
       
     </ul>
     <h2><a href="/md/archives/">Archives</a></h2>
