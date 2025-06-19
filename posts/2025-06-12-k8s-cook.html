@@ -1,0 +1,1102 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/md/assets/css/default.css">
+  <link rel="stylesheet" href="/md/assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <title>ツールの忘備録</title>
+</head>
+<body>
+
+<header>
+  <h1><a href="/md/">ツールの忘備録</a></h1></h1>
+</header>
+
+<div id="content">
+  <!-- メインコンテンツ部分 -->
+  <main>
+        <article>
+      <header>
+        <h1>「k8sクックブック」を読む</h1>
+        <p class="meta">
+          June 12, 2025 
+          <!--
+          in
+          <a href="/category/blog"
+            >blog</a
+          >
+        -->
+        </p>
+      </header>
+
+      <div class="content"><p>オライリーの<code class="language-plaintext highlighter-rouge">k8sクックブック</code>という書籍を読んだので、気になったことを中心に簡単な感想や要約を書きます。(網羅性はありません)</p>
+
+<p><code class="language-plaintext highlighter-rouge">k8s</code>本は非常に長くなることが一般的ですが、この書籍は要点だけに絞っており、非常に読みやすいです。</p>
+
+<p><strong>目次</strong></p>
+
+<ul id="markdown-toc">
+  <li><a href="#1-kubernetesの使用を開始する" id="markdown-toc-1-kubernetesの使用を開始する">1. Kubernetesの使用を開始する</a></li>
+  <li><a href="#2-kubernetesクラスタの作成" id="markdown-toc-2-kubernetesクラスタの作成">2. Kubernetesクラスタの作成</a></li>
+  <li><a href="#3-kubernetesクライアントの使い方を学ぶ" id="markdown-toc-3-kubernetesクライアントの使い方を学ぶ">3. Kubernetesクライアントの使い方を学ぶ</a></li>
+  <li><a href="#4-基本的なワークロードの作成と変更" id="markdown-toc-4-基本的なワークロードの作成と変更">4. 基本的なワークロードの作成と変更</a></li>
+  <li><a href="#5-サービスの利用" id="markdown-toc-5-サービスの利用">5. サービスの利用</a></li>
+  <li><a href="#6-アプリケーションマニフェストの管理" id="markdown-toc-6-アプリケーションマニフェストの管理">6. アプリケーションマニフェストの管理</a></li>
+  <li><a href="#7-kubernetes-apiとキーメタデータの探索" id="markdown-toc-7-kubernetes-apiとキーメタデータの探索">7. Kubernetes APIとキーメタデータの探索</a></li>
+  <li><a href="#9-スケーリング" id="markdown-toc-9-スケーリング">9. スケーリング</a></li>
+  <li><a href="#10-セキュリティ" id="markdown-toc-10-セキュリティ">10. セキュリティ</a></li>
+  <li><a href="#11-監視とロギング" id="markdown-toc-11-監視とロギング">11. 監視とロギング</a></li>
+  <li><a href="#12-メンテナンスとトラブルシューティング" id="markdown-toc-12-メンテナンスとトラブルシューティング">12. メンテナンスとトラブルシューティング</a></li>
+  <li><a href="#13-サービスメッシュ" id="markdown-toc-13-サービスメッシュ">13. サービスメッシュ</a></li>
+  <li><a href="#14-サーバーレスおよびイベント駆動型アプリケーション" id="markdown-toc-14-サーバーレスおよびイベント駆動型アプリケーション">14. サーバーレスおよびイベント駆動型アプリケーション</a></li>
+  <li><a href="#15-kubernetesの拡張" id="markdown-toc-15-kubernetesの拡張">15. Kubernetesの拡張</a></li>
+</ul>
+
+<hr />
+
+<p><strong>サイト</strong></p>
+
+<ul>
+  <li><a href="https://www.oreilly.com/library/view/kubernetes-2/9798341651562">オライリー</a></li>
+</ul>
+
+<hr />
+
+<h3 id="1-kubernetesの使用を開始する">1. Kubernetesの使用を開始する</h3>
+
+<h4 id="11-kubernetes-cli-kubectl-のインストール">1.1. Kubernetes CLI kubectl のインストール</h4>
+
+<ul>
+  <li>GKEでは以下で<code class="language-plaintext highlighter-rouge">kubectl</code>をインストールできる
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>gcloud components <span class="nb">install </span>kubectl
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h4 id="12-minikube-をインストールしてローカルの-kubernetes-インスタンス">1.2. Minikube をインストールしてローカルの Kubernetes インスタンス</h4>
+
+<ul>
+  <li>Docker-desktop, kind, k3d</li>
+</ul>
+
+<h4 id="13-開発のための-minikube-のローカル使用">1.3. 開発のための Minikube のローカル使用</h4>
+
+<h4 id="14-minikube-での最初のアプリケーションの起動">1.4. Minikube での最初のアプリケーションの起動</h4>
+
+<h4 id="15-kind-を使用して-kubernetes-をローカルで実行する">1.5. kind を使用して Kubernetes をローカルで実行する</h4>
+
+<ul>
+  <li>練習だけでなく、テスト環境としても使える
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>brew <span class="nb">install </span>kind
+kind create cluster
+kind delete cluster
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h4 id="16-docker-desktop-での-kubernetes-の使用">1.6. Docker Desktop での Kubernetes の使用</h4>
+
+<h4 id="17-kubectl-コンテキストの切り替え">1.7. kubectl コンテキストの切り替え</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">kubectl config get-contexts</code></li>
+</ul>
+
+<h4 id="18-を使用してコンテキストと名前空間を切り替える-kubectx-と-kubens">1.8. を使用してコンテキストと名前空間を切り替える kubectx と kubens</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectx xxx
+kubens
+</code></pre></div></div>
+
+<h3 id="2-kubernetesクラスタの作成">2. Kubernetesクラスタの作成</h3>
+
+<ul>
+  <li>クラウドでは不要な操作が多い</li>
+</ul>
+
+<h4 id="21-kubernetes-クラスターの新規ノードの準備">2.1. Kubernetes クラスターの新規ノードの準備</h4>
+
+<h4 id="22-kubernetes-コントロールプレーンノードのブートストラップ">2.2. Kubernetes コントロールプレーンノードのブートストラップ</h4>
+
+<h4 id="23-container-network-アドオンのインストール-クラスタネットワーキング">2.3. Container Network アドオンのインストール クラスタネットワーキング</h4>
+
+<ul>
+  <li>ポッドが相互に通信できるようにポッドネットワークアドオン</li>
+  <li>例：Calicoネットワークアドオン
+<code class="language-plaintext highlighter-rouge">kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/calico.yaml</code></li>
+  <li>クラスタと互換性のあるCNIが必要</li>
+</ul>
+
+<h4 id="24-ワーカーノードの-kubernetes-クラスターへの追加">2.4. ワーカーノードの Kubernetes クラスターへの追加</h4>
+
+<h4 id="25-kubernetes-dashboard-のデプロイ">2.5. Kubernetes Dashboard のデプロイ</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl apply <span class="nt">-f</span> https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
+kubectl get deployment kubernetes-dashboard <span class="nt">-n</span> kubernetes-dashboard
+</code></pre></div></div>
+
+<h4 id="26-kubernetes-ダッシュボードへのアクセス">2.6. Kubernetes ダッシュボードへのアクセス</h4>
+
+<ul>
+  <li>クラスターを管理する権限を持つServiceAccountを作成する必要</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">apiVersion</span><span class="pi">:</span> <span class="s">v1</span>
+ <span class="s">kind</span><span class="err">:</span> <span class="s">ServiceAccount</span>
+ <span class="s">metadata</span><span class="err">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">admin-user</span>
+  <span class="na">namespace</span><span class="pi">:</span> <span class="s">kubernetes-dashboard</span>
+<span class="nn">---</span>
+<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">rbac.authorization.k8s.io/v1</span>
+ <span class="s">kind</span><span class="err">:</span> <span class="s">ClusterRoleBinding</span>
+ <span class="s">metadata</span><span class="err">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">admin-user</span>
+ <span class="na">roleRef</span><span class="pi">:</span>
+  <span class="na">apiGroup</span><span class="pi">:</span> <span class="s">rbac.authorization.k8s.io</span>
+  <span class="na">kind</span><span class="pi">:</span> <span class="s">ClusterRole</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">cluster-admin</span>
+ <span class="na">subjects:- kind</span><span class="pi">:</span> <span class="s">ServiceAccount</span>
+  <span class="s">name</span><span class="err">:</span> <span class="s">admin-user</span>
+  <span class="s">namespace</span><span class="err">:</span> <span class="s">kubernetes-dashboard</span>
+</code></pre></div></div>
+
+<ul>
+  <li>そのアカウントで認証トークンを作成する必要
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">kubectl -n kubernetes-dashboard create token admin-user</code></li>
+    </ul>
+  </li>
+  <li>プロキシ接続を設定
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">kubectl proxy</code></li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="27-kubernetes-メトリクスサーバーのデプロイ">2.7. Kubernetes メトリクスサーバーのデプロイ</h4>
+
+<ul>
+  <li>ダッシュボードにCPU, メモリの使用状況を視覚化
+    <ul>
+      <li>Kubernetes Metrics Serverが必要</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl apply <span class="nt">-f</span> https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+kubectl get deployment metrics-server <span class="nt">-n</span> kube-system
+</code></pre></div></div>
+<ul>
+  <li>Podのログを確認
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">kubectl logs -f deployment/metrics-server -n kube-system</code></li>
+    </ul>
+  </li>
+  <li>証明書を確認できないエラーが出た場合
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">kubectl patch</code>で<code class="language-plaintext highlighter-rouge">--kubelet-insecure-tls</code>を追加</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl patch deployment metrics-server <span class="nt">-n</span> kube-system <span class="nt">--type</span><span class="o">=</span><span class="s1">'json'</span><span class="nt">-p</span><span class="o">=</span><span class="s1">'[{"op": "add", "path": "/spec/template/spec/containers/0/args/-", "value": "--kubelet-insecure-tls"}]'</span>
+</code></pre></div></div>
+<ul>
+  <li>ダッシュボードにCPU, メモリの使用状況が出ることを確認</li>
+  <li>あるいは<code class="language-plaintext highlighter-rouge">kubectl top pods -A</code>, <code class="language-plaintext highlighter-rouge">kubectl top nodes</code></li>
+</ul>
+
+<h4 id="28-github-からの-kubernetes-リリースのダウンロード">2.8. GitHub からの Kubernetes リリースのダウンロード</h4>
+
+<h4 id="29-クライアントおよびサーバーのバイナリのダウンロード">2.9. クライアントおよびサーバーのバイナリのダウンロード</h4>
+
+<h4 id="210-systemd-ユニットファイルを使用したkubernetes-コンポーネントの実行">2.10. systemd ユニットファイルを使用したKubernetes コンポーネントの実行</h4>
+
+<h4 id="211-google-kubernetes-エンジンでの-kubernetes-クラスターの作成">2.11. Google Kubernetes エンジンでの Kubernetes クラスターの作成</h4>
+
+<h4 id="212-azure-kubernetes-サービスでの-kubernetes-クラスターの作成">2.12. Azure Kubernetes サービスでの Kubernetes クラスターの作成</h4>
+
+<h4 id="213-amazon-elastic-kubernetes-サービス-での-kubernetes-クラスターの作成">2.13. Amazon Elastic Kubernetes サービス での Kubernetes クラスターの作成</h4>
+
+<h3 id="3-kubernetesクライアントの使い方を学ぶ">3. Kubernetesクライアントの使い方を学ぶ</h3>
+
+<h4 id="31-リソースの一覧表示">3.1. リソースの一覧表示</h4>
+
+<ul>
+  <li>すべてのサービスとデプロイメントを⼀覧表⽰
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">kubectl get services,deployments</code></li>
+    </ul>
+  </li>
+  <li>オートコンプリートを有効にすることが重要</li>
+</ul>
+
+<p><strong>省略名</strong></p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">configmaps</code>（別名 <code class="language-plaintext highlighter-rouge">cm</code>）</li>
+  <li><code class="language-plaintext highlighter-rouge">daemonsets</code>（別名 <code class="language-plaintext highlighter-rouge">ds</code>）</li>
+  <li><code class="language-plaintext highlighter-rouge">deployments</code>（別名 <code class="language-plaintext highlighter-rouge">deploy</code>）</li>
+  <li><code class="language-plaintext highlighter-rouge">endpoints</code>（別名 <code class="language-plaintext highlighter-rouge">ep</code>）</li>
+  <li><code class="language-plaintext highlighter-rouge">events</code>（別名 <code class="language-plaintext highlighter-rouge">ev</code>）</li>
+  <li><code class="language-plaintext highlighter-rouge">horizontalpodautoscalers</code>（別名 <code class="language-plaintext highlighter-rouge">hpa</code>）</li>
+  <li><code class="language-plaintext highlighter-rouge">ingresses</code>（別名 <code class="language-plaintext highlighter-rouge">ing</code>）</li>
+  <li><code class="language-plaintext highlighter-rouge">namespaces</code>（別名 <code class="language-plaintext highlighter-rouge">ns</code>）</li>
+  <li><code class="language-plaintext highlighter-rouge">nodes</code>（別名 <code class="language-plaintext highlighter-rouge">no</code>）</li>
+  <li><code class="language-plaintext highlighter-rouge">persistentvolumeclaims</code>（別名 <code class="language-plaintext highlighter-rouge">pvc</code>）</li>
+  <li><code class="language-plaintext highlighter-rouge">persistentvolumes</code>（別名 <code class="language-plaintext highlighter-rouge">pv</code>）</li>
+  <li><code class="language-plaintext highlighter-rouge">pods</code>（別名 <code class="language-plaintext highlighter-rouge">po</code>）</li>
+  <li><code class="language-plaintext highlighter-rouge">replicasets</code>（別名 <code class="language-plaintext highlighter-rouge">rs</code>）</li>
+  <li><code class="language-plaintext highlighter-rouge">replicationcontrollers</code>（別名 <code class="language-plaintext highlighter-rouge">rc</code>）</li>
+  <li><code class="language-plaintext highlighter-rouge">resourcequotas</code>（別名 <code class="language-plaintext highlighter-rouge">quota</code>）</li>
+  <li><code class="language-plaintext highlighter-rouge">serviceaccounts</code>（別名 <code class="language-plaintext highlighter-rouge">sa</code>）</li>
+  <li><code class="language-plaintext highlighter-rouge">services</code>（別名 <code class="language-plaintext highlighter-rouge">svc</code>）</li>
+</ul>
+
+<h4 id="32-リソースの削除">3.2. リソースの削除</h4>
+
+<ul>
+  <li>名前空間my-app内のすべてのリソースと名前空間⾃体を削除</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl get ns
+kubectl delete ns my-app
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># app=niceoneラベルが付いたサービスとデプロイメントを削除</span>
+kubectl delete svc,deploy <span class="nt">-l</span> <span class="nv">app</span><span class="o">=</span>niceone
+
+<span class="c"># hangingpodという名前のポッドを強制的に削除</span>
+kubectl delete pod hangingpod <span class="nt">--grace-period</span><span class="o">=</span>0 <span class="nt">--force</span>
+
+<span class="c"># 名前空間test内のすべてのポッドを削除</span>
+kubectl delete pods <span class="nt">--all</span> <span class="nt">--namespace</span> <span class="nb">test</span>
+</code></pre></div></div>
+<ul>
+  <li>PodやReplicasetなどは削除しない
+    <ul>
+      <li>Deploymentを通じて削除する</li>
+    </ul>
+  </li>
+  <li>カスケード削除と直接削除を考慮する</li>
+</ul>
+
+<h4 id="33-kubectl-によるリソース変更の監視">3.3. kubectl によるリソース変更の監視</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">--watch</code>オプション
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">kubectl get pods --watch</code></li>
+      <li><code class="language-plaintext highlighter-rouge">watch kubectl get pods</code></li>
+    </ul>
+  </li>
+  <li>出力のフォーマットが違う</li>
+</ul>
+
+<h4 id="34-kubectl-を使用したオブジェクトの編集">3.4. kubectl を使用したオブジェクトの編集</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="nv">$ </span>kubectl run nginx <span class="nt">--image</span><span class="o">=</span>nginx
+ <span class="nv">$ </span>kubectl edit pod/nginx
+
+ <span class="c"># EDITORまたはKUBE_EDITOR環境変数</span>
+<span class="nv">$ </span><span class="nb">export </span><span class="nv">EDITOR</span><span class="o">=</span>vi
+</code></pre></div></div>
+<ul>
+  <li>全ての変更が更新をトリガーするわけではない</li>
+</ul>
+
+<h4 id="35-kubectl-にリソースとフィールドの説明を求める">3.5. kubectl にリソースとフィールドの説明を求める</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">kubectl explain svc</code>
+    <ul>
+      <li>APIサーバのOASからリソースとフィールドを取得</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="4-基本的なワークロードの作成と変更">4. 基本的なワークロードの作成と変更</h3>
+
+<h4 id="41-kubectl-run-を使用した-pod-の作成">4.1. kubectl run を使用した Pod の作成</h4>
+
+<ul>
+  <li>NGINX リバースプロキシを実⾏するポッドを作成</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>kubectl run nginx <span class="nt">--image</span><span class="o">=</span>nginx
+<span class="nv">$ </span>kubectl get pod/nginx
+</code></pre></div></div>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">--expose</code>
+    <ul>
+      <li>関連サービスを自動作成</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">--dry-run=client</code>
+    <ul>
+      <li>実行をテスト</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">$ kubectl run nginx --image=nginx --port=2368 --expose</code></li>
+</ul>
+
+<h4 id="42-kubectl-create-を使用したデプロイメントの作成">4.2. kubectl create を使用したデプロイメントの作成</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>kubectl create deployment wordpress <span class="nt">--image</span> wordpress:6.3.1
+<span class="nv">$ </span>kubectl get deployments.apps/wordpress
+</code></pre></div></div>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">--replicas</code></li>
+</ul>
+
+<h4 id="43-ファイルマニフェストからのオブジェクトの作成">4.3. ファイルマニフェストからのオブジェクトの作成</h4>
+
+<h4 id="44-pod-マニフェストをゼロから作成する">4.4. Pod マニフェストをゼロから作成する</h4>
+
+<h4 id="45-マニフェストを使用したデプロイメントの起動">4.5. マニフェストを使用したデプロイメントの起動</h4>
+
+<h4 id="46-デプロイメントの更新">4.6. デプロイメントの更新</h4>
+
+<ul>
+  <li>デプロイメントを更新し、デフォルトの更新戦略RollingUpdateロールアウトを⾃動的に処理</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="nv">$ </span>kubectl create deployment myapp <span class="nt">--image</span><span class="o">=</span>gcr.io/google-samples/hello-app:1.0
+
+ <span class="nv">$ </span>kubectl <span class="nb">set </span>image deployment/myapp <span class="se">\</span>
+    hello-app<span class="o">=</span>gcr.io/google-samples/hello-app:2.0
+
+ <span class="nv">$ </span>kubectl rollout status deployment myapp
+
+ <span class="c"># yamlを編集</span>
+ <span class="nv">$ </span>kubectl edit deploy myapp
+
+ <span class="nv">$ </span>kubectl rollout <span class="nb">history </span>deployment myapp
+REVISION        CHANGE-CAUSE
+ 1               &lt;none&gt;
+ 2               &lt;none&gt;
+ 3               &lt;none&gt;
+</code></pre></div></div>
+
+<ul>
+  <li>上記ではリビジョン3にロールアウトされている</li>
+  <li>しかし、<code class="language-plaintext highlighter-rouge">CHANGE_CAUSE</code>は空</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>kubectl annotate deployment/myapp <span class="se">\</span>
+ kubernetes.io/change-cause<span class="o">=</span><span class="s2">"Added port definition."</span>
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="c"># 特定のキーを更新</span>
+ kubectl patch deployment myapp <span class="nt">-p</span> <span class="s1">'{"spec": {"template":
+ {"spec": {"containers":
+ [{"name": "sise", "image": "gcr.io/google-samples/hello-app:2.0"}]}}}}'</span>
+
+ <span class="c"># リビジョン2にロールバック</span>
+ <span class="nv">$ </span>kubectl rollout undo deployment myapp <span class="nt">--to-revision</span> 2
+</code></pre></div></div>
+
+<ul>
+  <li>レプリカ数などの要素の変更では、新しいデプロイメントはトリガーされない</li>
+</ul>
+
+<h4 id="47-バッチジョブの実行">4.7. バッチジョブの実行</h4>
+
+<ul>
+  <li>バッチ変換、バックアップ操作、DBスキーマのアップグレードなど</li>
+  <li>Jobリソースの作成</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl get <span class="nb">jobs
+</span>kubectl describe <span class="nb">jobs</span>/counter
+
+<span class="c"># 作成されたPodも削除される</span>
+kubectl delete <span class="nb">jobs</span>/counter
+</code></pre></div></div>
+<ul>
+  <li>ジョブは一時停止し、再開することもできる</li>
+</ul>
+
+<h4 id="48-pod-内のスケジュールに基づくタスクの実行">4.8. Pod 内のスケジュールに基づくタスクの実行</h4>
+
+<ul>
+  <li>マクロも使⽤できる
+    <ul>
+      <li>@hourly 、@daily 、@weekly 、@monthly 、@yearlyなど</li>
+    </ul>
+  </li>
+  <li>CronJobリソースの作成</li>
+  <li>suspendフラグを切り替えることで⼀時停⽌と再開</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>kubectl patch cronjob.batch/hourly-date <span class="nt">--type</span><span class="o">=</span>strategic <span class="se">\</span>
+<span class="nt">--patch</span> <span class="s1">'{"spec":{"suspend":true}}'</span>
+</code></pre></div></div>
+
+<h4 id="49-ノードごとのインフラストラクチャーデーモンの実行">4.9. ノードごとのインフラストラクチャーデーモンの実行</h4>
+
+<ul>
+  <li>Fluentdなど</li>
+  <li>デーモンを特定のノードに制限
+    <ul>
+      <li>specにある<code class="language-plaintext highlighter-rouge">nodeSelector</code>セクションを使用</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="5-サービスの利用">5. サービスの利用</h3>
+
+<ul>
+  <li>Podがクラスター内で通信する方法、互いを検出する方法、外部からアクセスする方法
+<img src="/md/assets/images/k8s-network.png" alt="k8sネットワーク" /></li>
+  <li><code class="language-plaintext highlighter-rouge">kube-proxy</code>
+    <ul>
+      <li>全てのノードで実行されるプロセス</li>
+      <li>API サーバーにクエリを実⾏してクラスター内の新しいサービスについて学習</li>
+      <li>ノードのiptablesを更新して、必要なルーティング情報を提供</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="51-アプリケーションを公開するサービスの作成">5.1. アプリケーションを公開するサービスの作成</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>kubectl expose deploy/nginx <span class="nt">--port</span> 80
+<span class="nv">$ </span>kubectl describe svc/nginx
+</code></pre></div></div>
+<ul>
+  <li>上記ではClusterIPが作成される</li>
+  <li>ブラウザ経由でアクセス</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl proxy
+open http://localhost:8001/api/v1/namespaces/default/services/nginx/proxy/
+</code></pre></div></div>
+
+<ul>
+  <li>サービスが正常に動作しない場合
+    <ul>
+      <li>セレクター内のラベルを確認</li>
+      <li><code class="language-plaintext highlighter-rouge">kubectl get endpoints &lt;service-name&gt;</code>で確認</li>
+      <li>生成されていない場合、ポッドを見つけられていない可能性</li>
+    </ul>
+  </li>
+  <li>k8sはServiceを利用し、全てのノードのiptablesを動的に構成</li>
+</ul>
+
+<h4 id="52-サービスの-dns-エントリーの確認">5.2. サービスの DNS エントリーの確認</h4>
+
+<ul>
+  <li>Serviceが作成したDNS登録を確認
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">$SERVICENAME.$NAMESPACE.svc.cluster.local</code></li>
+      <li>完全修飾ドメイン名</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">nslookup nginx</code>
+    <ul>
+      <li>例：<code class="language-plaintext highlighter-rouge">nginx.default.svc.cluster.local</code></li>
+      <li>同じ名前空間でないと、結果を返さない</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="53-サービスのタイプの変更">5.3. サービスのタイプの変更</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">LoadBalancer</code>タイプはコストがかかる可能性</li>
+</ul>
+
+<h4 id="54-ingress-コントローラーのデプロイ">5.4. Ingress コントローラーのデプロイ</h4>
+
+<ul>
+  <li>リバースプロキシ、LBとして機能</li>
+  <li>
+    <p>ホスト名、URIパスで変更できる</p>
+  </li>
+  <li>Ingressコントローラをデプロイ</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>kubectl apply <span class="nt">-f</span> https://raw.githubusercontent.com/kubernetes/ingress-nginx/
+ controller-v1.8.1/deploy/static/provider/cloud/deploy.yaml
+</code></pre></div></div>
+<ul>
+  <li>新しく作成されたingress-nginx名前空間で新しいポッドが起動
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">kubectl get pods -n ingress-nginx</code></li>
+    </ul>
+  </li>
+  <li>k8s Gateway APIの新しい仕様がIngress仕様の将来的な代替として登場
+    <ul>
+      <li>今後はこちらを検討する価値がある</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="55-クラスターの外部からサービスにアクセスできるようにする">5.5. クラスターの外部からサービスにアクセスできるようにする</h4>
+
+<ul>
+  <li>hello-appサービスへのURI パス/webを構成するIngressオブジェクト</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="na">apiVersion</span><span class="pi">:</span> <span class="s">networking.k8s.io/v1</span>
+ <span class="na">kind</span><span class="pi">:</span> <span class="s">Ingress</span>
+ <span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">nginx-public</span>
+  <span class="na">annotations</span><span class="pi">:</span>
+    <span class="na">nginx.ingress.kubernetes.io/rewrite-target</span><span class="pi">:</span> <span class="s">/</span>
+ <span class="na">spec</span><span class="pi">:</span>
+  <span class="na">ingressClassName</span><span class="pi">:</span> <span class="s">nginx</span>
+  <span class="na">rules</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">host</span><span class="pi">:</span>
+    <span class="na">http</span><span class="pi">:</span>
+      <span class="na">paths</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">path</span><span class="pi">:</span> <span class="s">/web</span>
+        <span class="na">pathType</span><span class="pi">:</span> <span class="s">Prefix</span>
+        <span class="na">backend</span><span class="pi">:</span>
+          <span class="na">service</span><span class="pi">:</span>
+            <span class="na">name</span><span class="pi">:</span> <span class="s">web</span>
+            <span class="na">port</span><span class="pi">:</span>
+              <span class="na">number</span><span class="pi">:</span> <span class="m">8080</span>
+</code></pre></div></div>
+
+<ul>
+  <li>ダッシュボードで確認できる</li>
+  <li>上記の場合は、プライベートIPアドレス</li>
+  <li>IngressコントローラーはAPIサーバーの/ingressesエンドポイントをリッスン</li>
+  <li><code class="language-plaintext highlighter-rouge">kubectl describe ingress</code>
+<img src="/md/assets/images/k8s-ingress.png" alt="Ingress" /></li>
+</ul>
+
+<h3 id="6-アプリケーションマニフェストの管理">6. アプリケーションマニフェストの管理</h3>
+
+<ul>
+  <li>Helm, kompose, kappなどのツール</li>
+  <li>kompose
+    <ul>
+      <li>docker-composeをk8sに変換</li>
+    </ul>
+  </li>
+  <li>kapp
+    <ul>
+      <li>複数のyamlを一個のアプリケーションとして管理</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="61-kubernetes-パッケージマネージャーである-helm-のインストール">6.1. Kubernetes パッケージマネージャーである Helm のインストール</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">brew install helm</code></li>
+</ul>
+
+<h4 id="62-helm-へのチャートリポジトリの追加">6.2. Helm へのチャートリポジトリの追加</h4>
+
+<ul>
+  <li>Artifact Hubなどが有名
+    <ul>
+      <li>helmコマンドは上記と統合</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 検索</span>
+helm search hub <span class="nt">--list-repo-url</span> redis
+
+<span class="c"># Bitnamiによって公開されたチャートをデプロイする場合</span>
+helm repo add bitnami https://charts.bitnami.com/bitnami
+</code></pre></div></div>
+
+<h4 id="63-helm-を使用したアプリケーションのインストール">6.3. Helm を使用したアプリケーションのインストール</h4>
+
+<ul>
+  <li>Redisチャートをデプロイする場合</li>
+  <li><code class="language-plaintext highlighter-rouge">helm repo update</code>
+    <ul>
+      <li>検索の前に、チャートリポジトリのローカルキャッシュを更新</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>helm search repo bitnami/redis
+helm <span class="nb">install </span>redis bitnami/redis
+kubectl get all <span class="nt">-l</span> app.kubernetes.io/name<span class="o">=</span>redis
+</code></pre></div></div>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">helm install</code>コマンドの出力に注意
+    <ul>
+      <li>シークレット情報が含まれている可能性</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">helm list</code>, <code class="language-plaintext highlighter-rouge">helm status name</code></li>
+</ul>
+
+<h4 id="64-チャートのカスタマイズ可能なパラメーターの検査">6.4. チャートのカスタマイズ可能なパラメーターの検査</h4>
+
+<ul>
+  <li>Valuesファイルの確認
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">helm show values bitnami/redis</code></li>
+    </ul>
+  </li>
+  <li>Readmeの表示
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">helm show readme bitnami/redis</code></li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="65-チャートパラメータの上書き">6.5. チャートパラメータの上書き</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>helm <span class="nb">install </span>redis bitnami/redis <span class="nt">--set</span> <span class="nv">architecture</span><span class="o">=</span>standalone
+helm <span class="nb">install </span>redis bitnami/redis <span class="nt">--values</span> values.yaml
+</code></pre></div></div>
+
+<ul>
+  <li>yamlには<code class="language-plaintext highlighter-rouge">architecture: standalone</code>を含める</li>
+</ul>
+
+<h4 id="66-ユーザー指定のパラメータの取得-helm-リリース">6.6. ユーザー指定のパラメータの取得 Helm リリース</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">helm get values redis</code></li>
+  <li><code class="language-plaintext highlighter-rouge">helm get</code>では、YAML、フックなども取得できる</li>
+</ul>
+
+<h4 id="67-helm-を使用したアプリケーションのアンインストール">6.7. Helm を使用したアプリケーションのアンインストール</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">helm uninstall redis</code></li>
+</ul>
+
+<h4 id="68-パッケージ化するための独自のチャートの作成-helm-によるアプリケーション">6.8. パッケージ化するための独自のチャートの作成 Helm によるアプリケーション</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">helm create</code>と<code class="language-plaintext highlighter-rouge">helm package</code>コマンドを使⽤</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ tree oreilly/
+ oreilly/
+ ├── Chart.yaml
+ ├── charts
+ ├── templates
+ │   ├── NOTES.txt
+ │   ├── _helpers.tpl
+ │   ├── deployment.yaml
+ │   ├── hpa.yaml
+ │   ├── ingress.yaml
+ │   ├── service.yaml
+ │   ├── serviceaccount.yaml
+ │   └── tests
+ │       └── test-connection.yaml
+ └── values.yaml
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># チャートをローカルでテスト</span>
+helm <span class="nb">install </span>oreilly-app ./oreilly
+
+helm package oreilly/
+
+<span class="c"># チャートをリポジトリに公開</span>
+<span class="c"># 以下はindex.yamlを生成</span>
+helm repo index <span class="nb">.</span>
+
+helm search repo oreilly
+</code></pre></div></div>
+
+<h4 id="69-komposeのインストール">6.9. Komposeのインストール</h4>
+
+<ul>
+  <li>docker-compose→k8s, openshift</li>
+  <li><code class="language-plaintext highlighter-rouge">brew install kompose</code></li>
+</ul>
+
+<h4 id="610-docker-compose-ファイルからkubernetes-マニフェストを生成">6.10. Docker Compose ファイルからKubernetes マニフェストを生成</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">kompose convert</code></li>
+  <li>その後、<code class="language-plaintext highlighter-rouge">kubectl apply</code></li>
+  <li><code class="language-plaintext highlighter-rouge">kompose convert --stdout | kubectl apply -f -</code></li>
+  <li>ボリューム、ネットワークなどは正しく変換されない可能性</li>
+</ul>
+
+<h4 id="611-docker-compose-ファイルからヘルムチャートを生成">6.11. Docker Compose ファイルからヘルムチャートを生成</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">kompose convert --chart</code></li>
+</ul>
+
+<h4 id="612-kapp-のインストール">6.12. kapp のインストール</h4>
+
+<ul>
+  <li>デプロイを管理したいが、helmにしたくない場合</li>
+  <li><code class="language-plaintext highlighter-rouge">brew install kapp</code></li>
+</ul>
+
+<h4 id="613-kapp-を使用した-yaml-マニフェストのデプロイ">6.13. kapp を使用した YAML マニフェストのデプロイ</h4>
+
+<ul>
+  <li>kapp を使⽤してYAML マニフェストをデプロイおよび管理</li>
+  <li>同じラベルをアプリとみなす</li>
+  <li><code class="language-plaintext highlighter-rouge">kapp deploy -a nginx -f manifests/</code></li>
+  <li><code class="language-plaintext highlighter-rouge">--diff-changesオプション</code>
+    <ul>
+      <li>更新されたyamlの差分を表示</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 作成されたリソースを確認</span>
+kapp inspect <span class="nt">-a</span> nginx
+
+kapp <span class="nb">ls
+</span>kapp delete <span class="nt">-a</span> nginx
+</code></pre></div></div>
+
+<h3 id="7-kubernetes-apiとキーメタデータの探索">7. Kubernetes APIとキーメタデータの探索</h3>
+
+<h4 id="71-kubernetes-api-サーバーのエンドポイントの検出">7.1. Kubernetes API サーバーのエンドポイントの検出</h4>
+
+<ul>
+  <li>利用可能な様々なAPIを検出</li>
+  <li><code class="language-plaintext highlighter-rouge">kubectl proxy</code>を実行後、curl</li>
+  <li><code class="language-plaintext highlighter-rouge">curl http://localhost:8001/api/v1/</code></li>
+  <li>あるいは<code class="language-plaintext highlighter-rouge">kubectl api-resources</code></li>
+</ul>
+
+<h4 id="72-kubernetes-マニフェストの構造について">7.2. Kubernetes マニフェストの構造について</h4>
+
+<h4 id="73-名前の競合を避けるための-namespace-の作成">7.3. 名前の競合を避けるための namespace の作成</h4>
+
+<ul>
+  <li>何も指定しない場合、default名前空間</li>
+  <li>予約済み
+    <ul>
+      <li>kube-system, kube-public, kube-node-lease</li>
+      <li>kube-publicは全てのユーザーが使用できるパブリックオブジェクトを格納</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">kubectl get ns</code></li>
+</ul>
+
+<h4 id="74-namespace-内でのクォータの設定">7.4. namespace 内でのクォータの設定</h4>
+
+<ul>
+  <li>名前空間で使用できるリソースを制限したい場合
+    <ul>
+      <li>ポッド数など</li>
+    </ul>
+  </li>
+  <li>ResourceQuotaオブジェクトを作成</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">apiVersion</span><span class="pi">:</span> <span class="s">v1</span>
+ <span class="s">kind</span><span class="err">:</span> <span class="s">ResourceQuota</span>
+ <span class="s">metadata</span><span class="err">:</span>
+   <span class="na">name</span><span class="pi">:</span> <span class="s">podquota</span>
+ <span class="na">spec</span><span class="pi">:</span>
+   <span class="na">hard</span><span class="pi">:</span>
+     <span class="na">pods</span><span class="pi">:</span> <span class="s2">"</span><span class="s">10"</span>
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>kubectl create namespace my-app
+ <span class="nv">$ </span>kubectl apply <span class="nt">-f</span> resource-quota-pods.yaml <span class="nt">--namespace</span><span class="o">=</span>my-app
+ <span class="nv">$ </span>kubectl describe resourcequota podquota <span class="nt">--namespace</span><span class="o">=</span>my-app
+</code></pre></div></div>
+
+<h4 id="75-オブジェクトのラベル付け">7.5. オブジェクトのラベル付け</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">kubectl label</code>コマンド</li>
+  <li>ラベルの削除、上書き、名前空間内の全てのリソースにラベルを付ける方法</li>
+  <li>メンバー(部門), 環境(本番)など</li>
+</ul>
+
+<h4 id="76-クエリーでのラベルの使用">7.6. クエリーでのラベルの使用</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">kubectl get --selector</code>コマンドを使⽤</li>
+  <li><code class="language-plaintext highlighter-rouge">-l</code>はその省略形</li>
+  <li><code class="language-plaintext highlighter-rouge">-L</code>を利用</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl get pods <span class="nt">--show-labels</span>
+kubectl get pods <span class="nt">--selector</span> <span class="nv">app</span><span class="o">=</span>nginx
+</code></pre></div></div>
+
+<ul>
+  <li>XまたはYのラベル
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">kubectl get pods -l 'env in (production, development)'</code></li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="77-1-つのコマンドによるリソースのアノテーション付け">7.7. 1 つのコマンドによるリソースのアノテーション付け</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">kubectl annotate</code>コマンドを使⽤</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl annotate pods foobar <span class="se">\</span>
+    <span class="nv">description</span><span class="o">=</span><span class="s1">'hello'</span>
+
+kubectl annotate deployment foobar <span class="se">\</span>
+ kubernetes.io/change-cause<span class="o">=</span><span class="s2">"Reason for creating a new revision"</span>
+</code></pre></div></div>
+
+<h4 id="8-ボリュームと構成データ">8. ボリュームと構成データ</h4>
+
+<ul>
+  <li>emptyDir
+    <ul>
+      <li>ローカルノードの一時ボリューム</li>
+    </ul>
+  </li>
+  <li>nfs</li>
+  <li>EBS, EFS</li>
+  <li>secret, configMap</li>
+</ul>
+
+<h4 id="81-コンテナ間でのデータ交換-ローカルボリューム">8.1. コンテナ間でのデータ交換 ローカルボリューム</h4>
+
+<ul>
+  <li>Pod内で2つのコンテナを実行し、データを交換したい</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">apiVersion</span><span class="pi">:</span> <span class="s">v1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">Pod</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">sharevol</span>
+ <span class="na">spec</span><span class="pi">:</span>
+  <span class="na">containers</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">c1</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">ubuntu:20.04</span>
+    <span class="na">command</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">bin/bash"</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">-c"</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">sleep</span><span class="nv"> </span><span class="s">10000"</span>
+    <span class="na">volumeMounts</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">xchange</span>
+        <span class="na">mountPath</span><span class="pi">:</span> <span class="s2">"</span><span class="s">/tmp/xchange"</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">c2</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">ubuntu:20.04</span>
+    <span class="na">command</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">bin/bash"</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">-c"</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">sleep</span><span class="nv"> </span><span class="s">10000"</span>
+    <span class="na">volumeMounts</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">xchange</span>
+        <span class="na">mountPath</span><span class="pi">:</span> <span class="s2">"</span><span class="s">/tmp/data"</span>
+  <span class="na">volumes</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">xchange</span>
+    <span class="na">emptyDir</span><span class="pi">:</span> <span class="pi">{}</span>
+</code></pre></div></div>
+
+<h4 id="82-シークレットを使用した-api-アクセスキーの-pod-への受け渡し">8.2. シークレットを使用した API アクセスキーの Pod への受け渡し</h4>
+
+<h4 id="83-アプリケーションへの設定データの提供">8.3. アプリケーションへの設定データの提供</h4>
+
+<h4 id="84-minikube-での永続ボリュームの使用">8.4. Minikube での永続ボリュームの使用</h4>
+
+<h4 id="85-minikube-でのデータ永続性について">8.5. Minikube でのデータ永続性について</h4>
+
+<h4 id="86-バージョン管理での暗号化されたシークレットの保存">8.6. バージョン管理での暗号化されたシークレットの保存</h4>
+
+<h3 id="9-スケーリング">9. スケーリング</h3>
+<!--
+#### 9.1. デプロイメントのスケーリング
+
+#### 9.2. Horizontal Pod Auto Scaling の使用
+
+#### 9.3. GKE でのクラスタの自動サイズ変更
+
+#### 9.4. Amazon EKS クラスターの自動サイズ変更
+-->
+
+<h3 id="10-セキュリティ">10. セキュリティ</h3>
+<!--
+#### 10.1. アプリケーションの一意の ID の提供
+
+#### 10.2. アクセス制御情報の一覧および表示
+
+#### 10.3. リソースへのアクセスの制御
+
+#### 10.4. Pod のセキュア化
+-->
+
+<h3 id="11-監視とロギング">11. 監視とロギング</h3>
+<!--
+#### 11.1. コンテナのログへのアクセス
+
+#### 11.2. 壊れた状態からの回復 活性プローブ
+
+#### 11.3. を使用して Pod へのトラフィックフローを制御する レデ
+ィネスプローブ
+
+#### 11.4. を使用して低速で起動するコンテナーの保護 スタートア
+ッププローブ
+
+#### 11.5. Liveness および Readiness プローブを お客様のデプ
+ロイメント
+
+#### 11.6. CLI での Kubernetes メトリクスへのアクセス
+
+#### 11.7. Minikube での Prometheus と Grafana の使用
+-->
+
+<h3 id="12-メンテナンスとトラブルシューティング">12. メンテナンスとトラブルシューティング</h3>
+<!--
+#### 12.1. kubectl のオートコンプリートの有効化
+
+#### 12.2. サービスからの Pod の削除
+
+#### 12.3. クラスター外の ClusterIP サービスへのアクセス
+
+#### 12.4. リソースステータスの理解と解析
+
+#### 12.5. Pod のデバッグ
+
+#### 12.6. Pod の起動動作への影響
+
+#### 12.7. クラスター状態の詳細なスナップショットの取得
+
+#### 12.8. Kubernetes ワーカーノードの追加
+
+#### 12.9. メンテナンスのための Kubernetes ノードのドレイン
+-->
+
+<h3 id="13-サービスメッシュ">13. サービスメッシュ</h3>
+<!--
+#### 13.1. Istio サービスメッシュのインストール
+
+#### 13.2. Istio Sidecar を使用したマイクロサービスのデプロイ
+
+#### 13.3. Istio 仮想サービスを使用したトラフィックのルーティン
+グ
+
+#### 13.4. Istio 仮想サービスを使用した URL の書き換え
+
+#### 13.5. Linkerd サービスメッシュのインストール
+
+#### 13.6. Linkerd Mesh へのサービスのデプロイ
+
+#### 13.7. Linkerd のサービスへのトラフィックのルーティング
+
+#### 13.8. Linkerd でのサーバーへのトラフィックの承認
+-->
+
+<h3 id="14-サーバーレスおよびイベント駆動型アプリケーション">14. サーバーレスおよびイベント駆動型アプリケーション</h3>
+<!--
+#### 14.1. Knative Operator のインストール
+
+#### 14.2. Knative Serving コンポーネントのインストール
+
+#### 14.3. Knative CLI のインストール
+
+#### 14.4. Knative サービスの作成
+
+#### 14.5. Knative Eventing コンポーネントのインストール
+
+#### 14.6. Knative Eventing ソースのデプロイ
+
+#### 14.7. Knative Eventing ソースの有効化
+
+#### 14.8. TriggerMesh からのイベントソースのインストール
+-->
+
+<h3 id="15-kubernetesの拡張">15. Kubernetesの拡張</h3>
+<!--
+#### 15.1. ソースからのコンパイル
+
+#### 15.2. 特定のコンポーネントのコンパイル
+
+#### 15.3. Python クライアントを使用した Kubernetes API との
+対話
+
+#### 15.4. カスタムを使用した API の拡張 リソース定義
+-->
+</div>
+
+      <footer>
+        <p>
+          Tags: 
+          <a href="/md/tag/書籍">書籍</a>,  
+          <a href="/md/tag/k8s">k8s</a> 
+        </p>
+      </footer>
+    </article>
+
+  </main>
+
+  <!-- サイドバー部分 -->
+  <aside id="sidebar">
+    <h2><a href="/md/about/">About</a></h2>
+
+    <!--
+    <h2><a href="/md/categories/">Categories</a></h2>
+    <ul>
+      
+        <li><a href="/md/category/blog"">blog</a></li>
+      
+    </ul>
+    -->
+    
+    <h2><a href="/md/tags/">Tags</a></h2>
+    <ul>
+      
+        <li><a href="/md/tag/fastapi">FastAPI</a></li>
+      
+        <li><a href="/md/tag/nodejs">Nodejs</a></li>
+      
+        <li><a href="/md/tag/mysql">MySQL</a></li>
+      
+        <li><a href="/md/tag/ツール">ツール</a></li>
+      
+        <li><a href="/md/tag/react">React</a></li>
+      
+        <li><a href="/md/tag/開発">開発</a></li>
+      
+        <li><a href="/md/tag/elasticsearch">Elasticsearch</a></li>
+      
+        <li><a href="/md/tag/firebase">Firebase</a></li>
+      
+        <li><a href="/md/tag/sqlite">sqlite</a></li>
+      
+        <li><a href="/md/tag/k8s">k8s</a></li>
+      
+        <li><a href="/md/tag/書籍">書籍</a></li>
+      
+        <li><a href="/md/tag/設計">設計</a></li>
+      
+        <li><a href="/md/tag/aws">AWS</a></li>
+      
+        <li><a href="/md/tag/cdk">CDK</a></li>
+      
+        <li><a href="/md/tag/go">Go</a></li>
+      
+        <li><a href="/md/tag/terraform">Terraform</a></li>
+      
+    </ul>
+    <h2><a href="/md/archives/">Archives</a></h2>
+    <ul>
+      
+      
+        <li><a href="/md/2025/06/">2025-06</a></li>
+      
+        <li><a href="/md/2025/05/">2025-05</a></li>
+      
+        <li><a href="/md/2025/03/">2025-03</a></li>
+      
+        <li><a href="/md/2025/02/">2025-02</a></li>
+      
+    </ul>
+  </aside>
+</div>
+
+<footer>
+  <p>&copy; 2025 ツールの忘備録</p>
+</footer>
+
+</body>
+</html>

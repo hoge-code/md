@@ -1,0 +1,2095 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/md/assets/css/default.css">
+  <link rel="stylesheet" href="/md/assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <title>ツールの忘備録</title>
+</head>
+<body>
+
+<header>
+  <h1><a href="/md/">ツールの忘備録</a></h1></h1>
+</header>
+
+<div id="content">
+  <!-- メインコンテンツ部分 -->
+  <main>
+        <article>
+      <header>
+        <h1>「Next.js公式ドキュメント」を読む</h1>
+        <p class="meta">
+          June 18, 2025 
+          <!--
+          in
+          <a href="/category/blog"
+            >blog</a
+          >
+        -->
+        </p>
+      </header>
+
+      <div class="content"><p><code class="language-plaintext highlighter-rouge">Next.js</code>の公式ドキュメントを読んだので、気になったことを中心に簡単な感想や要約を書きます。(網羅性はありません)</p>
+
+<p><strong>目次</strong></p>
+<ul id="markdown-toc">
+  <li><a href="#1インストール" id="markdown-toc-1インストール">1.インストール</a></li>
+  <li><a href="#2プロジェクトの構造" id="markdown-toc-2プロジェクトの構造">2.プロジェクトの構造</a></li>
+  <li><a href="#3レイアウトとページ" id="markdown-toc-3レイアウトとページ">3.レイアウトとページ</a></li>
+  <li><a href="#4リンクとナビゲーション" id="markdown-toc-4リンクとナビゲーション">4.リンクとナビゲーション</a></li>
+  <li><a href="#5サーバーおよびクライアントコンポーネント" id="markdown-toc-5サーバーおよびクライアントコンポーネント">5.サーバーおよびクライアントコンポーネント</a></li>
+  <li><a href="#6部分的な事前レンダリング" id="markdown-toc-6部分的な事前レンダリング">6.部分的な事前レンダリング</a></li>
+  <li><a href="#7データの取得" id="markdown-toc-7データの取得">7.データの取得</a></li>
+  <li><a href="#8データの更新" id="markdown-toc-8データの更新">8.データの更新</a></li>
+  <li><a href="#9キャッシュと再検証" id="markdown-toc-9キャッシュと再検証">9.キャッシュと再検証</a></li>
+  <li><a href="#10エラー処理" id="markdown-toc-10エラー処理">10.エラー処理</a></li>
+  <li><a href="#11css" id="markdown-toc-11css">11.CSS</a></li>
+  <li><a href="#12画像の最適化" id="markdown-toc-12画像の最適化">12.画像の最適化</a></li>
+  <li><a href="#13フォントの最適化" id="markdown-toc-13フォントの最適化">13.フォントの最適化</a></li>
+  <li><a href="#14メタデータとogイメージ" id="markdown-toc-14メタデータとogイメージ">14.メタデータとOGイメージ</a></li>
+  <li><a href="#15ルートハンドラとミドルウェア" id="markdown-toc-15ルートハンドラとミドルウェア">15.ルートハンドラとミドルウェア</a></li>
+  <li><a href="#16デプロイ" id="markdown-toc-16デプロイ">16.デプロイ</a></li>
+  <li><a href="#17アップグレード" id="markdown-toc-17アップグレード">17.アップグレード</a></li>
+</ul>
+
+<hr />
+
+<p><strong>サイト</strong></p>
+
+<ul>
+  <li><a href="https://nextjs.org/docs/">公式</a></li>
+</ul>
+
+<hr />
+
+<h3 id="1インストール">1.インストール</h3>
+
+<h4 id="システム要件">システム要件</h4>
+
+<h4 id="自動インストール">自動インストール</h4>
+
+<h4 id="手動インストール">手動インストール</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">pnpm i next@latest react@latest react-dom@latest</code></li>
+  <li><code class="language-plaintext highlighter-rouge">next dev, build, start, lint</code></li>
+</ul>
+
+<h5 id="アプリ-ディレクトリを作成する">アプリ ディレクトリを作成する</h5>
+
+<ul>
+  <li>layout.tsxは必須で、html, bodyタグを含める必要</li>
+  <li>作成せず、<code class="language-plaintext highlighter-rouge">next dev</code>を実行すると自動で作成される</li>
+</ul>
+
+<h5 id="パブリック-フォルダーを作成する-省略可能">パブリック フォルダーを作成する (省略可能)</h5>
+
+<ul>
+  <li>/で参照できる</li>
+</ul>
+
+<h4 id="開発サーバーを実行する">開発サーバーを実行する</h4>
+
+<h4 id="typescript-を設定する">TypeScript を設定する</h4>
+
+<h5 id="ideプラグイン">IDEプラグイン</h5>
+
+<h4 id="eslint-のセットアップ">ESLint のセットアップ</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">npm run lint</code>
+    <ul>
+      <li>strice, base, cancelのオプションが表示</li>
+      <li>strict
+        <ul>
+          <li>Core Web Vitalsが含まれる、推奨</li>
+          <li><code class="language-plaintext highlighter-rouge">.eslintrc.json</code>が作成される</li>
+        </ul>
+      </li>
+      <li>cancel
+        <ul>
+          <li>独自の場合</li>
+        </ul>
+      </li>
+      <li>毎回のビルドでも自動で実行される</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="絶対インポートとモジュールパスエイリアスの設定">絶対インポートとモジュールパスエイリアスの設定</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">tsconfig.json</code>, <code class="language-plaintext highlighter-rouge">jsconfig.json</code>で<code class="language-plaintext highlighter-rouge">baseUrl</code>を設定</li>
+  <li><code class="language-plaintext highlighter-rouge">paths</code>でエイリアスも設定
+    <div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s2">"</span><span class="s">compilerOptions"</span><span class="err">:</span> <span class="pi">{</span>
+<span class="s2">"</span><span class="s">baseUrl"</span><span class="pi">:</span> <span class="s2">"</span><span class="s">src/"</span><span class="pi">,</span>
+<span class="s2">"</span><span class="s">paths"</span><span class="pi">:</span> <span class="pi">{</span>
+  <span class="s2">"</span><span class="s">@/styles/*"</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">styles/*"</span><span class="pi">],</span>
+  <span class="s2">"</span><span class="s">@/components/*"</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">components/*"</span><span class="pi">]</span>
+<span class="pi">}</span>
+<span class="pi">}</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h3 id="2プロジェクトの構造">2.プロジェクトの構造</h3>
+
+<h4 id="フォルダとファイルの規則">フォルダとファイルの規則</h4>
+
+<h5 id="最上位フォルダ">最上位フォルダ</h5>
+
+<h5 id="トップレベルファイル">トップレベルファイル</h5>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">next.config.js</code></li>
+  <li><code class="language-plaintext highlighter-rouge">instrumentation.ts</code>
+    <ul>
+      <li>Opentelemetory</li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="ルーティングファイル">ルーティングファイル</h5>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">global-error.tsx</code></li>
+  <li><code class="language-plaintext highlighter-rouge">template.tsx</code>
+    <ul>
+      <li>再レンダリングされる</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">default.tsx</code>
+    <ul>
+      <li>並列ルートフォールバックパッケージ</li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="ネストされたルート">ネストされたルート</h5>
+
+<h5 id="動的ルート">動的ルート</h5>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">[folder]</code>
+    <ul>
+      <li>動的ルート</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">[...folder]</code>
+    <ul>
+      <li>包括的</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">[[...folder]]</code>
+    <ul>
+      <li>オプション、包括</li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="ルートグループプライベート">ルートグループ、プライベート</h5>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">(folder)</code>
+    <ul>
+      <li>ルーティングに影響を与えず、グループ化</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">_folder</code>
+    <ul>
+      <li>ルーティングから除外</li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="並行ルートと傍受ルート">並行ルートと傍受ルート</h5>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">@folder</code>
+    <ul>
+      <li>名前付きスロット</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">(.)folder</code>
+    <ul>
+      <li>同じレベルでインターセプト</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">(..)folder</code>
+    <ul>
+      <li>1つ上のレベルをインターセプト</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">(..)(..)folder</code>
+    <ul>
+      <li>2レベル上でインターセプト</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">(...)folder</code>
+    <ul>
+      <li>ルートからのインターセプト</li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="メタデータファイルの規則">メタデータファイルの規則</h5>
+
+<h6 id="アプリアイコン">アプリアイコン</h6>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">favicon.ico</code></li>
+  <li><code class="language-plaintext highlighter-rouge">icon.ts, tsx</code></li>
+  <li><code class="language-plaintext highlighter-rouge">apple-icon.ts, tsx</code></li>
+</ul>
+
+<h6 id="open-graphとtwitterの画像">Open GraphとTwitterの画像</h6>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">opengraph-image.ts, tsx</code></li>
+  <li><code class="language-plaintext highlighter-rouge">twitter-image.ts, tsx</code></li>
+</ul>
+
+<h6 id="seo">SEO</h6>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">sitemap.ts</code>
+    <ul>
+      <li>xmlが生成される</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">robots.ts</code></li>
+</ul>
+
+<h4 id="プロジェクトの整理">プロジェクトの整理</h4>
+
+<h5 id="コンポーネント階層">コンポーネント階層</h5>
+
+<p><img src="/md/assets/images/component-hierarchy.png" alt="component-hierarchy" /></p>
+
+<ul>
+  <li>再帰的にレンダリングされる(ネスト)</li>
+</ul>
+
+<p><img src="/md/assets/images/recursive-rendering.png" alt="recursive-rendering" /></p>
+
+<h5 id="コロケーション">コロケーション</h5>
+
+<h5 id="プライベートフォルダ">プライベートフォルダ</h5>
+
+<ul>
+  <li>デフォルトで安全に共存できるので基本的に不要</li>
+  <li>フォルダの前に<code class="language-plaintext highlighter-rouge">%5F</code>
+    <ul>
+      <li>アンダースコアで始まる</li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="ルートグループ">ルートグループ</h5>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>- (admin)
+    - dashboard
+- (marketing)
+    - about
+</code></pre></div></div>
+<ul>
+  <li>サイトのセクションやチーム別にルートを整理できる</li>
+</ul>
+
+<h5 id="srcフォルダ">srcフォルダ</h5>
+
+<h4 id="例">例</h4>
+
+<h5 id="プロジェクトファイルをアプリの外部に保存する">プロジェクトファイルをアプリの外部に保存する</h5>
+
+<h5 id="プロジェクトファイルをアプリ内の最上位フォルダに保存する">プロジェクトファイルをアプリ内の最上位フォルダに保存する</h5>
+
+<h5 id="プロジェクトファイルを機能またはルートごとに分割する">プロジェクトファイルを機能またはルートごとに分割する</h5>
+
+<h5 id="urlパスに影響を与えずにルートを整理する">URLパスに影響を与えずにルートを整理する</h5>
+
+<h5 id="特定のセグメントをレイアウトに組み込む">特定のセグメントをレイアウトに組み込む</h5>
+
+<h5 id="特定のルートでスケルトンをロードすることを選択する">特定のルートでスケルトンをロードすることを選択する</h5>
+
+<ul>
+  <li>新しいルートグループを作成し、<code class="language-plaintext highlighter-rouge">loading.tsx</code>を移動</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>- (overview)
+    - loading.tsx
+    - ...
+</code></pre></div></div>
+
+<h5 id="複数のルートレイアウトを作成する">複数のルートレイアウトを作成する</h5>
+
+<ul>
+  <li>最上位の<code class="language-plaintext highlighter-rouge">layout.tsx</code>を削除し、各ルートグループに配置</li>
+</ul>
+
+<h3 id="3レイアウトとページ">3.レイアウトとページ</h3>
+
+<h4 id="ページの作成">ページの作成</h4>
+
+<h4 id="レイアウトの作成">レイアウトの作成</h4>
+
+<ul>
+  <li>レイアウトは状態を保持、インタラクティブ性を維持、再レンダリングを行わない</li>
+</ul>
+
+<h4 id="ネストされたルートの作成">ネストされたルートの作成</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">app/blog/[slug]/page.tsx</code></li>
+</ul>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">function</span> <span class="nf">generateStaticParams</span><span class="p">()</span> <span class="p">{</span>
+<span class="p">}</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="kd">function</span> <span class="nf">Page</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="o">&lt;</span><span class="nx">h1</span><span class="o">&gt;</span><span class="nx">Hello</span><span class="p">,</span> <span class="nx">Blog</span> <span class="nx">Post</span> <span class="nx">Page</span><span class="o">!&lt;</span><span class="sr">/h1&gt;</span><span class="err">;
+</span><span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="ネストレイアウト">ネストレイアウト</h4>
+
+<h4 id="動的セグメントの作成">動的セグメントの作成</h4>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="k">default</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">BlogPostPage</span><span class="p">({</span>
+  <span class="nx">params</span><span class="p">,</span>
+<span class="p">}:</span> <span class="p">{</span>
+  <span class="nl">params</span><span class="p">:</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="p">{</span> <span class="na">slug</span><span class="p">:</span> <span class="kr">string</span> <span class="p">}</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="p">})</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="p">{</span> <span class="nx">slug</span> <span class="p">}</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">params</span><span class="p">;</span>
+  <span class="kd">const</span> <span class="nx">post</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">getPost</span><span class="p">(</span><span class="nx">slug</span><span class="p">);</span>
+
+  <span class="k">return </span><span class="p">(</span>
+    <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="nx">h1</span><span class="o">&gt;</span><span class="p">{</span><span class="nx">post</span><span class="p">.</span><span class="nx">title</span><span class="p">}</span><span class="o">&lt;</span><span class="sr">/h1</span><span class="err">&gt;
+</span>      <span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="p">{</span><span class="nx">post</span><span class="p">.</span><span class="nx">content</span><span class="p">}</span><span class="o">&lt;</span><span class="sr">/p</span><span class="err">&gt;
+</span>    <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>  <span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="ページ間のリンク">ページ間のリンク</h4>
+
+<ul>
+  <li>Linkコンポーネント
+    <ul>
+      <li>プリフェッチ、クライアント側ナビゲーションを追加</li>
+      <li><code class="language-plaintext highlighter-rouge">import Link from 'next/link'</code></li>
+      <li>より高度な遷移は<code class="language-plaintext highlighter-rouge">useRouter</code>を使う</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="4リンクとナビゲーション">4.リンクとナビゲーション</h3>
+
+<ul>
+  <li>ナビゲーションの高速性が大切
+    <ul>
+      <li>プリフェッチ、ストリーミング、クライアントサイドトランジション</li>
+      <li>動的ルート、低速ネットワークでの高速化</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="ナビゲーションの仕組み">ナビゲーションの仕組み</h4>
+
+<h5 id="サーバーレンダリング">サーバーレンダリング</h5>
+
+<ul>
+  <li>事前レンダリングはビルド時、再検証時に行われ、キャッシュされる</li>
+</ul>
+
+<h5 id="プリフェッチ">プリフェッチ</h5>
+
+<ul>
+  <li>Linkコンポーネントがビューポイントに入った時点で実行</li>
+  <li>静的ルート
+    <ul>
+      <li>完全にプリフェッチ</li>
+    </ul>
+  </li>
+  <li>動的ルート
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">loading.tsx</code>が存在する場合に部分的にプリフェッチ</li>
+      <li>ストリーミングが重要</li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="ストリーミング">ストリーミング</h5>
+
+<ul>
+  <li>準備が整い次第、一部をクライアントに送信</li>
+  <li><code class="language-plaintext highlighter-rouge">loading.tsx</code>を使用すると、page.tsxを<Suspense>境界で⾃動的に囲む</Suspense></li>
+</ul>
+
+<h5 id="クライアント側の遷移">クライアント側の遷移</h5>
+
+<ul>
+  <li>ページを移動すると、ページ全体が読み込まれる
+    <ul>
+      <li>状態のクリア、スクロールのリセットなどの問題</li>
+    </ul>
+  </li>
+  <li>Linkでクライアント側での遷移で対処</li>
+</ul>
+
+<h4 id="遷移が遅くなる原因は何でしょうか">遷移が遅くなる原因は何でしょうか?</h4>
+
+<h5 id="loadingtsxの動的ルートtsx">loading.tsxの動的ルート.tsx</h5>
+
+<ul>
+  <li>Next.js Devtools を使⽤してルートが静的か動的かを識別できる</li>
+  <li>devIndicators</li>
+</ul>
+
+<h5 id="generatestaticparams-のない動的セグメント">generateStaticParams のない動的セグメント</h5>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">generateStaticParams</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">posts</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">fetch</span><span class="p">(</span><span class="dl">'</span><span class="s1">https://.../posts</span><span class="dl">'</span><span class="p">).</span><span class="nf">then</span><span class="p">((</span><span class="nx">res</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">res</span><span class="p">.</span><span class="nf">json</span><span class="p">())</span>
+ 
+  <span class="k">return</span> <span class="nx">posts</span><span class="p">.</span><span class="nf">map</span><span class="p">((</span><span class="nx">post</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">({</span>
+    <span class="na">slug</span><span class="p">:</span> <span class="nx">post</span><span class="p">.</span><span class="nx">slug</span><span class="p">,</span>
+  <span class="p">}))</span>
+<span class="p">}</span>
+ 
+<span class="k">export</span> <span class="k">default</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">Page</span><span class="p">({</span>
+  <span class="nx">params</span><span class="p">,</span>
+<span class="p">}:</span> <span class="p">{</span>
+  <span class="nl">params</span><span class="p">:</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="p">{</span> <span class="na">slug</span><span class="p">:</span> <span class="kr">string</span> <span class="p">}</span><span class="o">&gt;</span>
+<span class="p">})</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="p">{</span> <span class="nx">slug</span> <span class="p">}</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">params</span>
+  <span class="c1">// ...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h5 id="遅いネットワーク">遅いネットワーク</h5>
+
+<ul>
+  <li>リンクをクリックする前に、プリフェッチが完了しない場合
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">loading.tsx</code>が表示されない</li>
+    </ul>
+  </li>
+  <li>遷移中に<code class="language-plaintext highlighter-rouge">useLinkStatus</code>フックを使用</li>
+</ul>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="dl">'</span><span class="s1">use client</span><span class="dl">'</span>
+ 
+<span class="k">import</span> <span class="p">{</span> <span class="nx">useLinkStatus</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">next/link</span><span class="dl">'</span>
+ 
+<span class="k">export</span> <span class="k">default</span> <span class="kd">function</span> <span class="nf">LoadingIndicator</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="p">{</span> <span class="nx">pending</span> <span class="p">}</span> <span class="o">=</span> <span class="nf">useLinkStatus</span><span class="p">()</span>
+  <span class="k">return</span> <span class="nx">pending</span> <span class="p">?</span> <span class="p">(</span>
+    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">role</span><span class="p">=</span><span class="s">"status"</span> <span class="na">aria-label</span><span class="p">=</span><span class="s">"Loading"</span> <span class="na">className</span><span class="p">=</span><span class="s">"spinner"</span> <span class="p">/&gt;</span>
+  <span class="p">)</span> <span class="p">:</span> <span class="kc">null</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>上記をデバウンスする場合
+    <ul>
+      <li>指定の遅延よりも長い場合にのみ表示</li>
+      <li>animationの100ミリ秒の遅延、非表示で開始</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.spinner</span> <span class="p">{</span>
+  <span class="c">/* ... */</span>
+  <span class="nl">opacity</span><span class="p">:</span> <span class="m">0</span><span class="p">;</span>
+  <span class="nl">animation</span><span class="p">:</span>
+    <span class="n">fadeIn</span> <span class="m">500ms</span> <span class="m">100ms</span> <span class="n">forwards</span><span class="p">,</span>
+    <span class="n">rotate</span> <span class="m">1s</span> <span class="n">linear</span> <span class="n">infinite</span><span class="p">;</span>
+<span class="p">}</span>
+ 
+<span class="k">@keyframes</span> <span class="n">fadeIn</span> <span class="p">{</span>
+  <span class="nt">from</span> <span class="p">{</span>
+    <span class="nl">opacity</span><span class="p">:</span> <span class="m">0</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="nt">to</span> <span class="p">{</span>
+    <span class="nl">opacity</span><span class="p">:</span> <span class="m">1</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+ 
+<span class="k">@keyframes</span> <span class="n">rotate</span> <span class="p">{</span>
+  <span class="nt">to</span> <span class="p">{</span>
+    <span class="nl">transform</span><span class="p">:</span> <span class="n">rotate</span><span class="p">(</span><span class="m">360deg</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h5 id="プリフェッチを無効にする">プリフェッチを無効にする</h5>
+
+<ul>
+  <li>膨大なリンクリストをレンダリングする際などにリソースの無駄な消費を避ける</li>
+</ul>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">&lt;</span><span class="nc">Link</span> <span class="na">prefetch</span><span class="p">=</span><span class="si">{</span><span class="kc">false</span><span class="si">}</span> <span class="na">href</span><span class="p">=</span><span class="s">"/blog"</span><span class="p">&gt;</span>Link<span class="p">&lt;/</span><span class="nc">Link</span><span class="p">&gt;</span>
+</code></pre></div></div>
+<ul>
+  <li>クリック時のみ取得される</li>
+  <li>ホバー時のみプリフェッチを行う場合</li>
+</ul>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="dl">'</span><span class="s1">use client</span><span class="dl">'</span>
+ 
+<span class="k">import</span> <span class="nx">Link</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">next/link</span><span class="dl">'</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">useState</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react</span><span class="dl">'</span>
+ 
+<span class="kd">function</span> <span class="nf">HoverPrefetchLink</span><span class="p">({</span>
+  <span class="nx">href</span><span class="p">,</span>
+  <span class="nx">children</span><span class="p">,</span>
+<span class="p">}:</span> <span class="p">{</span>
+  <span class="nl">href</span><span class="p">:</span> <span class="kr">string</span>
+  <span class="nx">children</span><span class="p">:</span> <span class="nx">React</span><span class="p">.</span><span class="nx">ReactNode</span>
+<span class="p">})</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="p">[</span><span class="nx">active</span><span class="p">,</span> <span class="nx">setActive</span><span class="p">]</span> <span class="o">=</span> <span class="nf">useState</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
+ 
+  <span class="k">return </span><span class="p">(</span>
+    <span class="p">&lt;</span><span class="nc">Link</span>
+      <span class="na">href</span><span class="p">=</span><span class="si">{</span><span class="nx">href</span><span class="si">}</span>
+      <span class="na">prefetch</span><span class="p">=</span><span class="si">{</span><span class="nx">active</span> <span class="p">?</span> <span class="kc">null</span> <span class="p">:</span> <span class="kc">false</span><span class="si">}</span>
+      <span class="na">onMouseEnter</span><span class="p">=</span><span class="si">{</span><span class="p">()</span> <span class="o">=&gt;</span> <span class="nf">setActive</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span><span class="si">}</span>
+    <span class="p">&gt;</span>
+      <span class="si">{</span><span class="nx">children</span><span class="si">}</span>
+    <span class="p">&lt;/</span><span class="nc">Link</span><span class="p">&gt;</span>
+  <span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h5 id="水分補給が完了していません">水分補給が完了していません</h5>
+
+<ul>
+  <li>Linkはクライアントコンポーネント
+    <ul>
+      <li>プリフェッチ前にハイドレートの必要</li>
+      <li>JSファイルが大きいと、ハイドレートが遅れ、プリフェッチが開始されない場合
+        <ul>
+          <li><code class="language-plaintext highlighter-rouge">next/bundle-analyzer</code>プラグインを使⽤</li>
+          <li>ロジックをサーバ側へ移動</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="例-1">例</h4>
+
+<h5 id="ネイティブ履歴api">ネイティブ履歴API</h5>
+
+<h6 id="windowhistorypushstate">window.history.pushState</h6>
+
+<ul>
+  <li>前の状態に戻れる
+    <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">useSearchParams</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">next/navigation</span><span class="dl">'</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h6 id="windowhistoryreplacestate">window.history.replaceState</h6>
+
+<ul>
+  <li>前の状態に戻れない</li>
+  <li>アプリのロケールを切り替える場合などに使用
+    <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">usePathname</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">next/navigation</span><span class="dl">'</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h3 id="5サーバーおよびクライアントコンポーネント">5.サーバーおよびクライアントコンポーネント</h3>
+
+<h4 id="サーバー-コンポーネントとクライアント-コンポーネントはいつ使用すればよいですか">サーバー コンポーネントとクライアント コンポーネントはいつ使用すればよいですか?</h4>
+
+<ul>
+  <li>サーバーコンポーネント
+    <ul>
+      <li>JS量の削減</li>
+      <li>First Contentful Paint（FCP）の改善</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="nextjs-ではサーバー-コンポーネントとクライアント-コンポーネントはどのように機能しますか">Next.js ではサーバー コンポーネントとクライアント コンポーネントはどのように機能しますか?</h4>
+
+<h5 id="サーバー上">サーバー上</h5>
+
+<ul>
+  <li>サーバーコンポーネント
+    <ul>
+      <li>RSC ペイロードという特別なデータ形式でレンダリングされる</li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="クライアント側最初の読み込み">クライアント側（最初の読み込み）</h5>
+
+<ul>
+  <li>HTML→RSCペイロード→JSはクライアントコンポーネントをハイドレート</li>
+</ul>
+
+<h5 id="その後のナビゲーション">その後のナビゲーション</h5>
+
+<h4 id="例-2">例</h4>
+
+<h5 id="クライアントコンポーネントの使用">クライアントコンポーネントの使用</h5>
+
+<h5 id="jsバンドルサイズの削減">JSバンドルサイズの削減</h5>
+
+<ul>
+  <li>CSR以外はサーバーコンポーネントにする</li>
+</ul>
+
+<h5 id="サーバーからクライアントコンポーネントへのデータの受け渡し">サーバーからクライアントコンポーネントへのデータの受け渡し</h5>
+
+<ul>
+  <li>useフックを使うこともできる</li>
+</ul>
+
+<h5 id="サーバーとクライアントのコンポーネントのインターリーブ">サーバーとクライアントのコンポーネントのインターリーブ</h5>
+
+<h5 id="コンテキストプロバイダー">コンテキストプロバイダー</h5>
+
+<h5 id="サードパーティコンポーネント">サードパーティコンポーネント</h5>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">useState</code>などを使うライブラリの場合
+    <ul>
+      <li>サーバーコンポーネントで直接使うとエラー</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="dl">'</span><span class="s1">use client</span><span class="dl">'</span>
+ 
+<span class="k">import</span> <span class="p">{</span> <span class="nx">Carousel</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">acme-carousel</span><span class="dl">'</span>
+ 
+<span class="k">export</span> <span class="k">default</span> <span class="nx">Carousel</span>
+</code></pre></div></div>
+
+<ul>
+  <li>ライブラリ開発者は、エントリポイントに<code class="language-plaintext highlighter-rouge">use client</code>を追加
+    <ul>
+      <li>ユーザーはラッパーを作成する必要がなくなる</li>
+      <li>これを含める<code class="language-plaintext highlighter-rouge">esbuild</code>の設定例も確認できる</li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="環境汚染の防止">環境汚染の防止</h5>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">NEXT_PUBLIC_</code>がついていない環境変数は空文字に置き換えられる</li>
+  <li>誤使用を防ぐために、<code class="language-plaintext highlighter-rouge">server-only</code>パッケージを使用</li>
+</ul>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="dl">'</span><span class="s1">server-only</span><span class="dl">'</span>
+ 
+<span class="k">export</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">getData</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">res</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">fetch</span><span class="p">(</span><span class="dl">'</span><span class="s1">https://external-service.com/data</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span>
+    <span class="na">headers</span><span class="p">:</span> <span class="p">{</span>
+      <span class="na">authorization</span><span class="p">:</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">API_KEY</span><span class="p">,</span>
+    <span class="p">},</span>
+  <span class="p">})</span>
+ 
+  <span class="k">return</span> <span class="nx">res</span><span class="p">.</span><span class="nf">json</span><span class="p">()</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">client-only</code>パッケージもある</li>
+  <li><code class="language-plaintext highlighter-rouge">pnpm add server-only</code>でインストール</li>
+  <li>TSの<code class="language-plaintext highlighter-rouge">noUncheckedSideEffectImports</code>が存在しない場合
+    <ul>
+      <li>独自の型宣言も提供</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="6部分的な事前レンダリング">6.部分的な事前レンダリング</h3>
+
+<ul>
+  <li>PRRは同じルートで静的、動的コンテンツを組み合わせる手法</li>
+</ul>
+
+<p><img src="/md/assets/images/prr.png" alt="PRR" /></p>
+<ul>
+  <li>静的コンテンツのシェルを送信、動的ホールは並列にストリーミングされる</li>
+</ul>
+
+<h4 id="部分的な事前レンダリングはどのように機能しますか">部分的な事前レンダリングはどのように機能しますか?</h4>
+
+<h5 id="静的レンダリング">静的レンダリング</h5>
+
+<ul>
+  <li>静的シェルは事前レンダリングされ、キャッシュされる</li>
+</ul>
+
+<h5 id="ダイナミックレンダリング">ダイナミックレンダリング</h5>
+
+<ul>
+  <li>以下を使用する場合、動的になる</li>
+  <li>cookies</li>
+  <li>headers</li>
+  <li>connection</li>
+  <li>draftMode</li>
+  <li>searchParamsプロパティ</li>
+  <li>unstable_noStore</li>
+  <li>{ cache: ‘no-store’ }でfetch</li>
+</ul>
+
+<h5 id="サスペンス">サスペンス</h5>
+
+<ul>
+  <li>動的な境界をマークするために使用</li>
+</ul>
+
+<h5 id="ストリーミング-1">ストリーミング</h5>
+
+<ul>
+  <li>チャンクに分割し、段階的にストリーミング</li>
+</ul>
+
+<h4 id="部分的な事前レンダリングを有効にする">部分的な事前レンダリングを有効にする</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">next.config.ts</code></li>
+</ul>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="kd">type</span> <span class="p">{</span> <span class="nx">NextConfig</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">next</span><span class="dl">'</span>
+ 
+<span class="kd">const</span> <span class="nx">nextConfig</span><span class="p">:</span> <span class="nx">NextConfig</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">experimental</span><span class="p">:</span> <span class="p">{</span>
+    <span class="na">ppr</span><span class="p">:</span> <span class="dl">'</span><span class="s1">incremental</span><span class="dl">'</span><span class="p">,</span>
+  <span class="p">},</span>
+<span class="p">}</span>
+ 
+<span class="k">export</span> <span class="k">default</span> <span class="nx">nextConfig</span>
+</code></pre></div></div>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">.../layout.tsx</code></li>
+</ul>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="k">export</span> <span class="kd">const</span> <span class="nx">experimental_ppr</span> <span class="o">=</span> <span class="kc">true</span>
+ <span class="p">...</span>
+</code></pre></div></div>
+<ul>
+  <li>上記はルートの最上位セグメントにのみ追加</li>
+  <li>子でPRRを無効にするには、<code class="language-plaintext highlighter-rouge">experimental_prr=false</code></li>
+</ul>
+
+<h4 id="例-3">例</h4>
+
+<h5 id="動的api">動的API</h5>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">Suspense</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react</span><span class="dl">'</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">User</span><span class="p">,</span> <span class="nx">AvatarSkeleton</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./user</span><span class="dl">'</span>
+ 
+<span class="k">export</span> <span class="kd">const</span> <span class="nx">experimental_ppr</span> <span class="o">=</span> <span class="kc">true</span>
+ 
+<span class="k">export</span> <span class="k">default</span> <span class="kd">function</span> <span class="nf">Page</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">return </span><span class="p">(</span>
+    <span class="p">&lt;</span><span class="nt">section</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>This will be prerendered<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nc">Suspense</span> <span class="na">fallback</span><span class="p">=</span><span class="si">{</span><span class="p">&lt;</span><span class="nc">AvatarSkeleton</span> <span class="p">/&gt;</span><span class="si">}</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nc">User</span> <span class="p">/&gt;</span>
+      <span class="p">&lt;/</span><span class="nc">Suspense</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">section</span><span class="p">&gt;</span>
+  <span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h5 id="動的プロップを渡す">動的プロップを渡す</h5>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">page.tsx</code></li>
+</ul>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">Table</span><span class="p">,</span> <span class="nx">TableSkeleton</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./table</span><span class="dl">'</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">Suspense</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react</span><span class="dl">'</span>
+ 
+<span class="k">export</span> <span class="k">default</span> <span class="kd">function</span> <span class="nf">Page</span><span class="p">({</span>
+  <span class="nx">searchParams</span><span class="p">,</span>
+<span class="p">}:</span> <span class="p">{</span>
+  <span class="nl">searchParams</span><span class="p">:</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="p">{</span> <span class="na">sort</span><span class="p">:</span> <span class="kr">string</span> <span class="p">}</span><span class="o">&gt;</span>
+<span class="p">})</span> <span class="p">{</span>
+  <span class="k">return </span><span class="p">(</span>
+    <span class="p">&lt;</span><span class="nt">section</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>This will be prerendered<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nc">Suspense</span> <span class="na">fallback</span><span class="p">=</span><span class="si">{</span><span class="p">&lt;</span><span class="nc">TableSkeleton</span> <span class="p">/&gt;</span><span class="si">}</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nc">Table</span> <span class="na">searchParams</span><span class="p">=</span><span class="si">{</span><span class="nx">searchParams</span><span class="si">}</span> <span class="p">/&gt;</span>
+      <span class="p">&lt;/</span><span class="nc">Suspense</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">section</span><span class="p">&gt;</span>
+  <span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">table.tsx</code></li>
+</ul>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">Table</span><span class="p">({</span>
+  <span class="nx">searchParams</span><span class="p">,</span>
+<span class="p">}:</span> <span class="p">{</span>
+  <span class="nl">searchParams</span><span class="p">:</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="p">{</span> <span class="na">sort</span><span class="p">:</span> <span class="kr">string</span> <span class="p">}</span><span class="o">&gt;</span>
+<span class="p">})</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">sort</span> <span class="o">=</span> <span class="p">(</span><span class="k">await</span> <span class="nx">searchParams</span><span class="p">).</span><span class="nx">sort</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">true</span><span class="dl">'</span>
+  <span class="k">return</span> <span class="dl">'</span><span class="s1">...</span><span class="dl">'</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="7データの取得">7.データの取得</h3>
+
+<ul>
+  <li>サーバー コンポーネントとクライアント コンポーネントでデータを取得する⽅法</li>
+  <li>データに依存するコンポーネントをストリーミングする⽅法</li>
+</ul>
+
+<h4 id="データの取得">データの取得</h4>
+
+<h5 id="サーバーコンポーネント">サーバーコンポーネント</h5>
+
+<ul>
+  <li>以下の2通り</li>
+</ul>
+
+<h6 id="フェッチapiを使用">フェッチAPIを使用</h6>
+
+<ul>
+  <li>fetchでデフォルトではキャッシュされない</li>
+  <li>動的レンダリングを有効にするには、<code class="language-plaintext highlighter-rouge">{ cache: 'no-store' }</code></li>
+  <li>開発時は、fetch呼び出しをログに記録できる</li>
+</ul>
+
+<h6 id="ormまたはデータベースを使用">ORMまたはデータベースを使用</h6>
+
+<h5 id="クライアントコンポーネント">クライアントコンポーネント</h5>
+
+<ul>
+  <li>以下の2通り</li>
+</ul>
+
+<h6 id="useフックを使ったデータのストリーミング">useフックを使ったデータのストリーミング</h6>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nx">Posts</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@/app/ui/posts
+import { Suspense } from </span><span class="dl">'</span><span class="nx">react</span><span class="dl">'</span><span class="s1">
+ 
+export default function Page() {
+  // Don</span><span class="dl">'</span><span class="nx">t</span> <span class="k">await</span> <span class="nx">the</span> <span class="nx">data</span> <span class="nx">fetching</span> <span class="kd">function</span>
+  <span class="nf">const</span> <span class="nx">posts</span> <span class="o">=</span> <span class="nf">getPosts</span><span class="p">()</span>
+ 
+  <span class="k">return </span><span class="p">(</span>
+    <span class="p">&lt;</span><span class="nc">Suspense</span> <span class="na">fallback</span><span class="p">=</span><span class="si">{</span><span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>Loading...<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span><span class="si">}</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nc">Posts</span> <span class="na">posts</span><span class="p">=</span><span class="si">{</span><span class="nx">posts</span><span class="si">}</span> <span class="p">/&gt;</span>
+    <span class="p">&lt;/</span><span class="nc">Suspense</span><span class="p">&gt;</span>
+  <span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="dl">'</span><span class="s1">use client</span><span class="dl">'</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">use</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react</span><span class="dl">'</span>
+ 
+<span class="k">export</span> <span class="k">default</span> <span class="kd">function</span> <span class="nf">Posts</span><span class="p">({</span>
+  <span class="nx">posts</span><span class="p">,</span>
+<span class="p">}:</span> <span class="p">{</span>
+  <span class="nl">posts</span><span class="p">:</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="p">{</span> <span class="na">id</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span> <span class="nl">title</span><span class="p">:</span> <span class="kr">string</span> <span class="p">}[]</span><span class="o">&gt;</span>
+<span class="p">})</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">allPosts</span> <span class="o">=</span> <span class="nf">use</span><span class="p">(</span><span class="nx">posts</span><span class="p">)</span>
+ 
+  <span class="k">return </span><span class="p">(</span>
+    <span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
+      <span class="si">{</span><span class="nx">allPosts</span><span class="p">.</span><span class="nf">map</span><span class="p">((</span><span class="nx">post</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">(</span>
+        <span class="p">&lt;</span><span class="nt">li</span> <span class="na">key</span><span class="p">=</span><span class="si">{</span><span class="nx">post</span><span class="p">.</span><span class="nx">id</span><span class="si">}</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">post</span><span class="p">.</span><span class="nx">title</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+      <span class="p">))</span><span class="si">}</span>
+    <span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
+  <span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h6 id="コミュニティライブラリ">コミュニティライブラリ</h6>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="dl">'</span><span class="s1">use client</span><span class="dl">'</span>
+<span class="k">import</span> <span class="nx">useSWR</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">swr</span><span class="dl">'</span>
+ 
+<span class="kd">const</span> <span class="nx">fetcher</span> <span class="o">=</span> <span class="p">(</span><span class="nx">url</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nf">fetch</span><span class="p">(</span><span class="nx">url</span><span class="p">).</span><span class="nf">then</span><span class="p">((</span><span class="nx">r</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">r</span><span class="p">.</span><span class="nf">json</span><span class="p">())</span>
+ 
+<span class="k">export</span> <span class="k">default</span> <span class="kd">function</span> <span class="nf">BlogPage</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="p">{</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">error</span><span class="p">,</span> <span class="nx">isLoading</span> <span class="p">}</span> <span class="o">=</span> <span class="nf">useSWR</span><span class="p">(</span>
+    <span class="dl">'</span><span class="s1">https://api.vercel.app/blog</span><span class="dl">'</span><span class="p">,</span>
+    <span class="nx">fetcher</span>
+  <span class="p">)</span>
+ 
+  <span class="k">if </span><span class="p">(</span><span class="nx">isLoading</span><span class="p">)</span> <span class="k">return</span> <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>Loading...<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+  <span class="k">if </span><span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="k">return</span> <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>Error: <span class="si">{</span><span class="nx">error</span><span class="p">.</span><span class="nx">message</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+  <span class="p">...</span>
+</code></pre></div></div>
+
+<h4 id="reactcache-によるリクエストの重複排除">React.cache によるリクエストの重複排除</h4>
+
+<ul>
+  <li>異なるコンポーネントで同じデータを取得できる</li>
+  <li><code class="language-plaintext highlighter-rouge">cache: 'force-cache'</code>を追加</li>
+</ul>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">cache</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react</span><span class="dl">'</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">db</span><span class="p">,</span> <span class="nx">posts</span><span class="p">,</span> <span class="nx">eq</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@/lib/db</span><span class="dl">'</span>
+ 
+<span class="k">export</span> <span class="kd">const</span> <span class="nx">getPost</span> <span class="o">=</span> <span class="nf">cache</span><span class="p">(</span><span class="k">async </span><span class="p">(</span><span class="nx">id</span><span class="p">:</span> <span class="kr">string</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">post</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">db</span><span class="p">.</span><span class="nx">query</span><span class="p">.</span><span class="nx">posts</span><span class="p">.</span><span class="nf">findFirst</span><span class="p">({</span>
+    <span class="na">where</span><span class="p">:</span> <span class="nf">eq</span><span class="p">(</span><span class="nx">posts</span><span class="p">.</span><span class="nx">id</span><span class="p">,</span> <span class="nf">parseInt</span><span class="p">(</span><span class="nx">id</span><span class="p">)),</span>
+  <span class="p">})</span>
+<span class="p">})</span>
+</code></pre></div></div>
+
+<h4 id="ストリーミング-2">ストリーミング</h4>
+
+<ul>
+  <li>アプリケーションでdynamicIO設定が有効になっていることを前提</li>
+  <li>遅いリクエストがある場合、ページ全体がブロックされる</li>
+</ul>
+
+<h5 id="loadingjs-を使用">loading.js を使用</h5>
+
+<h5 id="suspenseでラップ">Suspenseでラップ</h5>
+
+<ul>
+  <li>より細かく制御できる</li>
+</ul>
+
+<h5 id="意味のある読み込み状態の作成">意味のある読み込み状態の作成</h5>
+
+<h4 id="例-4">例</h4>
+
+<h5 id="シーケンシャルデータフェッチ">シーケンシャルデータフェッチ</h5>
+
+<ul>
+  <li>独自データのfetch、重複排除されない場合</li>
+</ul>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="k">default</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">Page</span><span class="p">({</span>
+  <span class="nx">params</span><span class="p">,</span>
+<span class="p">}:</span> <span class="p">{</span>
+  <span class="nl">params</span><span class="p">:</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="p">{</span> <span class="na">username</span><span class="p">:</span> <span class="kr">string</span> <span class="p">}</span><span class="o">&gt;</span>
+<span class="p">})</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="p">{</span> <span class="nx">username</span> <span class="p">}</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">params</span>
+  <span class="c1">// Get artist information</span>
+  <span class="kd">const</span> <span class="nx">artist</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">getArtist</span><span class="p">(</span><span class="nx">username</span><span class="p">)</span>
+ 
+  <span class="k">return </span><span class="p">(</span>
+    <span class="p">&lt;&gt;</span>
+      <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">artist</span><span class="p">.</span><span class="nx">name</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+      <span class="si">{</span><span class="cm">/* Show fallback UI while the Playlists component is loading */</span><span class="si">}</span>
+      <span class="p">&lt;</span><span class="nc">Suspense</span> <span class="na">fallback</span><span class="p">=</span><span class="si">{</span><span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>Loading...<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span><span class="si">}</span><span class="p">&gt;</span>
+        <span class="si">{</span><span class="cm">/* Pass the artist ID to the Playlists component */</span><span class="si">}</span>
+        <span class="p">&lt;</span><span class="nc">Playlists</span> <span class="na">artistID</span><span class="p">=</span><span class="si">{</span><span class="nx">artist</span><span class="p">.</span><span class="nx">id</span><span class="si">}</span> <span class="p">/&gt;</span>
+      <span class="p">&lt;/</span><span class="nc">Suspense</span><span class="p">&gt;</span>
+    <span class="p">&lt;/&gt;</span>
+  <span class="p">)</span>
+<span class="p">}</span>
+ 
+<span class="k">async</span> <span class="kd">function</span> <span class="nf">Playlists</span><span class="p">({</span> <span class="nx">artistID</span> <span class="p">}:</span> <span class="p">{</span> <span class="nl">artistID</span><span class="p">:</span> <span class="kr">string</span> <span class="p">})</span> <span class="p">{</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h5 id="並列データフェッチ">並列データフェッチ</h5>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">getArtist</span><span class="p">,</span> <span class="nx">getAlbums</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@/app/lib/data</span><span class="dl">'</span>
+ 
+<span class="k">export</span> <span class="k">default</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">Page</span><span class="p">({</span> <span class="nx">params</span> <span class="p">})</span> <span class="p">{</span>
+  <span class="c1">// These requests will be sequential</span>
+  <span class="kd">const</span> <span class="p">{</span> <span class="nx">username</span> <span class="p">}</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">params</span>
+  <span class="kd">const</span> <span class="nx">artist</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">getArtist</span><span class="p">(</span><span class="nx">username</span><span class="p">)</span>
+  <span class="kd">const</span> <span class="nx">albums</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">getAlbums</span><span class="p">(</span><span class="nx">username</span><span class="p">)</span>
+  <span class="k">return</span> <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">artist</span><span class="p">.</span><span class="nx">name</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<ul>
+  <li>上記は<code class="language-plaintext highlighter-rouge">Promise.all</code>を使うといい</li>
+</ul>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="kd">const</span> <span class="nx">artistData</span> <span class="o">=</span> <span class="nf">getArtist</span><span class="p">(</span><span class="nx">username</span><span class="p">)</span>
+  <span class="kd">const</span> <span class="nx">albumsData</span> <span class="o">=</span> <span class="nf">getAlbums</span><span class="p">(</span><span class="nx">username</span><span class="p">)</span>
+ 
+  <span class="c1">// Initiate both requests in parallel</span>
+  <span class="kd">const</span> <span class="p">[</span><span class="nx">artist</span><span class="p">,</span> <span class="nx">albums</span><span class="p">]</span> <span class="o">=</span> <span class="k">await</span> <span class="nb">Promise</span><span class="p">.</span><span class="nf">all</span><span class="p">([</span><span class="nx">artistData</span><span class="p">,</span> <span class="nx">albumsData</span><span class="p">])</span>
+</code></pre></div></div>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">Promise.allSettled</code>を使えば、一個のリクエストが失敗しても全体は失敗しない</li>
+</ul>
+
+<h5 id="データのプリロード">データのプリロード</h5>
+
+<ul>
+  <li>ユーティリティ関数<code class="language-plaintext highlighter-rouge">preload()</code>を作成</li>
+</ul>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">getItem</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@/lib/data</span><span class="dl">'</span>
+ 
+<span class="k">export</span> <span class="k">default</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">Page</span><span class="p">({</span>
+  <span class="nx">params</span><span class="p">,</span>
+<span class="p">}:</span> <span class="p">{</span>
+  <span class="nl">params</span><span class="p">:</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="p">{</span> <span class="na">id</span><span class="p">:</span> <span class="kr">string</span> <span class="p">}</span><span class="o">&gt;</span>
+<span class="p">})</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="p">{</span> <span class="nx">id</span> <span class="p">}</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">params</span>
+  <span class="c1">// starting loading item data</span>
+  <span class="nf">preload</span><span class="p">(</span><span class="nx">id</span><span class="p">)</span>
+  <span class="c1">// perform another asynchronous task</span>
+  <span class="kd">const</span> <span class="nx">isAvailable</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">checkIsAvailable</span><span class="p">()</span>
+ 
+  <span class="k">return</span> <span class="nx">isAvailable</span> <span class="p">?</span> <span class="p">&lt;</span><span class="nc">Item</span> <span class="na">id</span><span class="p">=</span><span class="si">{</span><span class="nx">id</span><span class="si">}</span> <span class="p">/&gt;</span> <span class="p">:</span> <span class="kc">null</span>
+<span class="p">}</span>
+ 
+<span class="k">export</span> <span class="kd">const</span> <span class="nx">preload</span> <span class="o">=</span> <span class="p">(</span><span class="nx">id</span><span class="p">:</span> <span class="kr">string</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="k">void</span> <span class="nf">getItem</span><span class="p">(</span><span class="nx">id</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="k">export</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">Item</span><span class="p">({</span> <span class="nx">id</span> <span class="p">}:</span> <span class="p">{</span> <span class="nl">id</span><span class="p">:</span> <span class="kr">string</span> <span class="p">})</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">result</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">getItem</span><span class="p">(</span><span class="nx">id</span><span class="p">)</span>
+  <span class="c1">// ...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="8データの更新">8.データの更新</h3>
+
+<h4 id="サーバー機能とは何ですか">サーバー機能とは何ですか?</h4>
+
+<ul>
+  <li>サーバーアクションは<code class="language-plaintext highlighter-rouge">startTransition</code>で使⽤される</li>
+  <li>キャッシュアーキテクチャと統合</li>
+</ul>
+
+<h4 id="サーバー関数の作成">サーバー関数の作成</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">use server</code>を非同期関数の先頭に書く</li>
+  <li>ファイルの先頭の場合、全ての関数に適用</li>
+</ul>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">createPost</span><span class="p">(</span><span class="nx">formData</span><span class="p">:</span> <span class="nx">FormData</span><span class="p">)</span> <span class="p">{</span>
+  <span class="dl">'</span><span class="s1">use server</span><span class="dl">'</span>
+  <span class="kd">const</span> <span class="nx">title</span> <span class="o">=</span> <span class="nx">formData</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">'</span><span class="s1">title</span><span class="dl">'</span><span class="p">)</span>
+  <span class="kd">const</span> <span class="nx">content</span> <span class="o">=</span> <span class="nx">formData</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">'</span><span class="s1">content</span><span class="dl">'</span><span class="p">)</span>
+ 
+  <span class="c1">// Update data</span>
+  <span class="c1">// Revalidate cache</span>
+<span class="p">}</span>
+ 
+<span class="k">export</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">deletePost</span><span class="p">(</span><span class="nx">formData</span><span class="p">:</span> <span class="nx">FormData</span><span class="p">)</span> <span class="p">{</span>
+  <span class="dl">'</span><span class="s1">use server</span><span class="dl">'</span>
+  <span class="kd">const</span> <span class="nx">id</span> <span class="o">=</span> <span class="nx">formData</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">'</span><span class="s1">id</span><span class="dl">'</span><span class="p">)</span>
+ 
+  <span class="c1">// Update data</span>
+  <span class="c1">// Revalidate cache</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h5 id="サーバーコンポーネント-1">サーバーコンポーネント</h5>
+
+<ul>
+  <li>インライン化できる</li>
+</ul>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="k">default</span> <span class="kd">function</span> <span class="nf">Page</span><span class="p">()</span> <span class="p">{</span>
+  <span class="c1">// Server Action</span>
+  <span class="k">async</span> <span class="kd">function</span> <span class="nf">createPost</span><span class="p">(</span><span class="nx">formData</span><span class="p">:</span> <span class="nx">FormData</span><span class="p">)</span> <span class="p">{</span>
+    <span class="dl">'</span><span class="s1">use server</span><span class="dl">'</span>
+    <span class="c1">// ...</span>
+  <span class="p">}</span>
+ 
+  <span class="k">return</span> <span class="p">&lt;&gt;&lt;/&gt;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<ul>
+  <li>プログレッシブエンハンスメントをサポート
+    <ul>
+      <li>JSが読み込まれていない、無効な場合でも、サーバーアクションを呼び出せる</li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="クライアントコンポーネント-1">クライアントコンポーネント</h5>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="dl">'</span><span class="s1">use client</span><span class="dl">'</span>
+ 
+<span class="k">import</span> <span class="p">{</span> <span class="nx">createPost</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@/app/actions</span><span class="dl">'</span>
+ 
+<span class="k">export</span> <span class="kd">function</span> <span class="nf">Button</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="p">&lt;</span><span class="nt">button</span> <span class="na">formAction</span><span class="p">=</span><span class="si">{</span><span class="nx">createPost</span><span class="si">}</span><span class="p">&gt;</span>Create<span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h5 id="アクションをプロパティとして渡す">アクションをプロパティとして渡す</h5>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">&lt;</span><span class="nc">ClientComponent</span> <span class="na">updateItemAction</span><span class="p">=</span><span class="si">{</span><span class="nx">updateItem</span><span class="si">}</span> <span class="p">/&gt;</span>
+</code></pre></div></div>
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="dl">'</span><span class="s1">use client</span><span class="dl">'</span>
+ 
+<span class="k">export</span> <span class="k">default</span> <span class="kd">function</span> <span class="nf">ClientComponent</span><span class="p">({</span>
+  <span class="nx">updateItemAction</span><span class="p">,</span>
+<span class="p">}:</span> <span class="p">{</span>
+  <span class="nl">updateItemAction</span><span class="p">:</span> <span class="p">(</span><span class="nx">formData</span><span class="p">:</span> <span class="nx">FormData</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="k">void</span>
+<span class="p">})</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="p">&lt;</span><span class="nt">form</span> <span class="na">action</span><span class="p">=</span><span class="si">{</span><span class="nx">updateItemAction</span><span class="si">}</span><span class="p">&gt;</span><span class="si">{</span><span class="cm">/* ... */</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">form</span><span class="p">&gt;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="サーバー関数の呼び出し">サーバー関数の呼び出し</h4>
+
+<ul>
+  <li>以下の2通り</li>
+</ul>
+
+<h5 id="フォーム">フォーム</h5>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">createPost</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@/app/actions</span><span class="dl">'</span>
+ 
+<span class="k">export</span> <span class="kd">function</span> <span class="nf">Form</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">return </span><span class="p">(</span>
+    <span class="p">&lt;</span><span class="nt">form</span> <span class="na">action</span><span class="p">=</span><span class="si">{</span><span class="nx">createPost</span><span class="si">}</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="p">=</span><span class="s">"text"</span> <span class="na">name</span><span class="p">=</span><span class="s">"title"</span> <span class="p">/&gt;</span>
+      <span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="p">=</span><span class="s">"text"</span> <span class="na">name</span><span class="p">=</span><span class="s">"content"</span> <span class="p">/&gt;</span>
+      <span class="p">&lt;</span><span class="nt">button</span> <span class="na">type</span><span class="p">=</span><span class="s">"submit"</span><span class="p">&gt;</span>Create<span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">form</span><span class="p">&gt;</span>
+  <span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="dl">'</span><span class="s1">use server</span><span class="dl">'</span>
+ 
+<span class="k">export</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">createPost</span><span class="p">(</span><span class="nx">formData</span><span class="p">:</span> <span class="nx">FormData</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">title</span> <span class="o">=</span> <span class="nx">formData</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">'</span><span class="s1">title</span><span class="dl">'</span><span class="p">)</span>
+  <span class="kd">const</span> <span class="nx">content</span> <span class="o">=</span> <span class="nx">formData</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">'</span><span class="s1">content</span><span class="dl">'</span><span class="p">)</span>
+ 
+  <span class="c1">// Update data</span>
+  <span class="c1">// Revalidate cache</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h5 id="イベントハンドラー">イベントハンドラー</h5>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      <span class="p">&lt;</span><span class="nt">button</span>
+        <span class="na">onClick</span><span class="p">=</span><span class="si">{</span><span class="k">async </span><span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+          <span class="kd">const</span> <span class="nx">updatedLikes</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">incrementLike</span><span class="p">()</span>
+          <span class="nf">setLikes</span><span class="p">(</span><span class="nx">updatedLikes</span><span class="p">)</span>
+        <span class="p">}</span><span class="si">}</span>
+      <span class="p">&gt;</span>
+        Like
+      <span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+</code></pre></div></div>
+
+<h4 id="例-5">例</h4>
+
+<h5 id="保留状態を表示">保留状態を表示</h5>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">useActionState</code> を使⽤して読み込みインジケーターを表⽰</li>
+</ul>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="dl">'</span><span class="s1">use client</span><span class="dl">'</span>
+ 
+<span class="k">import</span> <span class="p">{</span> <span class="nx">useActionState</span><span class="p">,</span> <span class="nx">startTransition</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react</span><span class="dl">'</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">createPost</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@/app/actions</span><span class="dl">'</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">LoadingSpinner</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@/app/ui/loading-spinner</span><span class="dl">'</span>
+ 
+<span class="k">export</span> <span class="kd">function</span> <span class="nf">Button</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="p">[</span><span class="nx">state</span><span class="p">,</span> <span class="nx">action</span><span class="p">,</span> <span class="nx">pending</span><span class="p">]</span> <span class="o">=</span> <span class="nf">useActionState</span><span class="p">(</span><span class="nx">createPost</span><span class="p">,</span> <span class="kc">false</span><span class="p">)</span>
+ 
+  <span class="k">return </span><span class="p">(</span>
+    <span class="p">&lt;</span><span class="nt">button</span> <span class="na">onClick</span><span class="p">=</span><span class="si">{</span><span class="p">()</span> <span class="o">=&gt;</span> <span class="nf">startTransition</span><span class="p">(</span><span class="nx">action</span><span class="p">)</span><span class="si">}</span><span class="p">&gt;</span>
+      <span class="si">{</span><span class="nx">pending</span> <span class="p">?</span> <span class="p">&lt;</span><span class="nc">LoadingSpinner</span> <span class="p">/&gt;</span> <span class="p">:</span> <span class="dl">'</span><span class="s1">Create Post</span><span class="dl">'</span><span class="si">}</span>
+    <span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+  <span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h5 id="再検証">再検証</h5>
+
+<ul>
+  <li>Server Function 内で<code class="language-plaintext highlighter-rouge">revalidatePath</code> または<code class="language-plaintext highlighter-rouge">revalidateTag</code> を呼び出す</li>
+  <li>キャッシュを再検証し、更新されたデータを表示</li>
+</ul>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">revalidatePath</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">next/cache</span><span class="dl">'</span>
+ 
+<span class="k">export</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">createPost</span><span class="p">(</span><span class="nx">formData</span><span class="p">:</span> <span class="nx">FormData</span><span class="p">)</span> <span class="p">{</span>
+  <span class="dl">'</span><span class="s1">use server</span><span class="dl">'</span>
+  <span class="c1">// Update data</span>
+  <span class="c1">// ...</span>
+ 
+  <span class="nf">revalidatePath</span><span class="p">(</span><span class="dl">'</span><span class="s1">/posts</span><span class="dl">'</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h5 id="リダイレクト">リダイレクト</h5>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="k">import</span> <span class="p">{</span> <span class="nx">redirect</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">next/navigation</span><span class="dl">'</span>
+</code></pre></div></div>
+
+<h5 id="クッキー">クッキー</h5>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="dl">'</span><span class="s1">use server</span><span class="dl">'</span>
+ 
+<span class="k">import</span> <span class="p">{</span> <span class="nx">cookies</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">next/headers</span><span class="dl">'</span>
+ 
+<span class="k">export</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">exampleAction</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">cookieStore</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">cookies</span><span class="p">()</span>
+ 
+  <span class="c1">// Get cookie</span>
+  <span class="nx">cookieStore</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">'</span><span class="s1">name</span><span class="dl">'</span><span class="p">)?.</span><span class="nx">value</span>
+ 
+  <span class="c1">// Set cookie</span>
+  <span class="nx">cookieStore</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="dl">'</span><span class="s1">name</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">Delba</span><span class="dl">'</span><span class="p">)</span>
+ 
+  <span class="c1">// Delete cookie</span>
+  <span class="nx">cookieStore</span><span class="p">.</span><span class="k">delete</span><span class="p">(</span><span class="dl">'</span><span class="s1">name</span><span class="dl">'</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h5 id="useeffect">useEffect</h5>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="dl">'</span><span class="s1">use client</span><span class="dl">'</span>
+ 
+<span class="k">import</span> <span class="p">{</span> <span class="nx">incrementViews</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./actions</span><span class="dl">'</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">useState</span><span class="p">,</span> <span class="nx">useEffect</span><span class="p">,</span> <span class="nx">useTransition</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react</span><span class="dl">'</span>
+ 
+<span class="k">export</span> <span class="k">default</span> <span class="kd">function</span> <span class="nf">ViewCount</span><span class="p">({</span> <span class="nx">initialViews</span> <span class="p">}:</span> <span class="p">{</span> <span class="nl">initialViews</span><span class="p">:</span> <span class="kr">number</span> <span class="p">})</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="p">[</span><span class="nx">views</span><span class="p">,</span> <span class="nx">setViews</span><span class="p">]</span> <span class="o">=</span> <span class="nf">useState</span><span class="p">(</span><span class="nx">initialViews</span><span class="p">)</span>
+  <span class="kd">const</span> <span class="p">[</span><span class="nx">isPending</span><span class="p">,</span> <span class="nx">startTransition</span><span class="p">]</span> <span class="o">=</span> <span class="nf">useTransition</span><span class="p">()</span>
+ 
+  <span class="nf">useEffect</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nf">startTransition</span><span class="p">(</span><span class="k">async </span><span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="kd">const</span> <span class="nx">updatedViews</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">incrementViews</span><span class="p">()</span>
+      <span class="nf">setViews</span><span class="p">(</span><span class="nx">updatedViews</span><span class="p">)</span>
+    <span class="p">})</span>
+  <span class="p">},</span> <span class="p">[])</span>
+ 
+  <span class="c1">// You can use `isPending` to give users feedback</span>
+  <span class="k">return</span> <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Total Views: <span class="si">{</span><span class="nx">views</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="9キャッシュと再検証">9.キャッシュと再検証</h3>
+
+<h4 id="フェッチ">フェッチ</h4>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">data</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">fetch</span><span class="p">(</span><span class="dl">'</span><span class="s1">https://...</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span> <span class="na">cache</span><span class="p">:</span> <span class="dl">'</span><span class="s1">force-cache</span><span class="dl">'</span> <span class="p">})</span>
+</code></pre></div></div>
+
+<ul>
+  <li>動的であることを保証したい場合は、<code class="language-plaintext highlighter-rouge">connectionAPI</code>を使用</li>
+  <li>再検証</li>
+</ul>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">data</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">fetch</span><span class="p">(</span><span class="dl">'</span><span class="s1">https://...</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span> <span class="na">next</span><span class="p">:</span> <span class="p">{</span> <span class="na">revalidate</span><span class="p">:</span> <span class="mi">3600</span> <span class="p">}</span> <span class="p">})</span>
+</code></pre></div></div>
+
+<h4 id="unstable_cache">unstable_cache</h4>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">unstable_cache</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">next/cache</span><span class="dl">'</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">getUserById</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@/app/lib/data</span><span class="dl">'</span>
+ 
+<span class="k">export</span> <span class="k">default</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">Page</span><span class="p">({</span>
+  <span class="nx">params</span><span class="p">,</span>
+<span class="p">}:</span> <span class="p">{</span>
+  <span class="nl">params</span><span class="p">:</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="p">{</span> <span class="na">userId</span><span class="p">:</span> <span class="kr">string</span> <span class="p">}</span><span class="o">&gt;</span>
+<span class="p">})</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="p">{</span> <span class="nx">userId</span> <span class="p">}</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">params</span>
+ 
+  <span class="kd">const</span> <span class="nx">getCachedUser</span> <span class="o">=</span> <span class="nf">unstable_cache</span><span class="p">(</span>
+    <span class="k">async </span><span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="nf">getUserById</span><span class="p">(</span><span class="nx">userId</span><span class="p">)</span>
+    <span class="p">},</span>
+    <span class="p">[</span><span class="nx">userId</span><span class="p">]</span> <span class="c1">// add the user ID to the cache key</span>
+  <span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">tags</code>, <code class="language-plaintext highlighter-rouge">revalidate</code>オプション</li>
+</ul>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">getCachedUser</span> <span class="o">=</span> <span class="nf">unstable_cache</span><span class="p">(</span>
+  <span class="k">async </span><span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nf">getUserById</span><span class="p">(</span><span class="nx">userId</span><span class="p">)</span>
+  <span class="p">},</span>
+  <span class="p">[</span><span class="nx">userId</span><span class="p">],</span>
+  <span class="p">{</span>
+    <span class="na">tags</span><span class="p">:</span> <span class="p">[</span><span class="dl">'</span><span class="s1">user</span><span class="dl">'</span><span class="p">],</span>
+    <span class="na">revalidate</span><span class="p">:</span> <span class="mi">3600</span><span class="p">,</span>
+  <span class="p">}</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="revalidatetag">revalidateTag</h4>
+
+<ul>
+  <li>タグとイベントに基づいてキャッシュを再検証</li>
+</ul>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">getUserById</span><span class="p">(</span><span class="nx">id</span><span class="p">:</span> <span class="kr">string</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">data</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">fetch</span><span class="p">(</span><span class="s2">`https://...`</span><span class="p">,</span> <span class="p">{</span>
+    <span class="na">next</span><span class="p">:</span> <span class="p">{</span>
+      <span class="na">tags</span><span class="p">:</span> <span class="p">[</span><span class="dl">'</span><span class="s1">user</span><span class="dl">'</span><span class="p">],</span>
+    <span class="p">},</span>
+  <span class="p">})</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>サーバーアクションなどで呼び出す</li>
+</ul>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">revalidateTag</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">next/cache</span><span class="dl">'</span>
+ 
+<span class="k">export</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">updateUser</span><span class="p">(</span><span class="nx">id</span><span class="p">:</span> <span class="kr">string</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// Mutate data</span>
+  <span class="nf">revalidateTag</span><span class="p">(</span><span class="dl">'</span><span class="s1">user</span><span class="dl">'</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="revalidatepath">revalidatePath</h4>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">revalidatePath</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">next/cache</span><span class="dl">'</span>
+ 
+<span class="k">export</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">updateUser</span><span class="p">(</span><span class="nx">id</span><span class="p">:</span> <span class="kr">string</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// Mutate data</span>
+  <span class="nf">revalidatePath</span><span class="p">(</span><span class="dl">'</span><span class="s1">/profile</span><span class="dl">'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="10エラー処理">10.エラー処理</h3>
+
+<ul>
+  <li>予想されるエラー、キャッチされないエラー</li>
+</ul>
+
+<h4 id="予想されるエラーの処理">予想されるエラーの処理</h4>
+
+<h5 id="サーバーアクション">サーバーアクション</h5>
+
+<ul>
+  <li>useActionStateを使う
+    <ul>
+      <li>サーバーアクションで予想されるエラーを処理</li>
+    </ul>
+  </li>
+  <li>try, catchやエラーのスローは避ける</li>
+</ul>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="dl">'</span><span class="s1">use server</span><span class="dl">'</span>
+ 
+<span class="k">export</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">createPost</span><span class="p">(</span><span class="nx">prevState</span><span class="p">:</span> <span class="kr">any</span><span class="p">,</span> <span class="nx">formData</span><span class="p">:</span> <span class="nx">FormData</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">title</span> <span class="o">=</span> <span class="nx">formData</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">'</span><span class="s1">title</span><span class="dl">'</span><span class="p">)</span>
+  <span class="kd">const</span> <span class="nx">content</span> <span class="o">=</span> <span class="nx">formData</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">'</span><span class="s1">content</span><span class="dl">'</span><span class="p">)</span>
+ 
+  <span class="kd">const</span> <span class="nx">res</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">fetch</span><span class="p">(</span><span class="dl">'</span><span class="s1">https://api.vercel.app/posts</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span>
+    <span class="na">method</span><span class="p">:</span> <span class="dl">'</span><span class="s1">POST</span><span class="dl">'</span><span class="p">,</span>
+    <span class="na">body</span><span class="p">:</span> <span class="p">{</span> <span class="nx">title</span><span class="p">,</span> <span class="nx">content</span> <span class="p">},</span>
+  <span class="p">})</span>
+  <span class="kd">const</span> <span class="nx">json</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">res</span><span class="p">.</span><span class="nf">json</span><span class="p">()</span>
+ 
+  <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">res</span><span class="p">.</span><span class="nx">ok</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">{</span> <span class="na">message</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Failed to create post</span><span class="dl">'</span> <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="dl">'</span><span class="s1">use client</span><span class="dl">'</span>
+ 
+<span class="k">import</span> <span class="p">{</span> <span class="nx">useActionState</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react</span><span class="dl">'</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">createPost</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@/app/actions</span><span class="dl">'</span>
+ 
+<span class="kd">const</span> <span class="nx">initialState</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">message</span><span class="p">:</span> <span class="dl">''</span><span class="p">,</span>
+<span class="p">}</span>
+ 
+<span class="k">export</span> <span class="kd">function</span> <span class="nf">Form</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="p">[</span><span class="nx">state</span><span class="p">,</span> <span class="nx">formAction</span><span class="p">,</span> <span class="nx">pending</span><span class="p">]</span> <span class="o">=</span> <span class="nf">useActionState</span><span class="p">(</span><span class="nx">createPost</span><span class="p">,</span> <span class="nx">initialState</span><span class="p">)</span>
+ 
+  <span class="k">return </span><span class="p">(</span>
+    <span class="p">&lt;</span><span class="nt">form</span> <span class="na">action</span><span class="p">=</span><span class="si">{</span><span class="nx">formAction</span><span class="si">}</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">label</span> <span class="na">htmlFor</span><span class="p">=</span><span class="s">"title"</span><span class="p">&gt;</span>Title<span class="p">&lt;/</span><span class="nt">label</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="p">=</span><span class="s">"text"</span> <span class="na">id</span><span class="p">=</span><span class="s">"title"</span> <span class="na">name</span><span class="p">=</span><span class="s">"title"</span> <span class="na">required</span> <span class="p">/&gt;</span>
+      <span class="p">&lt;</span><span class="nt">label</span> <span class="na">htmlFor</span><span class="p">=</span><span class="s">"content"</span><span class="p">&gt;</span>Content<span class="p">&lt;/</span><span class="nt">label</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">textarea</span> <span class="na">id</span><span class="p">=</span><span class="s">"content"</span> <span class="na">name</span><span class="p">=</span><span class="s">"content"</span> <span class="na">required</span> <span class="p">/&gt;</span>
+      <span class="si">{</span><span class="nx">state</span><span class="p">?.</span><span class="nx">message</span> <span class="o">&amp;&amp;</span> <span class="p">&lt;</span><span class="nt">p</span> <span class="na">aria-live</span><span class="p">=</span><span class="s">"polite"</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">state</span><span class="p">.</span><span class="nx">message</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span><span class="si">}</span>
+      <span class="p">&lt;</span><span class="nt">button</span> <span class="na">disabled</span><span class="p">=</span><span class="si">{</span><span class="nx">pending</span><span class="si">}</span><span class="p">&gt;</span>Create Post<span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">form</span><span class="p">&gt;</span>
+  <span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h5 id="サーバーコンポーネント-2">サーバーコンポーネント</h5>
+
+<h5 id="not-found">not-found</h5>
+
+<ul>
+  <li>ルートで<code class="language-plaintext highlighter-rouge">notFound</code>関数を呼び出す
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">not-found.js</code>が表示される</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">post</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nf">notFound</span><span class="p">()</span>
+  <span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="k">default</span> <span class="kd">function</span> <span class="nf">NotFound</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>404 - Page Not Found<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="キャッチされない例外の処理">キャッチされない例外の処理</h4>
+
+<ul>
+  <li>エラーバウンダリによってキャッチされる</li>
+</ul>
+
+<h5 id="ネストされたエラーバウンダリ">ネストされたエラーバウンダリ</h5>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">error.tsx</code>の作成</li>
+</ul>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="dl">'</span><span class="s1">use client</span><span class="dl">'</span> <span class="c1">// Error boundaries must be Client Components</span>
+ 
+<span class="k">import</span> <span class="p">{</span> <span class="nx">useEffect</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react</span><span class="dl">'</span>
+ 
+<span class="k">export</span> <span class="k">default</span> <span class="kd">function</span> <span class="nf">Error</span><span class="p">({</span>
+  <span class="nx">error</span><span class="p">,</span>
+  <span class="nx">reset</span><span class="p">,</span>
+<span class="p">}:</span> <span class="p">{</span>
+  <span class="nl">error</span><span class="p">:</span> <span class="nb">Error</span> <span class="o">&amp;</span> <span class="p">{</span> <span class="nx">digest</span><span class="p">?:</span> <span class="kr">string</span> <span class="p">}</span>
+  <span class="nl">reset</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="k">void</span>
+<span class="p">})</span> <span class="p">{</span>
+  <span class="nf">useEffect</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="c1">// Log the error to an error reporting service</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="nx">error</span><span class="p">)</span>
+  <span class="p">},</span> <span class="p">[</span><span class="nx">error</span><span class="p">])</span>
+ 
+  <span class="k">return </span><span class="p">(</span>
+    <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">h2</span><span class="p">&gt;</span>Something went wrong!<span class="p">&lt;/</span><span class="nt">h2</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">button</span>
+        <span class="na">onClick</span><span class="p">=</span><span class="si">{</span>
+          <span class="c1">// Attempt to recover by trying to re-render the segment</span>
+          <span class="p">()</span> <span class="o">=&gt;</span> <span class="nf">reset</span><span class="p">()</span>
+        <span class="si">}</span>
+      <span class="p">&gt;</span>
+        Try again
+      <span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+  <span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h5 id="グローバルエラー">グローバルエラー</h5>
+
+<ul>
+  <li>あまり一般的ではない</li>
+  <li><code class="language-plaintext highlighter-rouge">global-error.tsx</code>ファイルを使⽤</li>
+</ul>
+
+<h3 id="11css">11.CSS</h3>
+
+<h4 id="css-モジュール">CSS モジュール</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">.module.css</code></li>
+</ul>
+
+<h4 id="グローバルcss">グローバルCSS</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">app/global.css</code>を<code class="language-plaintext highlighter-rouge">app/layout.tsx</code>でインポート</li>
+</ul>
+
+<h4 id="外部スタイルシート">外部スタイルシート</h4>
+
+<h4 id="順序付けとマージ">順序付けとマージ</h4>
+
+<ul>
+  <li>NextはCSSを自動的にマージし、ビルドでCSSを最適化</li>
+</ul>
+
+<h5 id="推奨-事項">推奨 事項</h5>
+
+<h4 id="開発-vs-生産">開発 vs 生産</h4>
+
+<h4 id="次のステップ">次のステップ</h4>
+
+<h3 id="12画像の最適化">12.画像の最適化</h3>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">&lt;Image&gt;</code>コンポーネントの特徴
+    <ul>
+      <li>デバイスに応じたサイズの最適化</li>
+      <li>遅延読み込みを使用し、ビューポイントに入ったときに読み込み</li>
+      <li>オプションでぼかしのプレースホルダーも使用できる</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="ローカル画像">ローカル画像</h4>
+
+<ul>
+  <li>自動的に<code class="language-plaintext highlighter-rouge">width</code>, <code class="language-plaintext highlighter-rouge">height</code>を決定</li>
+</ul>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nx">Image</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">next/image</span><span class="dl">'</span>
+<span class="k">import</span> <span class="nx">ProfileImage</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./profile.png</span><span class="dl">'</span>
+ 
+<span class="k">export</span> <span class="k">default</span> <span class="kd">function</span> <span class="nf">Page</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">return </span><span class="p">(</span>
+    <span class="p">&lt;</span><span class="nc">Image</span>
+      <span class="na">src</span><span class="p">=</span><span class="si">{</span><span class="nx">ProfileImage</span><span class="si">}</span>
+      <span class="na">alt</span><span class="p">=</span><span class="s">"Picture of the author"</span>
+      <span class="c1">// width={500} automatically provided</span>
+      <span class="c1">// height={500} automatically provided</span>
+      <span class="c1">// blurDataURL="data:..." automatically provided</span>
+      <span class="c1">// placeholder="blur" // Optional blur-up while loading</span>
+    <span class="p">/&gt;</span>
+  <span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="リモートイメージ">リモートイメージ</h4>
+
+<ul>
+  <li>width、height、blurDataURLプロパティを⼿動で指定する必要</li>
+  <li>読み込み時のレイアウトのずれを防ぐために使用される</li>
+  <li>あるいは<code class="language-plaintext highlighter-rouge">fill</code>プロパティ
+    <ul>
+      <li>画像を親要素のサイズに合わせて埋め込む</li>
+    </ul>
+  </li>
+  <li>安全に外部から読み込むには<code class="language-plaintext highlighter-rouge">next.config.js</code>でURLパターンを設定
+    <ul>
+      <li>できるだけ具体的に指定</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="kd">type</span> <span class="p">{</span> <span class="nx">NextConfig</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">next</span><span class="dl">'</span>
+ 
+<span class="kd">const</span> <span class="nx">config</span><span class="p">:</span> <span class="nx">NextConfig</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">images</span><span class="p">:</span> <span class="p">{</span>
+    <span class="na">remotePatterns</span><span class="p">:</span> <span class="p">[</span>
+      <span class="p">{</span>
+        <span class="na">protocol</span><span class="p">:</span> <span class="dl">'</span><span class="s1">https</span><span class="dl">'</span><span class="p">,</span>
+        <span class="na">hostname</span><span class="p">:</span> <span class="dl">'</span><span class="s1">s3.amazonaws.com</span><span class="dl">'</span><span class="p">,</span>
+        <span class="na">port</span><span class="p">:</span> <span class="dl">''</span><span class="p">,</span>
+        <span class="na">pathname</span><span class="p">:</span> <span class="dl">'</span><span class="s1">/my-bucket/**</span><span class="dl">'</span><span class="p">,</span>
+        <span class="na">search</span><span class="p">:</span> <span class="dl">''</span><span class="p">,</span>
+      <span class="p">},</span>
+    <span class="p">],</span>
+  <span class="p">},</span>
+<span class="p">}</span>
+ 
+<span class="k">export</span> <span class="k">default</span> <span class="nx">config</span>
+</code></pre></div></div>
+
+<h3 id="13フォントの最適化">13.フォントの最適化</h3>
+
+<ul>
+  <li>フォントを自動的に最適化し、ネットワーク要求を削除</li>
+  <li>セルフホスティング機能をサポート</li>
+  <li><code class="language-plaintext highlighter-rouge">next/font/local</code>または<code class="language-plaintext highlighter-rouge">next/font/google</code>からインポート</li>
+  <li><code class="language-plaintext highlighter-rouge">app/layout.tsx</code></li>
+</ul>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">Geist</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">next/font/google</span><span class="dl">'</span>
+ 
+<span class="kd">const</span> <span class="nx">geist</span> <span class="o">=</span> <span class="nc">Geist</span><span class="p">({</span>
+  <span class="na">subsets</span><span class="p">:</span> <span class="p">[</span><span class="dl">'</span><span class="s1">latin</span><span class="dl">'</span><span class="p">],</span>
+<span class="p">})</span>
+ 
+<span class="k">export</span> <span class="k">default</span> <span class="kd">function</span> <span class="nf">Layout</span><span class="p">({</span> <span class="nx">children</span> <span class="p">}:</span> <span class="p">{</span> <span class="nl">children</span><span class="p">:</span> <span class="nx">React</span><span class="p">.</span><span class="nx">ReactNode</span> <span class="p">})</span> <span class="p">{</span>
+  <span class="k">return </span><span class="p">(</span>
+    <span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="p">=</span><span class="s">"en"</span> <span class="na">className</span><span class="p">=</span><span class="si">{</span><span class="nx">geist</span><span class="p">.</span><span class="nx">className</span><span class="si">}</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">children</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+  <span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="googleフォント">Googleフォント</h4>
+
+<ul>
+  <li>Google Fonts は⾃動的にセルフホストできる</li>
+</ul>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">Geist</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">next/font/google</span><span class="dl">'</span>
+</code></pre></div></div>
+<ul>
+  <li>可変フォントの使用がいい
+    <ul>
+      <li>パフォーマンスと柔軟性</li>
+      <li>使用できない場合、太さを指定する必要</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">Roboto</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">next/font/google</span><span class="dl">'</span>
+ 
+<span class="kd">const</span> <span class="nx">roboto</span> <span class="o">=</span> <span class="nc">Roboto</span><span class="p">({</span>
+  <span class="na">weight</span><span class="p">:</span> <span class="dl">'</span><span class="s1">400</span><span class="dl">'</span><span class="p">,</span>
+  <span class="na">subsets</span><span class="p">:</span> <span class="p">[</span><span class="dl">'</span><span class="s1">latin</span><span class="dl">'</span><span class="p">],</span>
+<span class="p">})</span>
+</code></pre></div></div>
+
+<h4 id="ローカルフォント">ローカルフォント</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">next/font/local</code>からフォントをインポートし、ローカルフォントファイルのsrcを指定</li>
+  <li><code class="language-plaintext highlighter-rouge">public</code>フォルダ、<code class="language-plaintext highlighter-rouge">app</code>フォルダに配置</li>
+</ul>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nx">localFont</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">next/font/local</span><span class="dl">'</span>
+ 
+<span class="kd">const</span> <span class="nx">myFont</span> <span class="o">=</span> <span class="nf">localFont</span><span class="p">({</span>
+  <span class="na">src</span><span class="p">:</span> <span class="dl">'</span><span class="s1">./my-font.woff2</span><span class="dl">'</span><span class="p">,</span>
+<span class="p">})</span>
+</code></pre></div></div>
+
+<ul>
+  <li>複数の場合は、<code class="language-plaintext highlighter-rouge">src</code>を配列する</li>
+</ul>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">roboto</span> <span class="o">=</span> <span class="nf">localFont</span><span class="p">({</span>
+  <span class="na">src</span><span class="p">:</span> <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="na">path</span><span class="p">:</span> <span class="dl">'</span><span class="s1">./Roboto-Regular.woff2</span><span class="dl">'</span><span class="p">,</span>
+      <span class="na">weight</span><span class="p">:</span> <span class="dl">'</span><span class="s1">400</span><span class="dl">'</span><span class="p">,</span>
+      <span class="na">style</span><span class="p">:</span> <span class="dl">'</span><span class="s1">normal</span><span class="dl">'</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="na">path</span><span class="p">:</span> <span class="dl">'</span><span class="s1">./Roboto-Italic.woff2</span><span class="dl">'</span><span class="p">,</span>
+      <span class="na">weight</span><span class="p">:</span> <span class="dl">'</span><span class="s1">400</span><span class="dl">'</span><span class="p">,</span>
+      <span class="na">style</span><span class="p">:</span> <span class="dl">'</span><span class="s1">italic</span><span class="dl">'</span><span class="p">,</span>
+    <span class="p">},</span>
+  <span class="p">],</span>
+<span class="p">})</span>
+</code></pre></div></div>
+
+<h3 id="14メタデータとogイメージ">14.メタデータとOGイメージ</h3>
+
+<ul>
+  <li>静的<code class="language-plaintext highlighter-rouge">metadata</code>オブジェクト</li>
+  <li>動的<code class="language-plaintext highlighter-rouge">generateMetadata</code>関数</li>
+  <li>favicon, og-imageを作成するファイル</li>
+  <li>上記は、<code class="language-plaintext highlighter-rouge">&lt;head&gt;</code>タグを自動的に生成</li>
+</ul>
+
+<h4 id="デフォルトフィールド">デフォルトフィールド</h4>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;meta</span> <span class="na">charset=</span><span class="s">"utf-8"</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">"viewport"</span> <span class="na">content=</span><span class="s">"width=device-width, initial-scale=1"</span> <span class="nt">/&gt;</span>
+</code></pre></div></div>
+
+<h4 id="静的メタデータ">静的メタデータ</h4>
+
+<ul>
+  <li>layout.js,page.jsからMetadata オブジェクトをエクスポート</li>
+  <li><code class="language-plaintext highlighter-rouge">app/blog/layout.tsx</code></li>
+</ul>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="kd">type</span> <span class="p">{</span> <span class="nx">Metadata</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">next</span><span class="dl">'</span>
+ 
+<span class="k">export</span> <span class="kd">const</span> <span class="nx">metadata</span><span class="p">:</span> <span class="nx">Metadata</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">title</span><span class="p">:</span> <span class="dl">'</span><span class="s1">My Blog</span><span class="dl">'</span><span class="p">,</span>
+  <span class="na">description</span><span class="p">:</span> <span class="dl">'</span><span class="s1">...</span><span class="dl">'</span><span class="p">,</span>
+<span class="p">}</span>
+ 
+<span class="k">export</span> <span class="k">default</span> <span class="kd">function</span> <span class="nf">Page</span><span class="p">()</span> <span class="p">{}</span>
+</code></pre></div></div>
+
+<h4 id="生成されたメタデータ">生成されたメタデータ</h4>
+
+<ul>
+  <li>以下では特定のポストのタイトルと説明を取得</li>
+</ul>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="kd">type</span> <span class="p">{</span> <span class="nx">Metadata</span><span class="p">,</span> <span class="nx">ResolvingMetadata</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">next</span><span class="dl">'</span>
+ 
+<span class="kd">type</span> <span class="nx">Props</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">params</span><span class="p">:</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="p">{</span> <span class="na">slug</span><span class="p">:</span> <span class="kr">string</span> <span class="p">}</span><span class="o">&gt;</span>
+  <span class="na">searchParams</span><span class="p">:</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="p">{</span> <span class="p">[</span><span class="na">key</span><span class="p">:</span> <span class="kr">string</span><span class="p">]:</span> <span class="kr">string</span> <span class="o">|</span> <span class="kr">string</span><span class="p">[]</span> <span class="o">|</span> <span class="kc">undefined</span> <span class="p">}</span><span class="o">&gt;</span>
+<span class="p">}</span>
+ 
+<span class="k">export</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">generateMetadata</span><span class="p">(</span>
+  <span class="p">{</span> <span class="nx">params</span><span class="p">,</span> <span class="nx">searchParams</span> <span class="p">}:</span> <span class="nx">Props</span><span class="p">,</span>
+  <span class="nx">parent</span><span class="p">:</span> <span class="nx">ResolvingMetadata</span>
+<span class="p">):</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">Metadata</span><span class="o">&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">slug</span> <span class="o">=</span> <span class="p">(</span><span class="k">await</span> <span class="nx">params</span><span class="p">).</span><span class="nx">slug</span>
+ 
+  <span class="c1">// fetch post information</span>
+  <span class="kd">const</span> <span class="nx">post</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">fetch</span><span class="p">(</span><span class="s2">`https://api.vercel.app/blog/</span><span class="p">${</span><span class="nx">slug</span><span class="p">}</span><span class="s2">`</span><span class="p">).</span><span class="nf">then</span><span class="p">((</span><span class="nx">res</span><span class="p">)</span> <span class="o">=&gt;</span>
+    <span class="nx">res</span><span class="p">.</span><span class="nf">json</span><span class="p">()</span>
+  <span class="p">)</span>
+ 
+  <span class="k">return</span> <span class="p">{</span>
+    <span class="na">title</span><span class="p">:</span> <span class="nx">post</span><span class="p">.</span><span class="nx">title</span><span class="p">,</span>
+    <span class="na">description</span><span class="p">:</span> <span class="nx">post</span><span class="p">.</span><span class="nx">description</span><span class="p">,</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+ 
+<span class="k">export</span> <span class="k">default</span> <span class="kd">function</span> <span class="nf">Page</span><span class="p">({</span> <span class="nx">params</span><span class="p">,</span> <span class="nx">searchParams</span> <span class="p">}:</span> <span class="nx">Props</span><span class="p">)</span> <span class="p">{}</span>
+</code></pre></div></div>
+
+<h5 id="メタデータのストリーミング">メタデータのストリーミング</h5>
+
+<ul>
+  <li>generateMetadataを解決するとレンダリングがブロックされ
+る可能性がある場合
+-Nextは解決されたメタデータを個別にストリーミングし、準備ができ次第HTML に挿⼊</li>
+</ul>
+
+<h5 id="データ要求のメモ化">データ要求のメモ化</h5>
+
+<ul>
+  <li>メタデータとページ⾃体に同じデータを取得する必要がある場合
+    <ul>
+      <li>cache機能の利用</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">cache</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react</span><span class="dl">'</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">db</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@/app/lib/db</span><span class="dl">'</span>
+ 
+<span class="c1">// getPost will be used twice, but execute only once</span>
+<span class="k">export</span> <span class="kd">const</span> <span class="nx">getPost</span> <span class="o">=</span> <span class="nf">cache</span><span class="p">(</span><span class="k">async </span><span class="p">(</span><span class="nx">slug</span><span class="p">:</span> <span class="kr">string</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">res</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">db</span><span class="p">.</span><span class="nx">query</span><span class="p">.</span><span class="nx">posts</span><span class="p">.</span><span class="nf">findFirst</span><span class="p">({</span> <span class="na">where</span><span class="p">:</span> <span class="nf">eq</span><span class="p">(</span><span class="nx">posts</span><span class="p">.</span><span class="nx">slug</span><span class="p">,</span> <span class="nx">slug</span><span class="p">)</span> <span class="p">})</span>
+  <span class="k">return</span> <span class="nx">res</span>
+<span class="p">})</span>
+</code></pre></div></div>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">getPost</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@/app/lib/data</span><span class="dl">'</span>
+ 
+<span class="k">export</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">generateMetadata</span><span class="p">({</span>
+  <span class="nx">params</span><span class="p">,</span>
+<span class="p">}:</span> <span class="p">{</span>
+  <span class="nl">params</span><span class="p">:</span> <span class="p">{</span> <span class="na">slug</span><span class="p">:</span> <span class="kr">string</span> <span class="p">}</span>
+<span class="p">})</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">post</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">getPost</span><span class="p">(</span><span class="nx">params</span><span class="p">.</span><span class="nx">slug</span><span class="p">)</span>
+  <span class="k">return</span> <span class="p">{</span>
+    <span class="na">title</span><span class="p">:</span> <span class="nx">post</span><span class="p">.</span><span class="nx">title</span><span class="p">,</span>
+    <span class="na">description</span><span class="p">:</span> <span class="nx">post</span><span class="p">.</span><span class="nx">description</span><span class="p">,</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+ 
+<span class="k">export</span> <span class="k">default</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">Page</span><span class="p">({</span> <span class="nx">params</span> <span class="p">}:</span> <span class="p">{</span> <span class="nl">params</span><span class="p">:</span> <span class="p">{</span> <span class="na">slug</span><span class="p">:</span> <span class="kr">string</span> <span class="p">}</span> <span class="p">})</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">post</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">getPost</span><span class="p">(</span><span class="nx">params</span><span class="p">.</span><span class="nx">slug</span><span class="p">)</span>
+  <span class="k">return</span> <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">post</span><span class="p">.</span><span class="nx">title</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="ファイルベースのメタデータ">ファイルベースのメタデータ</h4>
+
+<ul>
+  <li>favicon.ico、apple-icon.jpg、icon.jpg</li>
+  <li>opengraph-image.jpg と twitter-image.jpg</li>
+  <li>robots.txt</li>
+  <li>sitemap.xml</li>
+</ul>
+
+<h4 id="ファビコン">ファビコン</h4>
+
+<ul>
+  <li>ルートに<code class="language-plaintext highlighter-rouge">favicon.ico</code>を作成</li>
+</ul>
+
+<h4 id="静的オープングラフ画像">静的オープングラフ画像</h4>
+
+<ul>
+  <li>SNSで表現される画像</li>
+</ul>
+
+<h4 id="生成されたopen-graph画像">生成されたOpen Graph画像</h4>
+
+<ul>
+  <li>ImageResponseコンストラクタを使⽤
+    <ul>
+      <li>JSXとCSSを使⽤して動的な画像を⽣成</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">app/blog/[slug]/opengraph-image.ts</code></li>
+</ul>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">ImageResponse</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">next/og</span><span class="dl">'</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">getPost</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@/app/lib/data</span><span class="dl">'</span>
+ 
+<span class="c1">// Image metadata</span>
+<span class="k">export</span> <span class="kd">const</span> <span class="nx">size</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">width</span><span class="p">:</span> <span class="mi">1200</span><span class="p">,</span>
+  <span class="na">height</span><span class="p">:</span> <span class="mi">630</span><span class="p">,</span>
+<span class="p">}</span>
+ 
+<span class="k">export</span> <span class="kd">const</span> <span class="nx">contentType</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">image/png</span><span class="dl">'</span>
+ 
+<span class="c1">// Image generation</span>
+<span class="k">export</span> <span class="k">default</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">Image</span><span class="p">({</span> <span class="nx">params</span> <span class="p">}:</span> <span class="p">{</span> <span class="nl">params</span><span class="p">:</span> <span class="p">{</span> <span class="na">slug</span><span class="p">:</span> <span class="kr">string</span> <span class="p">}</span> <span class="p">})</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">post</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">getPost</span><span class="p">(</span><span class="nx">params</span><span class="p">.</span><span class="nx">slug</span><span class="p">)</span>
+ 
+  <span class="k">return</span> <span class="k">new</span> <span class="nc">ImageResponse</span><span class="p">(</span>
+    <span class="p">(</span>
+      <span class="c1">// ImageResponse JSX element</span>
+      <span class="o">&lt;</span><span class="nx">div</span>
+        <span class="nx">style</span><span class="o">=</span>
+      <span class="o">&gt;</span>
+        <span class="p">{</span><span class="nx">post</span><span class="p">.</span><span class="nx">title</span><span class="p">}</span>
+      <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>    <span class="p">)</span>
+  <span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<ul>
+  <li>ImageResponse は@vercel/og を使⽤</li>
+</ul>
+
+<h3 id="15ルートハンドラとミドルウェア">15.ルートハンドラとミドルウェア</h3>
+
+<h4 id="ルートハンドラー">ルートハンドラー</h4>
+
+<h5 id="慣習">慣習</h5>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">app/api/route.ts</code></li>
+</ul>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">GET</span><span class="p">(</span><span class="nx">request</span><span class="p">:</span> <span class="nx">Request</span><span class="p">)</span> <span class="p">{}</span>
+</code></pre></div></div>
+
+<h5 id="サポートされているhttpメソッド">サポートされているHTTPメソッド</h5>
+
+<ul>
+  <li>メソッドはGET、POST、PUT、PATCH、DELETE、HEAD、OPTIONS</li>
+</ul>
+
+<h5 id="拡張された-nextrequest-および-nextresponse-api">拡張された NextRequest および NextResponse API</h5>
+
+<h5 id="キャッシング">キャッシング</h5>
+
+<ul>
+  <li>GETメソッドのキャッシュを有効にすることができます</li>
+  <li><code class="language-plaintext highlighter-rouge">export const dynamic = 'force-static'</code></li>
+</ul>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">const</span> <span class="nx">dynamic</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">force-static</span><span class="dl">'</span>
+ 
+<span class="k">export</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">GET</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">res</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">fetch</span><span class="p">(</span><span class="dl">'</span><span class="s1">https://data.mongodb-api.com/...</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span>
+    <span class="na">headers</span><span class="p">:</span> <span class="p">{</span>
+      <span class="dl">'</span><span class="s1">Content-Type</span><span class="dl">'</span><span class="p">:</span> <span class="dl">'</span><span class="s1">application/json</span><span class="dl">'</span><span class="p">,</span>
+      <span class="dl">'</span><span class="s1">API-Key</span><span class="dl">'</span><span class="p">:</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">DATA_API_KEY</span><span class="p">,</span>
+    <span class="p">},</span>
+  <span class="p">})</span>
+  <span class="kd">const</span> <span class="nx">data</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">res</span><span class="p">.</span><span class="nf">json</span><span class="p">()</span>
+ 
+  <span class="k">return</span> <span class="nx">Response</span><span class="p">.</span><span class="nf">json</span><span class="p">({</span> <span class="nx">data</span> <span class="p">})</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<ul>
+  <li>他のメソッドはキャッシュされない</li>
+</ul>
+
+<h5 id="特別なルートハンドラー">特別なルートハンドラー</h5>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">sitemap.ts</code>、<code class="language-plaintext highlighter-rouge">opengraph-image.tsx</code>、<code class="language-plaintext highlighter-rouge">icon.tsx</code>など</li>
+</ul>
+
+<h5 id="ルート解決">ルート解決</h5>
+
+<h4 id="ミドルウェア">ミドルウェア</h4>
+
+<ul>
+  <li>ヘッダーの書き換え、リダイレクト、変更、直接レスポンスを返す</li>
+</ul>
+
+<h5 id="ユースケース">ユースケース</h5>
+
+<ul>
+  <li>A/Bテストや実験に基づいて異なるページに書き換えるなど</li>
+</ul>
+
+<h5 id="慣習-1">慣習</h5>
+
+<ul>
+  <li>ミドルウェアの複数ファイルの分割も可能</li>
+  <li>ルートでインポート</li>
+</ul>
+
+<h5 id="例-6">例</h5>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">NextResponse</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">next/server</span><span class="dl">'</span>
+<span class="k">import</span> <span class="kd">type</span> <span class="p">{</span> <span class="nx">NextRequest</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">next/server</span><span class="dl">'</span>
+ 
+<span class="c1">// This function can be marked `async` if using `await` inside</span>
+<span class="k">export</span> <span class="kd">function</span> <span class="nf">middleware</span><span class="p">(</span><span class="nx">request</span><span class="p">:</span> <span class="nx">NextRequest</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="nx">NextResponse</span><span class="p">.</span><span class="nf">redirect</span><span class="p">(</span><span class="k">new</span> <span class="nc">URL</span><span class="p">(</span><span class="dl">'</span><span class="s1">/home</span><span class="dl">'</span><span class="p">,</span> <span class="nx">request</span><span class="p">.</span><span class="nx">url</span><span class="p">))</span>
+<span class="p">}</span>
+ 
+<span class="c1">// See "Matching Paths" below to learn more</span>
+<span class="k">export</span> <span class="kd">const</span> <span class="nx">config</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">matcher</span><span class="p">:</span> <span class="dl">'</span><span class="s1">/about/:path*</span><span class="dl">'</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="16デプロイ">16.デプロイ</h3>
+
+<ul>
+  <li>nodejs, docker, adapter</li>
+</ul>
+
+<h4 id="nodejsサーバー">Node.jsサーバー</h4>
+
+<h5 id="テンプレート">テンプレート</h5>
+
+<h4 id="ドッカー">ドッカー</h4>
+
+<ul>
+  <li>ただし、ローカルでは<code class="language-plaintext highlighter-rouge">npm run dev</code>を使用</li>
+</ul>
+
+<h5 id="テンプレート-1">テンプレート</h5>
+
+<h4 id="静的エクスポート">静的エクスポート</h4>
+
+<ul>
+  <li>NextをSPAとして開始する例</li>
+  <li>サーバ機能はサポートされない</li>
+</ul>
+
+<h5 id="テンプレート-2">テンプレート</h5>
+
+<h4 id="アダプター">アダプター</h4>
+
+<ul>
+  <li>プラットフォーム依存</li>
+  <li>Amplify Hosting, Cloudflare, Netlify, Vercel</li>
+</ul>
+
+<h3 id="17アップグレード">17.アップグレード</h3>
+
+<h4 id="最新バージョン">最新バージョン</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">npx @next/codemod@latest upgrade latest</code></li>
+</ul>
+
+<h4 id="カナリア版">カナリア版</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">npm i next@canary</code></li>
+</ul>
+
+<h5 id="カナリアで利用可能な機能">カナリアで利用可能な機能</h5>
+
+<ul>
+  <li>キャッシュ:
+    <ul>
+      <li>“use cache”</li>
+      <li>cacheLife</li>
+      <li>cacheTag</li>
+      <li>dynamicIO</li>
+    </ul>
+  </li>
+  <li>認証:
+    <ul>
+      <li>forbidden</li>
+      <li>unauthorized</li>
+      <li>forbidden.js</li>
+      <li>unauthorized.js</li>
+      <li>authInterrupts</li>
+    </ul>
+  </li>
+</ul>
+
+</div>
+
+      <footer>
+        <p>
+          Tags: 
+          <a href="/md/tag/書籍">書籍</a>,  
+          <a href="/md/tag/react">React</a> 
+        </p>
+      </footer>
+    </article>
+
+  </main>
+
+  <!-- サイドバー部分 -->
+  <aside id="sidebar">
+    <h2><a href="/md/about/">About</a></h2>
+
+    <!--
+    <h2><a href="/md/categories/">Categories</a></h2>
+    <ul>
+      
+        <li><a href="/md/category/blog"">blog</a></li>
+      
+    </ul>
+    -->
+    
+    <h2><a href="/md/tags/">Tags</a></h2>
+    <ul>
+      
+        <li><a href="/md/tag/fastapi">FastAPI</a></li>
+      
+        <li><a href="/md/tag/nodejs">Nodejs</a></li>
+      
+        <li><a href="/md/tag/mysql">MySQL</a></li>
+      
+        <li><a href="/md/tag/ツール">ツール</a></li>
+      
+        <li><a href="/md/tag/react">React</a></li>
+      
+        <li><a href="/md/tag/開発">開発</a></li>
+      
+        <li><a href="/md/tag/elasticsearch">Elasticsearch</a></li>
+      
+        <li><a href="/md/tag/firebase">Firebase</a></li>
+      
+        <li><a href="/md/tag/sqlite">sqlite</a></li>
+      
+        <li><a href="/md/tag/k8s">k8s</a></li>
+      
+        <li><a href="/md/tag/書籍">書籍</a></li>
+      
+        <li><a href="/md/tag/設計">設計</a></li>
+      
+        <li><a href="/md/tag/aws">AWS</a></li>
+      
+        <li><a href="/md/tag/cdk">CDK</a></li>
+      
+        <li><a href="/md/tag/go">Go</a></li>
+      
+        <li><a href="/md/tag/terraform">Terraform</a></li>
+      
+    </ul>
+    <h2><a href="/md/archives/">Archives</a></h2>
+    <ul>
+      
+      
+        <li><a href="/md/2025/06/">2025-06</a></li>
+      
+        <li><a href="/md/2025/05/">2025-05</a></li>
+      
+        <li><a href="/md/2025/03/">2025-03</a></li>
+      
+        <li><a href="/md/2025/02/">2025-02</a></li>
+      
+    </ul>
+  </aside>
+</div>
+
+<footer>
+  <p>&copy; 2025 ツールの忘備録</p>
+</footer>
+
+</body>
+</html>

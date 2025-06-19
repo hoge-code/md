@@ -1,0 +1,1031 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/md/assets/css/default.css">
+  <link rel="stylesheet" href="/md/assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <title>ツールの忘備録</title>
+</head>
+<body>
+
+<header>
+  <h1><a href="/md/">ツールの忘備録</a></h1></h1>
+</header>
+
+<div id="content">
+  <!-- メインコンテンツ部分 -->
+  <main>
+        <article>
+      <header>
+        <h1>「GitOpsクックブック」を読む</h1>
+        <p class="meta">
+          June 16, 2025 
+          <!--
+          in
+          <a href="/category/blog"
+            >blog</a
+          >
+        -->
+        </p>
+      </header>
+
+      <div class="content"><p>オライリーの<code class="language-plaintext highlighter-rouge">GitOpsクックブック</code>という書籍を読んだので、気になったことを中心に簡単な感想や要約を書きます。(網羅性はありません)</p>
+
+<p><strong>目次</strong></p>
+
+<ul id="markdown-toc">
+  <li><a href="#1はじめに" id="markdown-toc-1はじめに">1.はじめに</a></li>
+  <li><a href="#2必要条件" id="markdown-toc-2必要条件">2.必要条件</a></li>
+  <li><a href="#3コンテナ" id="markdown-toc-3コンテナ">3.コンテナ</a></li>
+  <li><a href="#4kustomize" id="markdown-toc-4kustomize">4.Kustomize</a></li>
+  <li><a href="#5ヘルム" id="markdown-toc-5ヘルム">5.ヘルム</a></li>
+  <li><a href="#6クラウドネイティブcicd" id="markdown-toc-6クラウドネイティブcicd">6.クラウドネイティブCI/CD</a></li>
+  <li><a href="#7アルゴcd" id="markdown-toc-7アルゴcd">7.アルゴCD</a></li>
+  <li><a href="#8上級トピックス" id="markdown-toc-8上級トピックス">8.上級トピックス</a></li>
+</ul>
+
+<hr />
+
+<p><strong>サイト</strong></p>
+
+<ul>
+  <li><a href="https://www.oreilly.com/library/view/gitops/9798341635609/">オライリー</a></li>
+</ul>
+
+<hr />
+
+<h3 id="1はじめに">1.はじめに</h3>
+<!--
+#### 1.1.GitOpsとは何か？
+
+#### 1.2.なぜGitOpsなのか？
+
+#### 1.3.Kubernetes CI/CD
+
+#### 1.4.Kubernetes上でGitOpsを使ってアプリをデプロイする
+
+#### 1.5.DevOpsとアジャイル
+-->
+
+<h3 id="2必要条件">2.必要条件</h3>
+
+<h4 id="21コンテナレジストリへの登録">2.1.コンテナレジストリへの登録</h4>
+
+<ul>
+  <li>docker.ioのアカウントを作成</li>
+  <li>それ以外だとquay.ioが有名なレジストリサービス</li>
+</ul>
+
+<h4 id="22git-リポジトリに登録する">2.2.Git リポジトリに登録する</h4>
+
+<h4 id="23ローカルkubernetesクラスタを作成する">2.3.ローカルKubernetesクラスタを作成する</h4>
+
+<h3 id="3コンテナ">3.コンテナ</h3>
+<!--
+#### 3.1.Dockerを使ってコンテナを構築する
+
+#### 3.2.Dockerless Jibを使ってコンテナを構築する
+
+#### 3.3.Buildahを使ってコンテナを作る
+
+#### 3.4.ビルドパックでコンテナを構築する
+
+#### 3.5.KubernetesでShipwrightとkanikoを使ってコンテナを構築する
+
+#### 3.6.最終的な感想
+-->
+
+<h3 id="4kustomize">4.Kustomize</h3>
+
+<ul>
+  <li>最初のYAMLの開発が重要</li>
+  <li>その後は小規模な変更
+    <ul>
+      <li>イメージタグのversion, レプリカ数、設定値の更新など</li>
+    </ul>
+  </li>
+  <li>KustomizeはConfigMapが変更された際、ローリングアップデートを自動で実行</li>
+</ul>
+
+<h4 id="41kubernetesリソースのデプロイにkustomizeを使う">4.1.KubernetesリソースのデプロイにKustomizeを使う</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">kustomize.yaml</code>を作成</li>
+  <li>nameは以下のように書く</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">labels</span><span class="pi">:</span>
+    <span class="na">app.kubernetes.io/name</span><span class="pi">:</span> <span class="s">pacman-kikd</span>
+</code></pre></div></div>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">kustomize.yaml</code>サンプル</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">apiVersion</span><span class="pi">:</span> <span class="s">kustomize.config.k8s.io/v1beta1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">Kustomization</span> 
+<span class="na">resources</span><span class="pi">:</span> 
+<span class="pi">-</span> <span class="s">./namespace.yaml</span>
+<span class="pi">-</span> <span class="s">./deployment.yaml</span>
+<span class="pi">-</span> <span class="s">./service.yaml</span>
+</code></pre></div></div>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl apply <span class="nt">--dry-run</span><span class="o">=</span>client <span class="nt">-o</span> yaml <span class="se">\ </span>
+              <span class="nt">-k</span> ./ 
+</code></pre></div></div>
+<ul>
+  <li>-kオプションはkustomization yamlを使用</li>
+  <li>ベースフォルダを作成し、別のフォルダの<code class="language-plaintext highlighter-rouge">kustomization.yaml</code>が参照する例</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> ├── base
+ │   ├── kustomization.yaml
+ │   └── deployment.yaml
+ ├── kustomization.yaml
+ ├── configmap.yaml
+</code></pre></div></div>
+<ul>
+  <li>ベースディレクトリ</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">apiVersion</span><span class="pi">:</span> <span class="s">kustomize.config.k8s.io/v1beta1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">Kustomization</span>
+<span class="na">resources</span><span class="pi">:</span>
+<span class="pi">-</span> <span class="s">./deployment.yaml</span>
+</code></pre></div></div>
+<ul>
+  <li>ルートディレクトリ</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">apiVersion</span><span class="pi">:</span> <span class="s">kustomize.config.k8s.io/v1beta1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">Kustomization</span>
+<span class="na">resources</span><span class="pi">:</span>
+<span class="pi">-</span> <span class="s">./base</span>
+<span class="pi">-</span> <span class="s">./configmap.yaml</span>
+</code></pre></div></div>
+<ul>
+  <li>ルートのファイルを適用する</li>
+  <li>URLを指定できる</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">resources</span><span class="pi">:</span>
+<span class="pi">-</span> <span class="s">github.com/lordofthejars/mysql</span> 
+<span class="pi">-</span> <span class="s">github.com/lordofthejars/mysql?ref=test</span>
+</code></pre></div></div>
+<ul>
+  <li>上記は、ブランチtestのルートのyamlファイルを参照</li>
+  <li>kubectl以外では、<code class="language-plaintext highlighter-rouge">kustomize</code>を使用できる
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">kustomize build . | kubectl apply -f -</code></li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="42kustomize-でコンテナイメージを更新する">4.2.Kustomize でコンテナイメージを更新する</h4>
+
+<ul>
+  <li>deploymentファイルでイメージを更新する</li>
+  <li>バグ修正、新機能追加後に、新しいバージョンにアップデートする場面</li>
+  <li>registry/username/project:tag</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">spec</span><span class="pi">:</span>
+    <span class="na">containers</span><span class="pi">:</span>
+        <span class="pi">-</span> <span class="na">image</span><span class="pi">:</span> <span class="s">lordofthejars/pacman-kikd:1.0.0</span> 
+        <span class="na">imagePullPolicy</span><span class="pi">:</span> <span class="s">Always</span>
+        <span class="na">name</span><span class="pi">:</span> <span class="s">pacman-kikd</span>
+</code></pre></div></div>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">kustomization.yaml</code>のimagesセクションを使用して更新する</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="na">apiVersion</span><span class="pi">:</span> <span class="s">kustomize.config.k8s.io/v1beta1</span>
+ <span class="na">kind</span><span class="pi">:</span> <span class="s">Kustomization</span>
+ <span class="na">resources</span><span class="pi">:</span>
+ <span class="pi">-</span> <span class="s">./namespace.yaml</span>
+ <span class="pi">-</span> <span class="s">./deployment.yaml</span>
+ <span class="pi">-</span> <span class="s">./service.yaml</span>
+ <span class="na">images</span><span class="pi">:</span> 
+ <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">lordofthejars/pacman-kikd</span> 
+   <span class="na">newTag</span><span class="pi">:</span> <span class="s">1.0.1</span>
+</code></pre></div></div>
+<ul>
+  <li>その後、<code class="language-plaintext highlighter-rouge">kustomize build</code></li>
+  <li>元の<code class="language-plaintext highlighter-rouge">deployment.yaml</code>は更新されない</li>
+  <li>以下のコマンドでも可能
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">kustomize edit set image lordofthejars/pacman-kikd:1.0.2</code></li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="43kustomizeで任意のkubernetesフィールドを更新する">4.3.Kustomizeで任意のKubernetesフィールドを更新する</h4>
+
+<ul>
+  <li>レプリカ数などを更新</li>
+  <li>JSONで指定するには、<code class="language-plaintext highlighter-rouge">patches</code>セクションを使用
+    <ul>
+      <li>注釈、ラベル、制限などを追加</li>
+    </ul>
+  </li>
+  <li>Deploymentのレプリカ数を3に変更する例</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">apiVersion</span><span class="pi">:</span> <span class="s">kustomize.config.k8s.io/v1beta1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">Kustomization</span>
+<span class="na">resources</span><span class="pi">:</span>
+ <span class="pi">-</span> <span class="s">./deployment.yaml</span>
+<span class="na">patches</span><span class="pi">:</span> 
+  <span class="pi">-</span> <span class="na">target</span><span class="pi">:</span> 
+      <span class="na">version</span><span class="pi">:</span> <span class="s">v1</span>
+      <span class="na">group</span><span class="pi">:</span> <span class="s">apps</span>
+      <span class="na">kind</span><span class="pi">:</span> <span class="s">Deployment</span>
+      <span class="na">name</span><span class="pi">:</span> <span class="s">pacman-kikd</span>
+      <span class="na">namespace</span><span class="pi">:</span> <span class="s">pacman</span>
+    <span class="na">patch</span><span class="pi">:</span> <span class="pi">|-</span> 
+      <span class="s">- op: replace </span>
+        <span class="s">path: /spec/replicas </span>
+        <span class="s">value: 3 </span>
+</code></pre></div></div>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">replicas</code>フィールドも使用できる</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">replicas</span><span class="pi">:</span>
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">pacman-kikd</span> 
+  <span class="na">count</span><span class="pi">:</span> <span class="s">3</span> 
+<span class="na">resources</span><span class="pi">:</span>
+<span class="pi">-</span> <span class="s">deployment.yaml</span>
+</code></pre></div></div>
+<ul>
+  <li>値の変更だけでなく、追加、削除もできる</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="na">patch</span><span class="pi">:</span> <span class="pi">|</span>
+      <span class="s">- op: add </span>
+        <span class="s">path: /metadata/labels/testkey </span>
+        <span class="s">value: testvalue </span>
+</code></pre></div></div>
+<ul>
+  <li>外部のパッチファイルを参照できる</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">patches</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">target</span><span class="pi">:</span>
+    <span class="s">...</span>
+    <span class="na">path</span><span class="pi">:</span> <span class="s">external_patch.yaml</span>
+</code></pre></div></div>
+<ul>
+  <li>SMP(strategic merge patch)で変更できる
+    <ul>
+      <li>完成したYAMLにマージされる不完全なYAMLファイルのこと</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="44複数の環境にデプロイする">4.4.複数の環境にデプロイする</h4>
+
+<ul>
+  <li>Kustomizeを使用し、同じアプリを異なる名前空間にデプロイ</li>
+  <li>namespaceフィールドを使用し、設定
+    <ul>
+      <li>一個の名前空間をdev, 別のをprodなど</li>
+      <li>ベースファイルは同じで、名前空間、設定パラメータ、コンテナバージョンなどが違うだけ</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> ├── base 
+│  ├── deployment.yaml
+ │  └── kustomization.yaml
+ ├── production
+ │   └── kustomization.yaml 
+└── staging
+    └── kustomization.yaml 
+</code></pre></div></div>
+<ul>
+  <li>devのkustomization.yaml</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">apiVersion</span><span class="pi">:</span> <span class="s">kustomize.config.k8s.io/v1beta1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">Kustomization</span>
+<span class="na">resources</span><span class="pi">:</span>
+ <span class="pi">-</span> <span class="s">../base</span> 
+<span class="na">namespace</span><span class="pi">:</span> <span class="s">staging</span> 
+<span class="na">images</span><span class="pi">:</span>
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">lordofthejars/pacman-kikd</span>
+  <span class="na">newTag</span><span class="pi">:</span> <span class="s">1.2.0-beta</span>
+</code></pre></div></div>
+<ul>
+  <li>全てのリソースと参照の名前の前後に値を追加できる</li>
+  <li>環境やバージョンで名前を変更する場合に使う</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">apiVersion</span><span class="pi">:</span> <span class="s">kustomize.config.k8s.io/v1beta1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">Kustomization</span>
+<span class="na">resources</span><span class="pi">:</span>
+ <span class="pi">-</span> <span class="s">../base</span>
+<span class="na">namespace</span><span class="pi">:</span> <span class="s">staging</span>
+<span class="na">namePrefix</span><span class="pi">:</span> <span class="s">staging-</span> 
+<span class="na">nameSuffix</span><span class="pi">:</span> <span class="s">-v1-2-0</span> 
+<span class="na">images</span><span class="pi">:</span>
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">lordofthejars/pacman-kikd</span>
+  <span class="na">newTag</span><span class="pi">:</span> <span class="s">1.2.0-beta</span>
+</code></pre></div></div>
+<ul>
+  <li>以下のように出力される
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">name: staging-pacman-kikd-v1-2-0</code></li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="45kustomize-で-configmap-を生成する">4.5.Kustomize で ConfigMap を生成する</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">ConfigMapGenerator</code>機能フィールドを使⽤</li>
+  <li>あるいは、<code class="language-plaintext highlighter-rouge">ConfigMap</code>宣言</li>
+  <li>これらはメタデータ名にハッシュを自動的に追加</li>
+  <li>設定ファイルの変更は、deploymentにも反映される</li>
+  <li>環境ごとに異なる設定ファイルがある場合に便利</li>
+  <li>deployment.yaml</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="na">spec</span><span class="pi">:</span>
+      <span class="na">containers</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">image</span><span class="pi">:</span> <span class="s">lordofthejars/pacman-kikd:1.0.0</span>
+        <span class="na">imagePullPolicy</span><span class="pi">:</span> <span class="s">Always</span>
+        <span class="na">name</span><span class="pi">:</span> <span class="s">pacman-kikd</span>
+        <span class="na">volumeMounts</span><span class="pi">:</span>
+        <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">config</span>
+          <span class="na">mountPath</span><span class="pi">:</span> <span class="s">/config</span>
+      <span class="na">volumes</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">config</span>
+        <span class="na">configMap</span><span class="pi">:</span>
+          <span class="na">name</span><span class="pi">:</span> <span class="s">pacman-configmap</span>
+</code></pre></div></div>
+<ul>
+  <li>kustomization.yaml</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">apiVersion</span><span class="pi">:</span> <span class="s">kustomize.config.k8s.io/v1beta1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">Kustomization</span>
+<span class="na">resources</span><span class="pi">:</span>
+<span class="pi">-</span> <span class="s">./deployment.yaml</span>
+<span class="na">configMapGenerator</span><span class="pi">:</span>
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">pacman-configmap</span> 
+   <span class="s">literals</span><span class="err">:</span>
+   <span class="pi">-</span> <span class="s">db-timeout=2000</span> 
+   <span class="pi">-</span> <span class="s">db-username=Ada</span>
+</code></pre></div></div>
+<ul>
+  <li>結果：<code class="language-plaintext highlighter-rouge">name: pacman-configmap-96kb69b6t4</code></li>
+  <li>マージ戦略もサポート</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">configMapGenerator</span><span class="pi">:</span>
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">pacman-configmap</span>
+  <span class="na">behavior</span><span class="pi">:</span> <span class="s">merge</span> 
+  <span class="na">literals</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="s">db-username=Alexandra</span>
+</code></pre></div></div>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">.properties</code>ファイルもサポート</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">configMapGenerator:- name</span><span class="pi">:</span> 
+<span class="s">pacman-configmap</span>
+ <span class="s">files</span><span class="err">:</span> 
+<span class="pi">-</span> <span class="s">./connection.properties</span>
+</code></pre></div></div>
+<ul>
+  <li>kustomizeではsecretsも簡単に扱える</li>
+  <li>secretsを扱う簡単な方法はsealed secretsを使うこと</li>
+</ul>
+
+<h4 id="46最終的な感想">4.6.最終的な感想</h4>
+
+<h3 id="5ヘルム">5.ヘルム</h3>
+
+<ul>
+  <li>バージョン管理可能、デプロイ可能</li>
+  <li>goテンプレートを使用</li>
+  <li>kustomizeとの一番の違いはチャート
+    <ul>
+      <li>他チャートへの依存関係など</li>
+    </ul>
+  </li>
+  <li>helmはConfigMapが変更された際にローリングアップデートを自動で実行</li>
+</ul>
+
+<h4 id="51helmプロジェクトを作成する">5.1.Helmプロジェクトを作成する</h4>
+
+<ul>
+  <li>インストールの複雑さや簡単なアップグレードに対処</li>
+  <li>goテンプレート言語とSprigライブラリ</li>
+  <li>deploymentファイル</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">apiVersion</span><span class="pi">:</span> <span class="s">apps/v1</span>
+ <span class="s">kind</span><span class="err">:</span> <span class="s">Deployment</span>
+ <span class="s">metadata</span><span class="err">:</span>
+  <span class="na">name</span><span class="pi">:</span>  
+  <span class="na">labels</span><span class="pi">:</span>
+    <span class="na">app.kubernetes.io/name</span><span class="pi">:</span>  
+    <span class="na">app.kubernetes.io/version</span><span class="pi">:</span> 
+<span class="err"> </span><span class="na">spec</span><span class="pi">:</span>
+  <span class="na">replicas</span><span class="pi">:</span>  
+  <span class="na">selector</span><span class="pi">:</span>
+    <span class="na">matchLabels</span><span class="pi">:</span>
+      <span class="na">app.kubernetes.io/name</span><span class="pi">:</span> 
+  <span class="na">template</span><span class="pi">:</span>
+    <span class="na">metadata</span><span class="pi">:</span>
+      <span class="na">labels</span><span class="pi">:</span>
+        <span class="na">app.kubernetes.io/name</span><span class="pi">:</span> 
+    <span class="na">spec</span><span class="pi">:</span>
+      <span class="na">containers</span><span class="pi">:</span>
+          <span class="pi">-</span> <span class="na">image</span><span class="pi">:</span> <span class="s2">"</span><span class="s">:</span>
+          <span class="s">"</span>  
+            <span class="na">imagePullPolicy</span><span class="pi">:</span>  
+            <span class="na">securityContext</span><span class="pi">:</span>
+            <span class="na">name</span><span class="pi">:</span> 
+            <span class="na">ports</span><span class="pi">:</span>
+              <span class="pi">-</span> <span class="na">containerPort</span><span class="pi">:</span> 
+                <span class="na">name</span><span class="pi">:</span> <span class="s">http</span>
+                <span class="na">protocol</span><span class="pi">:</span> <span class="s">TCP</span>
+</code></pre></div></div>
+
+<ul>
+  <li>serviceファイル</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">apiVersion</span><span class="pi">:</span> <span class="s">v1</span>
+ <span class="s">kind</span><span class="err">:</span> <span class="s">Service</span>
+ <span class="s">metadata</span><span class="err">:</span>
+  <span class="na">labels</span><span class="pi">:</span>
+    <span class="na">app.kubernetes.io/name</span><span class="pi">:</span> 
+  <span class="na">name</span><span class="pi">:</span> 
+<span class="err"> </span><span class="na">spec</span><span class="pi">:</span>
+  <span class="na">ports</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">http</span>
+      <span class="na">port</span><span class="pi">:</span> 
+      <span class="na">targetPort</span><span class="pi">:</span> 
+  <span class="na">selector</span><span class="pi">:</span>
+    <span class="na">app.kubernetes.io/name</span><span class="pi">:</span> 
+</code></pre></div></div>
+
+<ul>
+  <li>デフォルト値の設定</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="na">image</span><span class="pi">:</span> 
+  <span class="na">repository</span><span class="pi">:</span> <span class="s">quay.io/gitops-cookbook/pacman-kikd</span> 
+  <span class="na">tag</span><span class="pi">:</span> <span class="s2">"</span><span class="s">1.0.0"</span>
+  <span class="na">pullPolicy</span><span class="pi">:</span> <span class="s">Always</span>
+  <span class="na">containerPort</span><span class="pi">:</span> <span class="m">8080</span>
+ <span class="na">replicaCount</span><span class="pi">:</span> <span class="m">1</span>
+ <span class="na">securityContext</span><span class="pi">:</span>
+  <span class="na">capabilities</span><span class="pi">:</span>
+    <span class="na">drop</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="s">ALL</span>
+  <span class="na">readOnlyRootFilesystem</span><span class="pi">:</span> <span class="kc">true</span>
+  <span class="na">runAsNonRoot</span><span class="pi">:</span> <span class="kc">true</span>
+  <span class="na">runAsUser</span><span class="pi">:</span> <span class="m">1000</span>
+</code></pre></div></div>
+<ul>
+  <li>ディレクトリの例</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> pacman
+    ├── Chart.yaml 
+    ├── templates 
+    │   ├── deployment.yaml 
+    │   ├── service.yaml
+    └── values.yaml
+</code></pre></div></div>
+<ul>
+  <li>ローカルでYAMLにレンダリング
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">helm template .</code></li>
+    </ul>
+  </li>
+  <li>デフォルト値の上書き
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">helm template  --set replicaCount=3 .</code></li>
+    </ul>
+  </li>
+  <li>デプロイ
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">helm install pacman .</code></li>
+    </ul>
+  </li>
+  <li>その後、<code class="language-plaintext highlighter-rouge">kubectl get pods, deploy</code></li>
+  <li>履歴
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">helm history pacman</code></li>
+    </ul>
+  </li>
+  <li>削除
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">helm uninstall pacman</code></li>
+    </ul>
+  </li>
+  <li>インストールプロセスで、依存チャートがインストールされる</li>
+</ul>
+
+<h4 id="52テンプレート間でinclude文で再利用する">5.2.テンプレート間でinclude文で再利用する</h4>
+
+<ul>
+  <li>複数のファイルでテンプレートステートメントを再利用したい</li>
+  <li>例えば、セレクターとして新しいラベルを追加する場合
+    <ul>
+      <li>複数個所で更新が必要</li>
+    </ul>
+  </li>
+  <li>以下ファイルを作成</li>
+</ul>
+
+<pre><code class="language-yamlapp.kubernetes.io/name:">
+</code></pre>
+
+<ul>
+  <li>includeキーワードを利用</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">spec</span><span class="pi">:</span>
+  <span class="na">replicas</span><span class="pi">:</span> 
+  <span class="na">selector</span><span class="pi">:</span>
+    <span class="na">matchLabels</span><span class="pi">:</span>
+  <span class="na">template</span><span class="pi">:</span>
+    <span class="na">metadata</span><span class="pi">:</span>
+      <span class="na">labels</span><span class="pi">:</span>
+    <span class="na">spec</span><span class="pi">:</span>
+      <span class="na">containers</span><span class="pi">:</span>
+        <span class="c1"># コンテナの定義はここに追加</span>
+</code></pre></div></div>
+<ul>
+  <li>ローカルで実行
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">helm template .</code></li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="53helmでコンテナイメージを更新する">5.3.Helmでコンテナイメージを更新する</h4>
+
+<ul>
+  <li>helmでdeploymentファイルからコンテナイメージを更新</li>
+  <li>values.yaml更新後、以下コマンドを実行
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">helm upgrade pacman .</code></li>
+    </ul>
+  </li>
+  <li>以前のリビジョンにロールバックできる
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">helm rollback packman 1</code></li>
+    </ul>
+  </li>
+  <li>新しいファイルをオーバーライドとして設定できる
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">helm template pacman -f newvalues.yaml .</code></li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="54ヘルムチャートのパッケージ化と配布">5.4.ヘルムチャートのパッケージ化と配布</h4>
+
+<ul>
+  <li>パッケージ化
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">helm package .</code></li>
+    </ul>
+  </li>
+  <li>生成されるフォルダ</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>repo
+ ├── index.yaml
+ ├── pacman-0.1.0.tgz
+</code></pre></div></div>
+<ul>
+  <li>署名ファイルを生成</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>helm package <span class="nt">--sign</span> <span class="nt">--key</span> <span class="s1">'me@example.com'</span> <span class="se">\</span>
+  <span class="nt">--keyring</span> /home/me/.gnupg/secring.gpg  <span class="nb">.</span>
+</code></pre></div></div>
+<ul>
+  <li>xxx.tgzとxxx.tgz.provが生成される
+    <ul>
+      <li>これもGitHubにアップロード</li>
+    </ul>
+  </li>
+  <li>チャートの有効性を確認
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">helm verify pacman-0.1.0.tgz</code></li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="55リポジトリからチャートをデプロイする">5.5.リポジトリからチャートをデプロイする</h4>
+
+<ul>
+  <li>登録済みリポジトリ一覧
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">helm repo list</code></li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">values.yaml</code>の確認
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">helm show values bitnami/postgresql</code></li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="56依存関係を持つグラフをデプロイする">5.6.依存関係を持つグラフをデプロイする</h4>
+
+<ul>
+  <li>別のチャートの依存関係のHelm Chartをデプロイ</li>
+  <li>例：ウェブアプリで、DB, キャッシュなどの依存関係</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">dependencies</span><span class="pi">:</span> 
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">postgresql</span> 
+    <span class="na">version</span><span class="pi">:</span> <span class="s">10.16.2</span> 
+    <span class="na">repository</span><span class="pi">:</span> <span class="s2">"</span><span class="s">https://charts.bitnami.com/bitnami"</span>
+</code></pre></div></div>
+<ul>
+  <li>また、以下の項目を追加</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">postgresql</span><span class="pi">:</span> 
+ <span class="na">server</span><span class="pi">:</span> <span class="s">jdbc:postgresql://music-db-postgresql:5432/mydb</span>
+ <span class="na">postgresqlUsername</span><span class="pi">:</span> <span class="s">my-default</span>
+ <span class="na">secretName</span><span class="pi">:</span> <span class="s">music-db-postgresql</span>
+ <span class="na">secretKey</span><span class="pi">:</span> <span class="s">postgresql-password</span>
+</code></pre></div></div>
+<ul>
+  <li>依存関係をDLし、ディレクトリに保存
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">helm dependency update</code></li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>music
+ ├── Chart.lock
+ ├── Chart.yaml
+ ├── charts
+ │    └── postgresql-10.16.2.tgz
+ ...
+</code></pre></div></div>
+
+<h4 id="57ローリングアップデートを自動的に起動する">5.7.ローリングアップデートを自動的に起動する</h4>
+
+<ul>
+  <li>ConfigMap変更時に、deploymentのローリングアップデートをトリガー</li>
+  <li>sha256sumテンプレート関数を使用し、deploymentに変更を生成</li>
+  <li>KustomizeにはConfigMapGeneratorという機能
+    <ul>
+      <li>新しいハッシュでdeploymentを直接更新</li>
+    </ul>
+  </li>
+  <li>Helmの場合、任意のファイルのSHA256ハッシュを計算し、テンプレートに埋め込むテンプレート関数</li>
+  <li>ファイルのSHA256値を計算し、アノテーションに設定
+    <ul>
+      <li>変更後にローリングアップデートがトリガーされる</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="na">template</span><span class="pi">:</span>
+    <span class="na">metadata</span><span class="pi">:</span>
+      <span class="na">labels</span><span class="pi">:</span>
+        <span class="na">app.kubernetes.io/name</span><span class="pi">:</span> 
+      <span class="na">annotations</span><span class="pi">:</span>
+        <span class="na">checksum/config</span><span class="pi">:</span> 
+</code></pre></div></div>
+
+<h4 id="58最終的な感想">5.8.最終的な感想</h4>
+
+<ul>
+  <li>単純な変更のみが必要な場合はKustomizeを使用</li>
+</ul>
+
+<h3 id="6クラウドネイティブcicd">6.クラウドネイティブCI/CD</h3>
+<!--
+#### 6.1.Tektonをインストールする
+
+#### 6.2.Hello Worldタスクの作成
+
+#### 6.3.Git からアプリをコンパイルしてパッケージ化するタスクを作成する
+
+#### 6.4.プライベート Git からアプリをコンパイルしてパッケージ化するタスクを作成する
+
+#### 6.5.TektonタスクとBuildahを使ってアプリケーションをコンテナ化する
+
+#### 6.6.Tektonタスクを使ってKubernetesにアプリケーションをデプロイする
+
+#### 6.7.アプリをビルドしてKubernetesにデプロイするTektonパイプラインを作成する
+
+#### 6.8.Tektonトリガーを使って、Git上で変更があったときに自動的にアプリケーションをコンパイルしてパッケージ化する
+
+#### 6.9.Kustomizeを使ってKubernetesリソースを更新し、変更をGitにプッシュする
+
+#### 6.10.Helmを使ってKubernetesリソースを更新し、プルリクエストを作成する
+
+#### 6.11.Droneを使ってKubernetes用のパイプラインを作成する
+
+#### 6.12.GitHub Actions を CI に使う
+-->
+
+<h3 id="7アルゴcd">7.アルゴCD</h3>
+
+<ul>
+  <li>ArgoCDはkustomize, helmもサポート</li>
+  <li>ローリングアップデートをスムーズにする</li>
+  <li>いつ、どのようにデプロイするかなどを効率的にサポート</li>
+</ul>
+
+<h4 id="71argo-cdを使ってアプリケーションをデプロイする">7.1.Argo CDを使ってアプリケーションをデプロイする</h4>
+
+<ul>
+  <li>argocd名前空間を作成し、ArgoCDをインストール</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl apply <span class="nt">-n</span> argocd <span class="se">\</span>
+<span class="nt">-f</span> https://raw.githubusercontent.com/argoproj/argo-cd/v2.3.4/manifests/install.yaml
+</code></pre></div></div>
+<ul>
+  <li>必須ではない
+    <ul>
+      <li>Argo CD CLIツールのインストール</li>
+      <li>Argo CDダッシュボードにアクセスするためのArgo CDサーバーサービスの公開</li>
+    </ul>
+  </li>
+  <li>argocd-server Kubernetes Serviceを公開する必要
+    <ul>
+      <li>ここでは、サービスを公開せずにAPIサーバに接続</li>
+      <li>Ingress, LoadBalancerとしての設定など</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl port-forward svc/argocd-server <span class="nt">-n</span> argocd 9090:443
+</code></pre></div></div>
+<ul>
+  <li>http://localhost:9090を使⽤してArgo CD サーバーにアクセス</li>
+  <li>初期パスワード</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">argoPass</span><span class="o">=</span><span class="si">$(</span>kubectl <span class="nt">-n</span> argocd get secret argocd-initial-admin-secret <span class="nt">-o</span> <span class="nv">jsonpath</span><span class="o">=</span><span class="s2">"{.data.password}"</span> 
+
+<span class="nv">argoURL</span><span class="o">=</span>localhost:9090
+ 
+argocd login <span class="nt">--insecure</span> <span class="nt">--grpc-web</span> <span class="nv">$argoURL</span>  <span class="nt">--username</span> admin <span class="nt">--password</span> <span class="nv">$argoPass</span>
+</code></pre></div></div>
+<ul>
+  <li>Applicationリソースの作成</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="na">apiVersion</span><span class="pi">:</span> <span class="s">argoproj.io/v1alpha1</span>
+ <span class="na">kind</span><span class="pi">:</span> <span class="s">Application</span>
+ <span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">bgd-app</span>
+  <span class="na">namespace</span><span class="pi">:</span> <span class="s">argocd</span> 
+<span class="na">spec</span><span class="pi">:</span>
+  <span class="na">destination</span><span class="pi">:</span> 
+    <span class="na">namespace</span><span class="pi">:</span> <span class="s">bgd</span>
+    <span class="na">server</span><span class="pi">:</span> <span class="s">https://kubernetes.default.svc</span> 
+  <span class="na">project</span><span class="pi">:</span> <span class="s">default</span> 
+  <span class="na">source</span><span class="pi">:</span>
+    <span class="na">repoURL</span><span class="pi">:</span> <span class="s">https://github.com/gitops-cookbook/gitops-cookbook-sc.git</span> 
+    <span class="na">path</span><span class="pi">:</span> <span class="s">ch07/bgd</span> 
+    <span class="na">targetRevision</span><span class="pi">:</span> <span class="s">main</span>
+</code></pre></div></div>
+<ul>
+  <li>apply後、<code class="language-plaintext highlighter-rouge">argocd</code>あるいはUIでステータスを確認できる
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">argocd app list</code></li>
+    </ul>
+  </li>
+  <li>STATUSは<code class="language-plaintext highlighter-rouge">OutOfSync</code>
+    <ul>
+      <li>登録はされたが、現在の状態とGitの状態が異なる</li>
+    </ul>
+  </li>
+  <li>デフォルトでは自動的に同期しない</li>
+  <li>以下を実行
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">argocd app sync bgd-app</code></li>
+    </ul>
+  </li>
+  <li>あるいはUIからSYNCボタンをクリック</li>
+  <li><code class="language-plaintext highlighter-rouge">git push</code>後、<code class="language-plaintext highlighter-rouge">argocd app list</code>で確認
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">Sync</code>になっている</li>
+      <li>しばらくすると、<code class="language-plaintext highlighter-rouge">OutOfSync</code>になる</li>
+    </ul>
+  </li>
+  <li>ロールバックは<code class="language-plaintext highlighter-rouge">git revert</code>後にpush</li>
+</ul>
+
+<h4 id="72自動同期">7.2.自動同期</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">automated</code>ポリシーで<code class="language-plaintext highlighter-rouge">syncPolicy</code>セクションを使用</li>
+  <li>自動同期のメリットは、<code class="language-plaintext highlighter-rouge">argocdAPI</code>へのログインや<code class="language-plaintext highlighter-rouge">argocd</code>ツールが不要になること
+    <ul>
+      <li>シークレット管理などセキュリティ上の問題</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">...</span>
+  <span class="na">source</span><span class="pi">:</span> 
+  <span class="s">...</span>
+  <span class="na">syncPolicy</span><span class="pi">:</span> 
+    <span class="na">automated</span><span class="pi">:</span> <span class="pi">{}</span> 
+</code></pre></div></div>
+<ul>
+  <li>デフォルトの保守的な戦略を使用
+    <ul>
+      <li>削除されたリソースのプルーニング</li>
+      <li>Git 経由ではなくk8sクラスターで直接変更が⾏われた場合にアプリケーションを⾃⼰修復</li>
+    </ul>
+  </li>
+  <li>ArgoCDは利用できないリソースを検出すると、削除せず、<code class="language-plaintext highlighter-rouge">OutOfSync</code>状態</li>
+  <li>手動で同期を呼び出す
+    <ul>
+      <li>` argocd app sync –prune`</li>
+    </ul>
+  </li>
+  <li>自動で削除する場合</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">syncPolicy</span><span class="pi">:</span>
+  <span class="na">automated</span><span class="pi">:</span>
+    <span class="na">prune</span><span class="pi">:</span> <span class="kc">true</span>
+</code></pre></div></div>
+<ul>
+  <li>Argo CDは、クラスター内で⼿動で発⽣したドリフトを修正しないように設定</li>
+  <li>以下でドリフトを修正</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="na">syncPolicy</span><span class="pi">:</span>
+    <span class="na">automated</span><span class="pi">:</span>
+      <span class="na">prune</span><span class="pi">:</span> <span class="kc">true</span>
+      <span class="na">selfHeal</span><span class="pi">:</span> <span class="kc">true</span>
+</code></pre></div></div>
+<ul>
+  <li>他にもArgoCD同期オプションは複数ある</li>
+</ul>
+
+<h4 id="73カスタマイズ統合">7.3.カスタマイズ統合</h4>
+
+<ul>
+  <li>以下条件でKustomize プロジェクトを検出
+    <ul>
+      <li>kustomization.yaml 、Kustomizationのいずれかのファイルがある場合</li>
+    </ul>
+  </li>
+  <li>Applicationファイルで使用するツールを明示的に指定できる</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">source</span><span class="pi">:</span>
+  <span class="na">directory</span><span class="pi">:</span> 
+    <span class="na">recurse</span><span class="pi">:</span> <span class="kc">true</span>
+</code></pre></div></div>
+<ul>
+  <li>可能な戦略は, directory, chart, helm, kustomize, path, plugin</li>
+</ul>
+
+<h4 id="74ヘルムとの統合">7.4.ヘルムとの統合</h4>
+
+<ul>
+  <li>Helmプロジェクトを検出するとインストールする</li>
+  <li>Argo CD はビルド環境変数をHelm マニフェストに⼊⼒
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">ARCOCD_APP_xxx</code>など</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="na">source</span><span class="pi">:</span>
+    <span class="na">path</span><span class="pi">:</span> <span class="s">ch07/bgd</span>
+    <span class="s">...</span>
+    <span class="na">helm</span><span class="pi">:</span> 
+      <span class="na">parameters</span><span class="pi">:</span> 
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">app</span> 
+        <span class="na">value</span><span class="pi">:</span> <span class="s">$ARGOCD_APP_NAME</span>
+</code></pre></div></div>
+<ul>
+  <li>values.yamlより優先度が高い</li>
+</ul>
+
+<h4 id="75imageアップデータ">7.5.imageアップデータ</h4>
+
+<h4 id="76プライベート-git-リポジトリからデプロイする">7.6.プライベート Git リポジトリからデプロイする</h4>
+
+<h4 id="77kubernetesマニフェストを順序付ける">7.7.Kubernetesマニフェストを順序付ける</h4>
+
+<h4 id="78同期ウィンドウを定義する">7.8.同期ウィンドウを定義する</h4>
+
+<h3 id="8上級トピックス">8.上級トピックス</h3>
+<!--
+#### 8.1.機密データを暗号化する（シールド・シークレット）
+
+#### 8.2.ArgoCDで秘密を暗号化する (ArgoCD + HashiCorp Vault + 外部秘密)
+
+#### 8.3.アプリケーションのデプロイを自動的にトリガーする (Argo CD Webhooks)
+
+#### 8.4.複数のクラスタにデプロイする
+
+#### 8.5.プルリクエストをクラスタにデプロイする
+
+#### 8.6.高度なデプロイテクニックを使う
+-->
+</div>
+
+      <footer>
+        <p>
+          Tags: 
+          <a href="/md/tag/書籍">書籍</a> 
+        </p>
+      </footer>
+    </article>
+
+  </main>
+
+  <!-- サイドバー部分 -->
+  <aside id="sidebar">
+    <h2><a href="/md/about/">About</a></h2>
+
+    <!--
+    <h2><a href="/md/categories/">Categories</a></h2>
+    <ul>
+      
+        <li><a href="/md/category/blog"">blog</a></li>
+      
+    </ul>
+    -->
+    
+    <h2><a href="/md/tags/">Tags</a></h2>
+    <ul>
+      
+        <li><a href="/md/tag/fastapi">FastAPI</a></li>
+      
+        <li><a href="/md/tag/nodejs">Nodejs</a></li>
+      
+        <li><a href="/md/tag/mysql">MySQL</a></li>
+      
+        <li><a href="/md/tag/ツール">ツール</a></li>
+      
+        <li><a href="/md/tag/react">React</a></li>
+      
+        <li><a href="/md/tag/開発">開発</a></li>
+      
+        <li><a href="/md/tag/elasticsearch">Elasticsearch</a></li>
+      
+        <li><a href="/md/tag/firebase">Firebase</a></li>
+      
+        <li><a href="/md/tag/sqlite">sqlite</a></li>
+      
+        <li><a href="/md/tag/k8s">k8s</a></li>
+      
+        <li><a href="/md/tag/書籍">書籍</a></li>
+      
+        <li><a href="/md/tag/設計">設計</a></li>
+      
+        <li><a href="/md/tag/aws">AWS</a></li>
+      
+        <li><a href="/md/tag/cdk">CDK</a></li>
+      
+        <li><a href="/md/tag/go">Go</a></li>
+      
+        <li><a href="/md/tag/terraform">Terraform</a></li>
+      
+    </ul>
+    <h2><a href="/md/archives/">Archives</a></h2>
+    <ul>
+      
+      
+        <li><a href="/md/2025/06/">2025-06</a></li>
+      
+        <li><a href="/md/2025/05/">2025-05</a></li>
+      
+        <li><a href="/md/2025/03/">2025-03</a></li>
+      
+        <li><a href="/md/2025/02/">2025-02</a></li>
+      
+    </ul>
+  </aside>
+</div>
+
+<footer>
+  <p>&copy; 2025 ツールの忘備録</p>
+</footer>
+
+</body>
+</html>
