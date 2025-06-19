@@ -16,6 +16,7 @@
 - [x] tf-cook
 - [x] grpc-micro
 - [x] k8s
+- [x] k8s-cook
 
 #### #2
 
@@ -44,12 +45,18 @@
 ##### part2
 
 - [ ] api-design
+- [ ] aws-cook
+- [ ] aws-resilient
 
 ##### part3
 
 - [ ] cdk
 - [ ] grpc
 - [ ] msa
+- [ ] devops
+- [ ] gitops-cook
+- [ ] ansible
+- [ ] docker
 
 #### #2
 
